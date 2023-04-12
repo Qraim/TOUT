@@ -7,6 +7,8 @@ Tout_autogen/timestamp: \
   CMakeFiles/3.25.2/CMakeSystem.cmake \
   Tout_autogen/moc_predefs.h \
   /home/qraim/CLionProjects/Tout/main.cpp \
+  /home/qraim/CLionProjects/Tout/tableau.cpp \
+  /home/qraim/CLionProjects/Tout/tableau.h \
   /home/qraim/CLionProjects/Tout/tout.cpp \
   /home/qraim/CLionProjects/Tout/tout.h \
   /home/qraim/CLionProjects/Tout/tubesimple.cpp \
@@ -318,6 +320,7 @@ Tout_autogen/timestamp: \
   /usr/include/c++/12.2.1/list \
   /usr/include/c++/12.2.1/locale \
   /usr/include/c++/12.2.1/map \
+  /usr/include/c++/12.2.1/math.h \
   /usr/include/c++/12.2.1/memory \
   /usr/include/c++/12.2.1/memory_resource \
   /usr/include/c++/12.2.1/mutex \

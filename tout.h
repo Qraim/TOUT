@@ -8,6 +8,8 @@
 #include <memory>
 #include "bdd.h"
 #include "tubesimple.h"
+#include "tableau.h"
+
 #include <QApplication>
 #include <QPushButton>
 #include <QComboBox>
@@ -37,10 +39,13 @@ public:
 private:
     std::shared_ptr<bdd> database;
     std::unique_ptr<tubesimple> tube;
+    std::unique_ptr<pertechargeherse> perteherse;
 
     QPushButton *show_tubesimple_button;
     QPushButton *show_database_button;
+    QPushButton *show_pertechargeherse_button;
 
+    void on_show_pertechargeherse_button_clicked();
 
     void on_show_tubesimple_button_clicked();
 

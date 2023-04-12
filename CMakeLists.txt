@@ -13,7 +13,7 @@ find_package(Qt5 COMPONENTS
         Widgets
         REQUIRED)
 
-add_executable(Tout main.cpp bdd.cpp bdd.h tubesimple.cpp tubesimple.h tout.cpp tout.h)
+add_executable(Tout main.cpp bdd.cpp bdd.h tubesimple.cpp tubesimple.h tout.cpp tout.h tableau.h tableau.cpp)
 target_link_libraries(Tout
         Qt5::Core
         Qt5::Gui
