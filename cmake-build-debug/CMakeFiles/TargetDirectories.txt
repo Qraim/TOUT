@@ -1,0 +1,5 @@
+/home/qraim/CLionProjects/Tout/cmake-build-debug/CMakeFiles/Tout.dir
+/home/qraim/CLionProjects/Tout/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/qraim/CLionProjects/Tout/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/qraim/CLionProjects/Tout/cmake-build-debug/CMakeFiles/Tout_autogen_timestamp_deps.dir
+/home/qraim/CLionProjects/Tout/cmake-build-debug/CMakeFiles/Tout_autogen.dir
