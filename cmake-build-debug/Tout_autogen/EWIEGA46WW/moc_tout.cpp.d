@@ -1,6 +1,7 @@
 /home/qraim/CLionProjects/Tout/cmake-build-debug/Tout_autogen/EWIEGA46WW/moc_tout.cpp: /home/qraim/CLionProjects/Tout/tout.h \
   /home/qraim/CLionProjects/Tout/cmake-build-debug/Tout_autogen/moc_predefs.h \
   /home/qraim/CLionProjects/Tout/bdd.h \
+  /home/qraim/CLionProjects/Tout/pcdim.h \
   /home/qraim/CLionProjects/Tout/tableau.h \
   /home/qraim/CLionProjects/Tout/tubesimple.h \
   /usr/include/asm-generic/errno-base.h \
@@ -509,6 +510,7 @@
   /usr/include/qt/QtWidgets/QShortcut \
   /usr/include/qt/QtWidgets/QStackedWidget \
   /usr/include/qt/QtWidgets/QTableWidget \
+  /usr/include/qt/QtWidgets/QTableWidgetItem \
   /usr/include/qt/QtWidgets/QVBoxLayout \
   /usr/include/qt/QtWidgets/QWidget \
   /usr/include/qt/QtWidgets/qabstractbutton.h \
