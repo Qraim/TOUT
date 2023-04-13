@@ -91,9 +91,21 @@
 	"HEADERS" : 
 	[
 		[
+			"/home/qraim/CLionProjects/Tout/MainWidow.h",
+			"MU",
+			"EWIEGA46WW/moc_MainWidow.cpp",
+			null
+		],
+		[
 			"/home/qraim/CLionProjects/Tout/bdd.h",
 			"MU",
 			"EWIEGA46WW/moc_bdd.cpp",
+			null
+		],
+		[
+			"/home/qraim/CLionProjects/Tout/gag.h",
+			"MU",
+			"EWIEGA46WW/moc_gag.cpp",
 			null
 		],
 		[
@@ -171,7 +183,9 @@
 	"SETTINGS_FILE" : "/home/qraim/CLionProjects/Tout/cmake-build-debug/CMakeFiles/Tout_autogen.dir/AutogenUsed.txt",
 	"SOURCES" : 
 	[
+		[ "/home/qraim/CLionProjects/Tout/MainWidow.cpp", "MU", null ],
 		[ "/home/qraim/CLionProjects/Tout/bdd.cpp", "MU", null ],
+		[ "/home/qraim/CLionProjects/Tout/gag.cpp", "MU", null ],
 		[ "/home/qraim/CLionProjects/Tout/main.cpp", "MU", null ],
 		[ "/home/qraim/CLionProjects/Tout/pcdim.cpp", "MU", null ],
 		[ "/home/qraim/CLionProjects/Tout/tableau.cpp", "MU", null ],

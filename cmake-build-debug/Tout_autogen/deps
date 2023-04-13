@@ -1,11 +1,15 @@
 Tout_autogen/timestamp: \
 	/home/qraim/CLionProjects/Tout/CMakeLists.txt \
+	/home/qraim/CLionProjects/Tout/MainWidow.cpp \
+	/home/qraim/CLionProjects/Tout/MainWidow.h \
 	/home/qraim/CLionProjects/Tout/bdd.cpp \
 	/home/qraim/CLionProjects/Tout/bdd.h \
 	/home/qraim/CLionProjects/Tout/cmake-build-debug/CMakeFiles/3.25.2/CMakeCCompiler.cmake \
 	/home/qraim/CLionProjects/Tout/cmake-build-debug/CMakeFiles/3.25.2/CMakeCXXCompiler.cmake \
 	/home/qraim/CLionProjects/Tout/cmake-build-debug/CMakeFiles/3.25.2/CMakeSystem.cmake \
 	/home/qraim/CLionProjects/Tout/cmake-build-debug/Tout_autogen/moc_predefs.h \
+	/home/qraim/CLionProjects/Tout/gag.cpp \
+	/home/qraim/CLionProjects/Tout/gag.h \
 	/home/qraim/CLionProjects/Tout/main.cpp \
 	/home/qraim/CLionProjects/Tout/pcdim.cpp \
 	/home/qraim/CLionProjects/Tout/pcdim.h \
@@ -410,6 +414,7 @@ Tout_autogen/timestamp: \
 	/usr/include/locale.h \
 	/usr/include/pthread.h \
 	/usr/include/qt/QtCore/QFile \
+	/usr/include/qt/QtCore/QLocale \
 	/usr/include/qt/QtCore/QString \
 	/usr/include/qt/QtCore/QTextStream \
 	/usr/include/qt/QtCore/qabstractitemmodel.h \
@@ -527,6 +532,7 @@ Tout_autogen/timestamp: \
 	/usr/include/qt/QtWidgets/QDialog \
 	/usr/include/qt/QtWidgets/QDialogButtonBox \
 	/usr/include/qt/QtWidgets/QFormLayout \
+	/usr/include/qt/QtWidgets/QGridLayout \
 	/usr/include/qt/QtWidgets/QHBoxLayout \
 	/usr/include/qt/QtWidgets/QHeaderView \
 	/usr/include/qt/QtWidgets/QLabel \

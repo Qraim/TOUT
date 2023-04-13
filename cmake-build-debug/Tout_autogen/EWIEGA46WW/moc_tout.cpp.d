@@ -1,6 +1,8 @@
 /home/qraim/CLionProjects/Tout/cmake-build-debug/Tout_autogen/EWIEGA46WW/moc_tout.cpp: /home/qraim/CLionProjects/Tout/tout.h \
   /home/qraim/CLionProjects/Tout/cmake-build-debug/Tout_autogen/moc_predefs.h \
+  /home/qraim/CLionProjects/Tout/MainWidow.h \
   /home/qraim/CLionProjects/Tout/bdd.h \
+  /home/qraim/CLionProjects/Tout/gag.h \
   /home/qraim/CLionProjects/Tout/pcdim.h \
   /home/qraim/CLionProjects/Tout/tableau.h \
   /home/qraim/CLionProjects/Tout/tubesimple.h \
@@ -381,6 +383,7 @@
   /usr/include/locale.h \
   /usr/include/pthread.h \
   /usr/include/qt/QtCore/QFile \
+  /usr/include/qt/QtCore/QLocale \
   /usr/include/qt/QtCore/QString \
   /usr/include/qt/QtCore/QTextStream \
   /usr/include/qt/QtCore/qabstractitemmodel.h \
@@ -498,6 +501,7 @@
   /usr/include/qt/QtWidgets/QDialog \
   /usr/include/qt/QtWidgets/QDialogButtonBox \
   /usr/include/qt/QtWidgets/QFormLayout \
+  /usr/include/qt/QtWidgets/QGridLayout \
   /usr/include/qt/QtWidgets/QHBoxLayout \
   /usr/include/qt/QtWidgets/QHeaderView \
   /usr/include/qt/QtWidgets/QLabel \
