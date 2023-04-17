@@ -51,9 +51,7 @@ std::vector<tableau> read_materials_from_csv(const std::string& filename) {
 
         std::getline(ss, token, ';');
         std::replace(token.begin(), token.end(), ',', '.');
-        std::cout<<token<<std::endl;
         k = std::stod(token); ;
-        std::cout<<"K après :"<<std::fixed << std::setprecision(3) <<k<<std::endl;
 
         std::getline(ss, token, ';');
         bar = std::stoi(token);
@@ -109,7 +107,7 @@ void write_materials_to_csv(const std::vector<tableau>& materials, const std::st
         std::cerr << "Impossible d'ouvrir le fichier : " << filename << std::endl;
         return;
     }
-    file << "Materiau;A;B;K;Bar;Diametre intérieur ;Diametre exterieur\n";
+    file << "Materiau;A;B;K;Bar;Diametre exterieur ;Diametre intérieur\n";
     for (const auto& t : materials) {
         for (const auto& m : t.matieres) {
             for (const auto& p : m.pressions) {
@@ -121,6 +119,7 @@ void write_materials_to_csv(const std::vector<tableau>& materials, const std::st
             }
         }
     }
+    std::cout<<"here"<<std::endl;
     file.close();
 }
 
@@ -235,7 +234,7 @@ void bdd::afficher_tableaux() {
     window->showMaximized();
 }
 
-std::tuple<float, float, float> bdd::get_material_coefficients( const std::string& material_name) {
+std::tuple<float, float, double> bdd::get_material_coefficients( const std::string& material_name) {
     for (const auto& t : materials) {
         for (const auto& m : t.matieres) {
             if (m.nom == material_name) {
@@ -284,8 +283,9 @@ void bdd::modifier_tableaux() {
     QFormLayout *formLayout = new QFormLayout(dialog);
     dialog->setLayout(formLayout);
 
-    // Create widgets for selecting matiere, outer diameter and inner diameter
+    // Create widgets for selecting matiere, pressure, outer diameter, and inner diameter
     QComboBox *matiereComboBox = new QComboBox(dialog);
+    QComboBox *pressureComboBox = new QComboBox(dialog);
     QComboBox *outerDiameterComboBox = new QComboBox(dialog);
     QLineEdit *currentInnerDiameterLineEdit = new QLineEdit(dialog);
     QLineEdit *newInnerDiameterLineEdit = new QLineEdit(dialog);
@@ -302,17 +302,40 @@ void bdd::modifier_tableaux() {
 
     populateMatiereComboBox();
 
-    // Connect matiereComboBox's signal to update outerDiameterComboBox
+    // Connect matiereComboBox's signal to update pressureComboBox and outerDiameterComboBox
     QObject::connect(matiereComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), [&](int) {
+        pressureComboBox->clear();
         outerDiameterComboBox->clear();
         std::string selectedMatiere = matiereComboBox->currentText().toStdString();
+        std::set<int> unique_pressures;
+        for (const auto &table : materials) {
+            for (const auto &mat : table.matieres) {
+                if (mat.nom == selectedMatiere) {
+                    for (const auto &p : mat.pressions) {
+                        unique_pressures.insert(p.bar);
+                    }
+                }
+            }
+        }
+        for (const int pressure : unique_pressures) {
+            pressureComboBox->addItem(QString::number(pressure));
+        }
+    });
+
+    // Connect pressureComboBox's signal to update outerDiameterComboBox
+    QObject::connect(pressureComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), [&](int) {
+        outerDiameterComboBox->clear();
+        std::string selectedMatiere = matiereComboBox->currentText().toStdString();
+        int selectedPressure = pressureComboBox->currentText().toInt();
         std::set<int> unique_outer_diameters;
         for (const auto &table : materials) {
             for (const auto &mat : table.matieres) {
                 if (mat.nom == selectedMatiere) {
                     for (const auto &p : mat.pressions) {
-                        for (const auto &d : p.diametre) {
-                            unique_outer_diameters.insert(d.first);
+                        if (p.bar == selectedPressure) {
+                            for (const auto &d : p.diametre) {
+                                unique_outer_diameters.insert(d.first);
+                            }
                         }
                     }
                 }
@@ -326,15 +349,18 @@ void bdd::modifier_tableaux() {
     // Connect outerDiameterComboBox's signal to display the current inner diameter
     QObject::connect(outerDiameterComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), [&](int) {
         std::string selectedMatiere = matiereComboBox->currentText().toStdString();
+        int selectedPressure = pressureComboBox->currentText().toInt();
         int selectedOuterDiameter = outerDiameterComboBox->currentText().toInt();
         for (const auto &table : materials) {
             for (const auto &mat : table.matieres) {
                 if (mat.nom == selectedMatiere) {
                     for (const auto &p : mat.pressions) {
-                        for (const auto &d : p.diametre) {
-                            if (d.first == selectedOuterDiameter) {
-                                currentInnerDiameterLineEdit->setText(QString::number(d.second));
-                                break;
+                        if (p.bar == selectedPressure) {
+                            for (const auto &d : p.diametre) {
+                                if (d.first == selectedOuterDiameter) {
+                                    currentInnerDiameterLineEdit->setText(QString::number(d.second));
+                                    break;
+                                }
                             }
                         }
                     }
@@ -343,10 +369,11 @@ void bdd::modifier_tableaux() {
         }
     });
 
-    // Trigger matiereComboBox signal to fill outerDiameterComboBox with initial values
+    // Trigger matiereComboBox signal to fill pressureComboBox and outerDiameterComboBox with initial values
     matiereComboBox->currentIndexChanged(matiereComboBox->currentIndex());
 
     formLayout->addRow("Matiere:", matiereComboBox);
+    formLayout->addRow("Pression:", pressureComboBox);
     formLayout->addRow("Diametre exterieur:", outerDiameterComboBox);
     formLayout->addRow("Diametre interieur actuel:", currentInnerDiameterLineEdit);
     formLayout->addRow("Nouveau diametre interieur:", newInnerDiameterLineEdit);
@@ -357,18 +384,21 @@ void bdd::modifier_tableaux() {
     // Connect buttonBox signals
     QObject::connect(buttonBox, &QDialogButtonBox::accepted, dialog, [&]() {
         std::string selectedMatiere = matiereComboBox->currentText().toStdString();
+        int selectedPressure = pressureComboBox->currentText().toInt();
         int selectedOuterDiameter = outerDiameterComboBox->currentText().toInt();
         float currentInnerDiameter = QStringToFloat(currentInnerDiameterLineEdit->text());
-        float newInnerDiameter =  QStringToFloat(newInnerDiameterLineEdit->text());
+        float newInnerDiameter = QStringToFloat(newInnerDiameterLineEdit->text());
 
         // Update the inner diameter for the selected pipe
         for (auto &table : materials) {
             for (auto &mat : table.matieres) {
                 if (mat.nom == selectedMatiere) {
                     for (auto &p : mat.pressions) {
-                        for (auto &d : p.diametre) {
-                            if (d.first == selectedOuterDiameter && d.second == currentInnerDiameter) {
-                                d.second = newInnerDiameter;
+                        if (p.bar == selectedPressure) {
+                            for (auto &d : p.diametre) {
+                                if (d.first == selectedOuterDiameter && d.second == currentInnerDiameter) {
+                                    d.second = newInnerDiameter;
+                                }
                             }
                         }
                     }
@@ -384,6 +414,9 @@ void bdd::modifier_tableaux() {
     // Show the modification window
     dialog->exec();
 }
+
+
+
 
 
 
@@ -658,7 +691,8 @@ void bdd::tuyau_dispo() {
 
     QTableWidget *tableWidget = new QTableWidget(dialog);
     tableWidget->setColumnCount(2);
-    tableWidget->setHorizontalHeaderLabels(QStringList() << "Diamètre intérieur" << "Epaisseur");
+    tableWidget->setHorizontalHeaderLabels(QStringList() << "Diametre extérieur"<< "Diametre intérieur");
+    tableWidget->verticalHeader()->setVisible(false);
     tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     formLayout->addRow(tableWidget);
 
@@ -690,6 +724,7 @@ void bdd::tuyau_dispo() {
     formLayout->addWidget(buttonBox);
     QObject::connect(buttonBox, &QDialogButtonBox::accepted, dialog, &QDialog::accept);
 
+    dialog->resize(400,400);
     dialog->exec();
 }
 
@@ -724,7 +759,7 @@ void bdd::montre_coef() {
         auto [a, b, k] = get_material_coefficients(matiere_name);
 
         if (a != 0.0f || b != 0.0f || k != 0.0f) {
-            resultLabel->setText("Coefficients pour " + QString::fromStdString(matiere_name) + ":\na: " + QString::number(a) + "\nb: " + QString::number(b) + "\nk: " + QString::number(k));
+            resultLabel->setText("Coefficients pour " + QString::fromStdString(matiere_name) + ":\na: " + QString::number(a, 'f', 2) + "\nb: " + QString::number(b, 'f', 2) + "\nk: " + QString::number(k, 'f', 2));
         } else {
             resultLabel->setText("Matière non trouvée. Veuillez entrer un nom de matière valide.");
         }
@@ -777,10 +812,10 @@ void bdd::trouver_tuyau() {
 
     QObject::connect(submitButton, &QPushButton::clicked, [&]() {
         float inner_diameter = QStringToFloat(diameterInput->text());
-        auto [matiere_name, outer_diameter] = find_matiere_and_outer_diameter(inner_diameter);
+        auto [matiere_name, pressure, outer_diameter] = find_matiere_pressure_and_outer_diameter(inner_diameter);
 
         if (!matiere_name.empty()) {
-            resultLabel->setText("Matière: " + QString::fromStdString(matiere_name) + "\nDiamètre extérieur: " + QString::number(outer_diameter));
+            resultLabel->setText("Matière: " + QString::fromStdString(matiere_name) + "\nPression: " + QString::number(pressure) + "\nDiamètre extérieur: " + QString::number(outer_diameter));
         } else {
             resultLabel->setText("Tuyau non trouvé. Veuillez entrer un diamètre intérieur valide.");
         }
@@ -791,4 +826,80 @@ void bdd::trouver_tuyau() {
     QObject::connect(buttonBox, &QDialogButtonBox::accepted, dialog, &QDialog::accept);
 
     dialog->exec();
+}
+
+
+matiere bdd::findMatiereByName(const std::string& material_name){
+    for(const auto& tab : materials){
+        for(const auto& mat : tab.matieres){
+            if(mat.nom == material_name)
+                return mat;
+        }
+    }
+}
+
+std::vector<int> bdd::getAllPressuresForMatiere(const std::string &material_name) {
+    std::vector<int> pressures;
+
+    // Iterate through materials to find the material by name
+    for (const auto &mat : materials) {
+        for (const auto &matiere : mat.matieres) {
+            if (matiere.nom == material_name) {
+                // Iterate through the pressures vector and collect pressure values
+                for (const auto &p : matiere.pressions) {
+                    pressures.push_back(p.bar);
+                }
+                // Return the vector of pressure values
+                return pressures;
+            }
+        }
+    }
+
+    // If the material is not found, return an empty vector
+    return pressures;
+}
+
+
+
+std::pair<std::string, QString> bdd::find_matiere_and_pressure_for_diametre(float inner_diameter) {
+    for(const auto& tab : materials){
+        for(const auto& mat : tab.matieres){
+            for(auto& press : mat.pressions){
+                for(const auto& diam : press.diametre){
+                    if(diam.second == inner_diameter){
+                        return {mat.nom,QString::number(press.bar)};
+                    }
+                }
+            }
+        }
+    }
+    return {"",""};
+}
+
+std::vector<std::string> bdd::getAllMatiereNames() {
+    std::vector<std::string> matieres;
+    for(const auto &t : materials){
+        for(const auto &m : t.matieres){
+            matieres.push_back(m.nom);
+        }
+    }
+    return matieres;
+}
+
+
+
+std::tuple<std::string, int, int> bdd::find_matiere_pressure_and_outer_diameter(float inner_diameter) {
+    for (const auto &table : materials) {
+        for (const auto &mat : table.matieres) {
+            for (const auto &p : mat.pressions) {
+                for (const auto &d : p.diametre) {
+                    float current_inner_diameter = d.second;
+                    if (std::abs(current_inner_diameter - inner_diameter) < 0.001) {
+                        return std::make_tuple(mat.nom, p.bar, d.first);
+                    }
+                }
+            }
+        }
+    }
+    return std::make_tuple("", 0, 0);
 }

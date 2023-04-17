@@ -435,7 +435,6 @@ void pertechargeherse::calcul() {
     for (int i = 0; i < _Donnees.size(); ++i) {
 
         // Récupère les données de la ligne courante.
-        debit = _Donnees[i][1];
         sigmaDebit = _Donnees[i][2];
         diametre = _Donnees[i][3];
         longueur = _Donnees[i][4];
@@ -445,13 +444,13 @@ void pertechargeherse::calcul() {
         aireTuyau = (M_PI * pow((diametre / 1000) / 2, 2));
 
         // Calcule le débit en m3/s.
-        debitM3 = sigmaDebit / 3600.0 / 1000.0;
+        debitM3 = sigmaDebit * 0.000277778;
 
         // Calcule la vitesse.
         vitesse = debitM3 / aireTuyau;
 
         // Convertit le débit en l/s.
-        float sigmaDebitLs = sigmaDebit / 3600.0;
+        float sigmaDebitLs = sigmaDebit / 3.6;
 
         // Calcule la perte de charge.
         perteCharge = k * pow(sigmaDebitLs, a) * pow(diametre, b) * longueur;

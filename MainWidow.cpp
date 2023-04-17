@@ -4,6 +4,8 @@
 MainWindow::MainWindow(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db), Calcul("Calculer", this) {
     setFixedSize(500, 310);
 
+    setWindowTitle(QString::fromStdString("Calcul du diametre intérieur d'un tube simple"));
+
     Materiau.setFixedWidth(80);
     Pression.setFixedWidth(80);
     debit.setFixedWidth(60);
@@ -15,13 +17,10 @@ MainWindow::MainWindow(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent
     Changer.setFixedWidth(80);
 
 
-
     std::vector<std::string> matiere_names = database->getAllMatiereNames();
     for (const auto& matiere_name : matiere_names) {
         Materiau.addItem(QString::fromStdString(matiere_name));
     }
-
-
 
     QGridLayout *gridLayout = new QGridLayout;
 
@@ -181,16 +180,22 @@ float MainWindow::calcullongueurdeniv() {
 
 float MainWindow::calculdebitvitesse() {
 
-    int debits = debit.text().toInt();
-    int vitesses = vitesse.text().toInt(); // Récupération des variables
+    float debits = debit.text().toFloat(); // Flow rate in m³/h
+    float vitesses = vitesse.text().toFloat(); // Flow velocity in m/s
 
-    float diametre = std::sqrt((4 * debits) / (M_PI * vitesses)) * 1000; // formule pour le calcul du diametre
+    float debits_m3s = debits / 3600; // Convert m³/h to m³/s
+    float diametre = std::sqrt((4 * debits_m3s) / (M_PI * vitesses)); // formula for calculating the diameter in meters
 
-    Gettuyau(diametre);
+    float diametre_mm = diametre * 1000; // Convert diameter from meters to millimeters
 
-    return roundf(diametre * 100) / 100; // Pour être sur deux décimales
+    Gettuyau(diametre_mm);
+
+    return roundf(diametre_mm * 100) / 100; // For two decimal places
 
 }
+
+
+
 
 std::map<float, float>
 MainWindow::gettableau() { // Générateur du tableau en fonction des entrées utilisateur avec ( diametre exterieur, diametre interieur )
@@ -305,29 +310,37 @@ void MainWindow::Gettuyau(float diametre) {
     std::pair<int, float> closestDuo;
     float minValue = std::numeric_limits<float>::max();
 
-    std::map<float, float> tableau = gettableau(); // récupération du tableau de diametres
+    QString selected_material = Materiau.currentText();
+    QString selected_pressure = Pression.currentText();
 
-    for (const auto &duo: tableau) { // ittération dans le tableau pour trouver le bon diametre
-        if (duo.second > diametre && duo.second < minValue) {
-            minValue = duo.second;
-            closestDuo = duo;
-            break; // On coupe la boucle quand on a trouvé
+    // Retrieve the corresponding material object from the database
+    matiere selected_matiere = database->findMatiereByName(selected_material.toStdString());
+
+    // Find the closest diameter
+    for (const auto &pression_obj : selected_matiere.pressions) {
+        if (pression_obj.bar == selected_pressure.toInt()) {
+            for (const auto &diametre_obj : pression_obj.diametre) {
+                float current_diametre = diametre_obj.second;
+                if (current_diametre > diametre && current_diametre < minValue) {
+                    minValue = current_diametre;
+                    closestDuo = {diametre_obj.first, current_diametre};
+                    break; // On coupe la boucle quand on a trouvé
+                }
+            }
         }
     }
 
-    // Maintenant, closestDuo contient le duo le plus proche et supérieur au diamètre
+    // Set the result text
     QString str;
     if (closestDuo.first == 0 && closestDuo.second == 0) {
         str = "Calcul Invalide";
     } else {
-        str = "Il faut un tuyau de " + Materiau.currentText() + " en " +
-              Pression.currentText() + " bar, de [ " + QString::number(closestDuo.first) + " ; " +
+        str = "Il faut un tuyau de " + selected_material + " en " +
+              selected_pressure + " bar, de [ " + QString::number(closestDuo.first) + " ; " +
               QString::number(closestDuo.second, 'f', 1) + " ] mm";
     }
     Champligne.setText(str);
 }
-
-
 
 void MainWindow::keyPressEvent(QKeyEvent *event) {
 

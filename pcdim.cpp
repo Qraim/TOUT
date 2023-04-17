@@ -103,10 +103,14 @@ float pcdim::calculdiametre()
     float debit = inputs[0]->text().toFloat(); // Debit de QLineEdit
     float vitesse = inputs[2]->text().toFloat(); // Vitesse de QLineEdit
 
-    float diametre = 2 * std::sqrt((1000 * debit) / (M_PI * vitesse)); // Diametre intérieur mm
-    return diametre;
-}
+    float debits_m3s = debit / 3600; // Convert m³/h to m³/s
+    float diametre = std::sqrt((4 * debits_m3s) / (M_PI * vitesse))*1000; // formula for calculating the diameter in meters
 
+    float diametre_mm = diametre * 1000; // Convert diameter from meters to millimeters
+
+    return diametre; // For two decimal places
+
+}
 std::string pcdim::gettableau(float inner_diameter) {
     auto result = database->find_matiere_and_pressure_for_diametre(inner_diameter);
 
@@ -120,22 +124,23 @@ std::tuple<float, float, float> pcdim::getMaterialProperties(const std::string &
 
 
 float pcdim::calculperte() {
+
     float debit_ls = inputs[0]->text().toFloat() / 3600; // Convert debit from m3/h to l/s
     float diametre = inputs[1]->text().toFloat(); // Convert diametre from mm to m
+    float longueur = inputs[3]->text().toFloat(); // Longueur in meters
 
     std::string pipe_material = gettableau(diametre);
 
-
     std::tuple<float, float, double> material_properties = getMaterialProperties(pipe_material);
-
 
     float a = std::get<0>(material_properties);
     float b = std::get<1>(material_properties);
     double k = std::get<2>(material_properties);
 
-    float longueur = inputs[3]->text().toFloat(); // Longueur in meters
+    std::cout<<a<<" "<<b<<" "<<k<<std::endl;
 
     float perte = k * std::pow(debit_ls, a) * std::pow(diametre, b) * std::pow(longueur, 1.0);
+    std::cout<<perte<<std::endl;
     return perte;
 }
 
