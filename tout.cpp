@@ -41,8 +41,6 @@ tout::tout(QWidget *parent) : QWidget(parent) {
     connect(show_database_button, &QPushButton::clicked, this, &tout::on_show_database_button_clicked);
 }
 
-
-
 void tout::on_show_tubesimple_button_clicked() {
     tube->show();
 }

@@ -98,7 +98,7 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     topLayout->addWidget(labelSigmaPerte, 3, 8, Qt::AlignCenter);
     topLayout->addWidget(labelSigmaPiezo, 3, 9, Qt::AlignCenter);
 
-        // Create QLabel objects for units
+    // Create QLabel objects for units
     QLabel *unitDebit2 = new QLabel("l/h");
     QLabel *unitEspacement2 = new QLabel("m");
     QLabel *unitDiametre2 = new QLabel("mm");
@@ -108,31 +108,6 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     QLabel *unitPiezo = new QLabel("m");
     QLabel *unitSigmaPerte = new QLabel("m");
     QLabel *unitSigmaPiezo = new QLabel("m");
-
-    // Set the size policies for QLabel objects
-    QSizePolicy expandingPolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    QSizePolicy fixedPolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-
-    labelNumero->setSizePolicy(fixedPolicy);
-    labelDebit2->setSizePolicy(expandingPolicy);
-    labelEspacement2->setSizePolicy(expandingPolicy);
-    labelDiametre2->setSizePolicy(expandingPolicy);
-    labelLongueur2->setSizePolicy(expandingPolicy);
-    labelHauteur2->setSizePolicy(expandingPolicy);
-    labelPerte->setSizePolicy(expandingPolicy);
-    labelPiezo->setSizePolicy(expandingPolicy);
-    labelSigmaPerte->setSizePolicy(expandingPolicy);
-    labelSigmaPiezo->setSizePolicy(expandingPolicy);
-
-    unitDebit2->setSizePolicy(expandingPolicy);
-    unitEspacement2->setSizePolicy(expandingPolicy);
-    unitDiametre2->setSizePolicy(expandingPolicy);
-    unitLongueur2->setSizePolicy(expandingPolicy);
-    unitHauteur2->setSizePolicy(expandingPolicy);
-    unitPerte->setSizePolicy(expandingPolicy);
-    unitPiezo->setSizePolicy(expandingPolicy);
-    unitSigmaPerte->setSizePolicy(expandingPolicy);
-    unitSigmaPiezo->setSizePolicy(expandingPolicy);
 
 
     // Add the units to the layout, placing them in the row below the labels
@@ -146,6 +121,95 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     topLayout->addWidget(unitSigmaPerte, 4, 8, Qt::AlignCenter);
     topLayout->addWidget(unitSigmaPiezo, 4, 9, Qt::AlignCenter);
 
+
+    // Add labels and QLineEdit widgets to the topLayout
+    topLayout->addWidget(labelDebit, 1, 0, Qt::AlignCenter);
+    topLayout->addWidget(Debit, 2, 0, Qt::AlignCenter);
+    topLayout->addWidget(labelEspacement, 1, 1, Qt::AlignCenter);
+    topLayout->addWidget(Espacement, 2, 1, Qt::AlignCenter);
+    topLayout->addWidget(labelDiametre, 1, 2, Qt::AlignCenter);
+    topLayout->addWidget(Diametre, 2, 2, Qt::AlignCenter);
+    topLayout->addWidget(labelLongueur, 1, 3, Qt::AlignCenter);
+    topLayout->addWidget(Longueur, 2, 3, Qt::AlignCenter);
+    topLayout->addWidget(labelHauteur, 1, 4, Qt::AlignCenter);
+    topLayout->addWidget(Hauteur, 2, 4, Qt::AlignCenter);
+
+
+    // Add labels and QLineEdit widgets to the topLayout
+    topLayout->addWidget(labelDebit, 1, 0, Qt::AlignCenter);
+    topLayout->addWidget(Debit, 2, 0, Qt::AlignCenter);
+    topLayout->addWidget(labelEspacement, 1, 1, Qt::AlignCenter);
+    topLayout->addWidget(Espacement, 2, 1, Qt::AlignCenter);
+    topLayout->addWidget(labelDiametre, 1, 2, Qt::AlignCenter);
+    topLayout->addWidget(Diametre, 2, 2, Qt::AlignCenter);
+    topLayout->addWidget(labelLongueur, 1, 3, Qt::AlignCenter);
+    topLayout->addWidget(Longueur, 2, 3, Qt::AlignCenter);
+    topLayout->addWidget(labelHauteur, 1, 4, Qt::AlignCenter);
+    topLayout->addWidget(Hauteur, 2, 4, Qt::AlignCenter);
+
+    // Add labels and QLineEdit widgets to the topLayout
+    topLayout->addWidget(labelDebit, 1, 0, Qt::AlignCenter);
+    topLayout->addWidget(Debit, 2, 0, Qt::AlignCenter);
+    topLayout->addWidget(labelEspacement, 1, 1, Qt::AlignCenter);
+    topLayout->addWidget(Espacement, 2, 1, Qt::AlignCenter);
+    topLayout->addWidget(labelDiametre, 1, 2, Qt::AlignCenter);
+    topLayout->addWidget(Diametre, 2, 2, Qt::AlignCenter);
+    topLayout->addWidget(labelLongueur, 1, 3, Qt::AlignCenter);
+    topLayout->addWidget(Longueur, 2, 3, Qt::AlignCenter);
+    topLayout->addWidget(labelHauteur, 1, 4, Qt::AlignCenter);
+    topLayout->addWidget(Hauteur, 2, 4, Qt::AlignCenter);
+
+    // Add labels and QLineEdit widgets to the topLayout
+    topLayout->addWidget(labelDebit, 1, 0, Qt::AlignCenter);
+    topLayout->addWidget(Debit, 2, 0, Qt::AlignCenter);
+    topLayout->addWidget(labelEspacement, 1, 1, Qt::AlignCenter);
+    topLayout->addWidget(Espacement, 2, 1, Qt::AlignCenter);
+    topLayout->addWidget(labelDiametre, 1, 2, Qt::AlignCenter);
+    topLayout->addWidget(Diametre, 2, 2, Qt::AlignCenter);
+    topLayout->addWidget(labelLongueur, 1, 3, Qt::AlignCenter);
+    topLayout->addWidget(Longueur, 2, 3, Qt::AlignCenter);
+    topLayout->addWidget(labelHauteur, 1, 4, Qt::AlignCenter);
+    topLayout->addWidget(Hauteur, 2, 4, Qt::AlignCenter);
+
+    int fixedwidth = 180;
+    int fixedheigth = 40;
+
+    // Add labels and QLineEdit widgets to the topLayout
+    topLayout->addWidget(labelDebit, 1, 0, Qt::AlignCenter);
+    topLayout->addWidget(Debit, 2, 0, Qt::AlignCenter);
+    topLayout->addWidget(labelEspacement, 1, 1, Qt::AlignCenter);
+    topLayout->addWidget(Espacement, 2, 1, Qt::AlignCenter);
+    topLayout->addWidget(labelDiametre, 1, 2, Qt::AlignCenter);
+    topLayout->addWidget(Diametre, 2, 2, Qt::AlignCenter);
+    topLayout->addWidget(labelLongueur, 1, 3, Qt::AlignCenter);
+    topLayout->addWidget(Longueur, 2, 3, Qt::AlignCenter);
+    topLayout->addWidget(labelHauteur, 1, 4, Qt::AlignCenter);
+    topLayout->addWidget(Hauteur, 2, 4, Qt::AlignCenter);
+
+
+    // Set the fixed size for QLabel objects
+    int fixedWidth = 180;
+    int fixedHeight = 40;
+
+    labelDebit2->setFixedSize(fixedWidth, fixedHeight);
+    labelEspacement2->setFixedSize(fixedWidth, fixedHeight);
+    labelDiametre2->setFixedSize(fixedWidth, fixedHeight);
+    labelLongueur2->setFixedSize(fixedWidth, fixedHeight);
+    labelHauteur2->setFixedSize(fixedWidth, fixedHeight);
+    labelPerte->setFixedSize(fixedWidth, fixedHeight);
+    labelPiezo->setFixedSize(fixedWidth, fixedHeight);
+    labelSigmaPerte->setFixedSize(fixedWidth, fixedHeight);
+    labelSigmaPiezo->setFixedSize(fixedWidth, fixedHeight);
+
+    unitDebit2->setFixedSize(fixedWidth, fixedHeight);
+    unitEspacement2->setFixedSize(fixedWidth, fixedHeight);
+    unitDiametre2->setFixedSize(fixedWidth, fixedHeight);
+    unitLongueur2->setFixedSize(fixedWidth, fixedHeight);
+    unitHauteur2->setFixedSize(fixedWidth, fixedHeight);
+    unitPerte->setFixedSize(fixedWidth, fixedHeight);
+    unitPiezo->setFixedSize(fixedWidth, fixedHeight);
+    unitSigmaPerte->setFixedSize(fixedWidth, fixedHeight);
+    unitSigmaPiezo->setFixedSize(fixedWidth, fixedHeight);
 
     for (int col = 0; col < 10; ++col) {
         topLayout->setColumnStretch(col, 1);
@@ -267,6 +331,7 @@ void gag::AjoutLigne() {
         valueLabel->setAlignment(alignment);
         valueLabel->setSizePolicy(sizePolicy);
         valueLabel->setFixedHeight(fixedHeight);
+        valueLabel->setFixedWidth(180);
 
         // Add the QLineEdit object into the scroll area using the appropriate row and column number.
         scrollAreaLayout->addWidget(valueLabel, row, col, Qt::AlignTop);
@@ -332,7 +397,7 @@ void gag::focusNextInput() {
 
 void gag::calcul() {
     // Initialise les paramètres.
-    float k = 0;
+    double k = 0;
     float a = 0;
     float b = 0;
 
@@ -348,18 +413,15 @@ void gag::calcul() {
     std::string material_name = Materiau->currentText().toStdString();
     auto coefficients = database->get_material_coefficients(material_name);
 
-    k = std::get<0>(coefficients);
-    a = std::get<1>(coefficients);
-    b = std::get<2>(coefficients);
-
-    std::cout<<k<<a<<b<<std::endl;
+    a = std::get<0>(coefficients);
+    b = std::get<1>(coefficients);
+    k = std::get<2>(coefficients);
 
     float sigmaPiezo = 0; // Cumul piezo
     float sigmaPerte = 0; // Cumul perte
     float sigmaLongueur = 0;
     float sigmaHauteur = 0;
 
-    float K = 0.01; // Coefficient pour les pertes de charge (à ajuster en fonction de votre système).
     // Effectue les calculs pour chaque ligne de données.
     for (int i = 0; i < _Donnees.size(); ++i) {
 
@@ -437,6 +499,7 @@ void gag::RafraichirTableau() {
             value->setReadOnly(true);
             value->setAlignment(alignment);
             value->setFixedHeight(fixedHeight); // Set the line size.
+            value->setFixedWidth(180);
             value->setSizePolicy(sizePolicy);
             scrollAreaLayout->addWidget(value, i + 1, j, Qt::AlignTop);
         }

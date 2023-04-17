@@ -13,10 +13,9 @@ find_package(Qt5 COMPONENTS
         Widgets
         REQUIRED)
 
-add_executable(Tout main.cpp bdd.cpp bdd.h tubesimple.cpp tubesimple.h tout.cpp tout.h tableau.h tableau.cpp pcdim.cpp pcdim.h gag.cpp gag.h MainWidow.cpp MainWidow.h)
+add_executable(Tout WIN32 main.cpp bdd.cpp bdd.h tubesimple.cpp tubesimple.h tout.cpp tout.h tableau.h tableau.cpp pcdim.cpp pcdim.h gag.cpp gag.h MainWidow.cpp MainWidow.h)
 target_link_libraries(Tout
         Qt5::Core
         Qt5::Gui
         Qt5::Widgets
         )
-

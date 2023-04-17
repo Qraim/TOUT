@@ -1,0 +1,4 @@
+/home/qraim/CLionProjects/Tout/build/CMakeFiles/Tout.dir
+/home/qraim/CLionProjects/Tout/build/CMakeFiles/edit_cache.dir
+/home/qraim/CLionProjects/Tout/build/CMakeFiles/rebuild_cache.dir
+/home/qraim/CLionProjects/Tout/build/CMakeFiles/Tout_autogen.dir

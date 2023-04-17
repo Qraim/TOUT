@@ -187,7 +187,7 @@ build Tout_autogen/timestamp Tout_autogen/mocs_compilation.cpp | ${cmake_ninja_w
 #############################################
 # Phony custom command for CMakeFiles/Tout_autogen_timestamp_deps
 
-build CMakeFiles/Tout_autogen_timestamp_deps | ${cmake_ninja_workdir}CMakeFiles/Tout_autogen_timestamp_deps: phony /usr/lib/libQt5Core.so.5.15.9 /usr/bin/moc /usr/bin/uic /usr/lib/libQt5Gui.so.5.15.9 /usr/lib/libQt5Widgets.so.5.15.9
+build CMakeFiles/Tout_autogen_timestamp_deps | ${cmake_ninja_workdir}CMakeFiles/Tout_autogen_timestamp_deps: phony /usr/lib/libQt5Core.so.5.15.9 /usr/bin/moc /usr/lib/libQt5Widgets.so.5.15.9 /usr/lib/libQt5Gui.so.5.15.9 /usr/bin/uic
 
 
 #############################################

@@ -33,6 +33,7 @@ public:
      pcdim(std::shared_ptr<bdd> db,QWidget *parent = nullptr);
     ~pcdim();
 
+
 private:
 
     void clearInput();

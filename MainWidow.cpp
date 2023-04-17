@@ -120,19 +120,21 @@ void MainWindow::onSwitchButtonClicked() {
 }
 
 void MainWindow::updateSecondComboBox(int index) {
-    Pression.clear(); // On efface le contenu pour le remplacer
+    Pression.clear(); // Clear the contents to replace them
 
     // Get the selected material
     QString selected_material = Materiau.itemText(index);
 
-    // Retrieve the corresponding material object
-    matiere selected_matiere = database->findMatiereByName(selected_material.toStdString());
+    // Get all the different pressure values for the selected material
+    std::vector<int> pressures = database->getAllPressuresForMatiere(selected_material.toStdString());
 
     // Fill the Pression ComboBox with available pressure values
-    for (const auto& pression_obj : selected_matiere.pressions) {
-        Pression.addItem(QString::number(pression_obj.bar));
+    for (const auto& pressure : pressures) {
+        Pression.addItem(QString::number(pressure));
     }
 }
+
+
 
 
 float MainWindow::calculer() {
@@ -150,9 +152,15 @@ float MainWindow::calculer() {
 
 float MainWindow::calcullongueurdeniv() {
 
-    float k = 831743.11;
-    float a = 1.75;
-    float b = -4.75;
+    float a,b;
+    double k;
+
+    std::string material_name = Materiau.currentText().toStdString();
+    auto coefficients = database->get_material_coefficients(material_name);
+
+    a = std::get<0>(coefficients);
+    b = std::get<1>(coefficients);
+    k = std::get<2>(coefficients);
 
     float debits = (debit.text().toFloat() * 1000) / 3600;
     float deniveles = denivele.text().toFloat();

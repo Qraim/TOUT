@@ -34,6 +34,13 @@ Q_OBJECT
 public:
     explicit gag(std::shared_ptr<bdd> db,QWidget *parent = nullptr);
 
+    void refresh(){
+        Materiau->clear();
+        std::vector<std::string> matiere_names = database->getAllMatiereNames();
+        for (const auto& matiere_name : matiere_names) {
+            Materiau->addItem(QString::fromStdString(matiere_name));
+        }
+    }
 private:
 
     std::shared_ptr<bdd> database;

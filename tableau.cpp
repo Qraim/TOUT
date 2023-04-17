@@ -261,6 +261,7 @@ void pertechargeherse::AjoutLigne() {
         lineEdit->setAlignment(Qt::AlignCenter);
         lineEdit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
         lineEdit->setFixedHeight(40); // Fixe la taille de la ligne.
+        lineEdit->setFixedWidth(200);
 
         if (indices[i] != -1) { // Si l'indice n'est pas égal à -1, on remplit la case correspondante avec la donnée.
             if (i == 0) {
@@ -399,7 +400,7 @@ bool pertechargeherse::Allinputfill() {
 void pertechargeherse::calcul() {
 
     // Initialise les paramètres.
-    float k = 0;
+    double k = 0;
     float a = 0;
     float b = 0;
 
@@ -425,11 +426,10 @@ void pertechargeherse::calcul() {
         _Donnees[i][2] = sigmaDebit;
     }
 
-    std::tuple<float, float, float> coefficients = database->get_material_coefficients(Materiau->currentText().toStdString());
+    std::tuple<float, float, double> coefficients = database->get_material_coefficients(Materiau->currentText().toStdString());
     a = std::get<0>(coefficients);
     b = std::get<1>(coefficients);
     k = std::get<2>(coefficients);
-    std::cout<<k<<a<<b<<std::endl;
 
     // Effectue les calculs pour chaque ligne de données.
     for (int i = 0; i < _Donnees.size(); ++i) {
@@ -537,6 +537,9 @@ void pertechargeherse::RafraichirTableau() {
 
             // Définit la hauteur fixe de la ligne de texte.
             lineEdit->setFixedHeight(40);
+
+            lineEdit->setFixedWidth(200);
+
 
             if (i == 0) {
                 lineEdit->setText(QString::number(donneesLigne[i], 'f', 0));

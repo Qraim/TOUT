@@ -126,16 +126,14 @@ float pcdim::calculperte() {
     std::string pipe_material = gettableau(diametre);
 
 
-    std::tuple<float, float, float> material_properties = getMaterialProperties(pipe_material);
+    std::tuple<float, float, double> material_properties = getMaterialProperties(pipe_material);
 
 
-    float k = std::get<0>(material_properties);
-    float a = std::get<1>(material_properties);
-    float b = std::get<2>(material_properties);
+    float a = std::get<0>(material_properties);
+    float b = std::get<1>(material_properties);
+    double k = std::get<2>(material_properties);
 
     float longueur = inputs[3]->text().toFloat(); // Longueur in meters
-
-    std::cout<<longueur<<" "<< k <<" "<< a << " "<< b<<" " << debit_ls << " " << diametre  <<std::endl;
 
     float perte = k * std::pow(debit_ls, a) * std::pow(diametre, b) * std::pow(longueur, 1.0);
     return perte;
@@ -150,7 +148,6 @@ void pcdim::calculate()
 
     if (debitEntered && diametreEntered && vitesseEntered && longueurEntered) {
         float perte = calculperte();
-        std::cout<<perte<<std::endl;
         inputs[4]->setText(QString::number(perte));
         return;
     }
