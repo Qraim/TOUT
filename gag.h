@@ -22,6 +22,7 @@
 #include <QPushButton>
 #include <QDoubleValidator>
 #include <QLocale>
+#include <QSpacerItem>
 
 
 #include <vector>

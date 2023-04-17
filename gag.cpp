@@ -4,6 +4,11 @@
 
 #include "gag.h"
 
+float QStringToFloat3(const QString &str) {
+    QString modifiedStr = str;
+    modifiedStr.replace(',', '.');
+    return modifiedStr.toFloat();
+}
 
 gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db){
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
@@ -63,17 +68,18 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     QLabel *labelLongueur = new QLabel("Longueur: m");
     QLabel *labelHauteur = new QLabel("Hauteur: m");
 
-    // Add labels and QLineEdit widgets to the topLayout
-    topLayout->addWidget(labelDebit, 1, 0, Qt::AlignCenter);
-    topLayout->addWidget(Debit, 2, 0, Qt::AlignCenter);
-    topLayout->addWidget(labelEspacement, 1, 1, Qt::AlignCenter);
-    topLayout->addWidget(Espacement, 2, 1, Qt::AlignCenter);
-    topLayout->addWidget(labelDiametre, 1, 2, Qt::AlignCenter);
-    topLayout->addWidget(Diametre, 2, 2, Qt::AlignCenter);
-    topLayout->addWidget(labelLongueur, 1, 3, Qt::AlignCenter);
-    topLayout->addWidget(Longueur, 2, 3, Qt::AlignCenter);
-    topLayout->addWidget(labelHauteur, 1, 4, Qt::AlignCenter);
-    topLayout->addWidget(Hauteur, 2, 4, Qt::AlignCenter);
+
+    topLayout->addWidget(labelDebit, 1, 2, Qt::AlignCenter);
+    topLayout->addWidget(Debit, 2, 2, Qt::AlignCenter);
+    topLayout->addWidget(labelEspacement, 1, 3, Qt::AlignCenter);
+    topLayout->addWidget(Espacement, 2, 3, Qt::AlignCenter);
+    topLayout->addWidget(labelDiametre, 1, 4, Qt::AlignCenter);
+    topLayout->addWidget(Diametre, 2, 4, Qt::AlignCenter);
+    topLayout->addWidget(labelLongueur, 1, 5, Qt::AlignCenter);
+    topLayout->addWidget(Longueur, 2, 5, Qt::AlignCenter);
+    topLayout->addWidget(labelHauteur, 1, 6, Qt::AlignCenter);
+    topLayout->addWidget(Hauteur, 2, 6, Qt::AlignCenter);
+
 
     // Add additional labels under the QLineEdit widgets
     QLabel *labelNumero = new QLabel("Numéro");
@@ -87,16 +93,16 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     QLabel *labelSigmaPerte = new QLabel("ΣJ");
     QLabel *labelSigmaPiezo = new QLabel("ΣPiezo");
 
-    topLayout->addWidget(labelNumero, 3, 0, Qt::AlignCenter);
-    topLayout->addWidget(labelDebit2, 3, 1, Qt::AlignCenter);
-    topLayout->addWidget(labelEspacement2, 3, 2, Qt::AlignCenter);
-    topLayout->addWidget(labelDiametre2, 3, 3, Qt::AlignCenter);
-    topLayout->addWidget(labelLongueur2, 3, 4, Qt::AlignCenter);
-    topLayout->addWidget(labelHauteur2, 3, 5, Qt::AlignCenter);
-    topLayout->addWidget(labelPerte, 3, 6, Qt::AlignCenter);
-    topLayout->addWidget(labelPiezo, 3, 7, Qt::AlignCenter);
-    topLayout->addWidget(labelSigmaPerte, 3, 8, Qt::AlignCenter);
-    topLayout->addWidget(labelSigmaPiezo, 3, 9, Qt::AlignCenter);
+    topLayout->addWidget(labelNumero, 4, 0, Qt::AlignCenter);
+    topLayout->addWidget(labelDebit2, 4, 1, Qt::AlignCenter);
+    topLayout->addWidget(labelEspacement2, 4, 2, Qt::AlignCenter);
+    topLayout->addWidget(labelDiametre2, 4, 3, Qt::AlignCenter);
+    topLayout->addWidget(labelLongueur2, 4, 4, Qt::AlignCenter);
+    topLayout->addWidget(labelHauteur2, 4, 5, Qt::AlignCenter);
+    topLayout->addWidget(labelPerte, 4, 6, Qt::AlignCenter);
+    topLayout->addWidget(labelPiezo, 4, 7, Qt::AlignCenter);
+    topLayout->addWidget(labelSigmaPerte,4, 8, Qt::AlignCenter);
+    topLayout->addWidget(labelSigmaPiezo,4, 9, Qt::AlignCenter);
 
     // Create QLabel objects for units
     QLabel *unitDebit2 = new QLabel("l/h");
@@ -111,15 +117,15 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
 
 
     // Add the units to the layout, placing them in the row below the labels
-    topLayout->addWidget(unitDebit2, 4, 1, Qt::AlignCenter);
-    topLayout->addWidget(unitEspacement2, 4, 2, Qt::AlignCenter);
-    topLayout->addWidget(unitDiametre2, 4, 3, Qt::AlignCenter);
-    topLayout->addWidget(unitLongueur2, 4, 4, Qt::AlignCenter);
-    topLayout->addWidget(unitHauteur2, 4, 5, Qt::AlignCenter);
-    topLayout->addWidget(unitPerte, 4, 6, Qt::AlignCenter);
-    topLayout->addWidget(unitPiezo, 4, 7, Qt::AlignCenter);
-    topLayout->addWidget(unitSigmaPerte, 4, 8, Qt::AlignCenter);
-    topLayout->addWidget(unitSigmaPiezo, 4, 9, Qt::AlignCenter);
+    topLayout->addWidget(unitDebit2, 5, 1, Qt::AlignCenter);
+    topLayout->addWidget(unitEspacement2, 5, 2, Qt::AlignCenter);
+    topLayout->addWidget(unitDiametre2, 5, 3, Qt::AlignCenter);
+    topLayout->addWidget(unitLongueur2, 5, 4, Qt::AlignCenter);
+    topLayout->addWidget(unitHauteur2, 5, 5, Qt::AlignCenter);
+    topLayout->addWidget(unitPerte, 5, 6, Qt::AlignCenter);
+    topLayout->addWidget(unitPiezo, 5, 7, Qt::AlignCenter);
+    topLayout->addWidget(unitSigmaPerte, 5, 8, Qt::AlignCenter);
+    topLayout->addWidget(unitSigmaPiezo, 5, 9, Qt::AlignCenter);
 
 
     // Add labels and QLineEdit widgets to the topLayout

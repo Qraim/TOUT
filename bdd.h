@@ -59,6 +59,7 @@ struct matiere {
     double k;
     std::vector<pression> pressions;
 
+    matiere(){};
     matiere(std::string n, float a_, float b_, double k_, std::vector<pression> p) : nom(n), a(a_), b(b_), k(k_), pressions(p) {}
 };
 

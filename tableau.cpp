@@ -14,6 +14,13 @@ void espacementColonne(QGridLayout *layout) {
     }
 }
 
+float QStringToFloat2(const QString &str) {
+    QString modifiedStr = str;
+    modifiedStr.replace(',', '.');
+    return modifiedStr.toFloat();
+}
+
+
 
 pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db) {
 
@@ -190,11 +197,6 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db,QWidget *parent) : QW
     bottomLayout->addLayout(hbox3);
     bottomLayout->addLayout(hbox4);
 
-    inputQ->setValidator(new QDoubleValidator(0.000001, 1000000, 6, this));
-    inputD->setValidator(new QDoubleValidator(0.000001, 1000000, 6, this));
-    inputL->setValidator(new QDoubleValidator(0.000001, 1000000, 6, this));
-    inputH->setValidator(new QDoubleValidator(0.000001, 1000000, 6, this));
-
     inputQ->setFocus();
 
     // Définir l'espacement des inputsLayout et bottomLayout
@@ -220,10 +222,10 @@ pertechargeherse::~pertechargeherse() {
 
 void pertechargeherse::AjoutDonne() {
 
-    float debit = inputQ->text().toFloat(); // récupération des inputs
-    float diametre = inputD->text().toFloat();
-    float longueur = inputL->text().toFloat();
-    float hauteur = inputH->text().toFloat();
+    float debit = QStringToFloat2(inputQ->text()); // récupération des inputs
+    float diametre = QStringToFloat2(inputD->text());
+    float longueur = QStringToFloat2(inputL->text());
+    float hauteur = QStringToFloat2(inputH->text());
 
     int numero = _Donnees.size()+1; // numéro
 

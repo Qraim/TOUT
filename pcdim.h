@@ -43,6 +43,7 @@ private:
     std::shared_ptr<bdd> database;
 
     QGridLayout *mainLayout;
+    QLabel *unitsLabels[5];
     QLabel *labels[5];
     QLineEdit *inputs[5];
     QPushButton *buttons[5];

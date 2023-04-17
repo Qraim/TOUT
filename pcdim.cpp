@@ -13,7 +13,8 @@ pcdim::pcdim(std::shared_ptr<bdd> db,QWidget *parent)
 
 
     // Ajoutez les noms souhaités pour les labels dans ce tableau
-    QString labelNames[] = {"Débit (m3/h)", "Diametre int (mm)", "Vitesse (m/s)", "Longueur (m)", "Perte (m)"};
+    QString labelNames[] = {"Débit", "Diametre", "Vitesse", "Longueur", "Perte"};
+    QString units[] = {"(m3/h)", "(mm)", "(m/s)", "(m)", "(m)"};
 
     for (int i = 0; i < 5; ++i)
     {
@@ -21,22 +22,25 @@ pcdim::pcdim(std::shared_ptr<bdd> db,QWidget *parent)
         labels[i] = new QLabel(labelNames[i], this);
         mainLayout->addWidget(labels[i], i, 0);
 
+        unitsLabels[i] = new QLabel(units[i], this);
+        mainLayout->addWidget(unitsLabels[i], i, 2);
+
         inputs[i] = new QLineEdit(this);
         mainLayout->addWidget(inputs[i], i, 1);
         inputs[i]->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
         buttons[i] = new QPushButton(QString("Effacer"));
-        mainLayout->addWidget(buttons[i], i, 2);
+        mainLayout->addWidget(buttons[i], i, 3);
         connect(buttons[i], &QPushButton::clicked, this, &pcdim::clearInput);
     }
 
     // Renommer les deux boutons
     bottomButtons[0] = new QPushButton("Calculer", this);
-    mainLayout->addWidget(bottomButtons[0], 6, 0, 1, 3, Qt::AlignCenter);
+    mainLayout->addWidget(bottomButtons[0], 6, 0, 1, 4, Qt::AlignCenter);
     connect(bottomButtons[0], &QPushButton::clicked, this, &pcdim::calculate);
 
     bottomButtons[1] = new QPushButton("Effacer", this);
-    mainLayout->addWidget(bottomButtons[1], 7, 0, 1, 3, Qt::AlignCenter);
+    mainLayout->addWidget(bottomButtons[1], 7, 0, 1, 4, Qt::AlignCenter);
     connect(bottomButtons[1], &QPushButton::clicked, this, &pcdim::clearAll);
 
     for (int i = 0; i < 5; ++i)
@@ -44,12 +48,17 @@ pcdim::pcdim(std::shared_ptr<bdd> db,QWidget *parent)
         inputs[i]->installEventFilter(this);
     }
 
+    QLabel *Warning = new QLabel("<p align='center'>Attention, le diametre doit correspondre à un diametre intérieur présent<br>dans la base de données</p>");
+    Warning->setAlignment(Qt::AlignCenter);
+    mainLayout->addWidget(Warning, 8, 0, 1, 4);
+
     diametersButton = new QPushButton("Diamètre", this);
-    mainLayout->addWidget(diametersButton, 0, 3);
+    mainLayout->addWidget(diametersButton, 0, 4);
     connect(diametersButton, &QPushButton::clicked, this, &pcdim::showDiametersTable);
 
-
 }
+
+
 
 
 pcdim::~pcdim() = default;
@@ -137,10 +146,8 @@ float pcdim::calculperte() {
     float b = std::get<1>(material_properties);
     double k = std::get<2>(material_properties);
 
-    std::cout<<a<<" "<<b<<" "<<k<<std::endl;
-
     float perte = k * std::pow(debit_ls, a) * std::pow(diametre, b) * std::pow(longueur, 1.0);
-    std::cout<<perte<<std::endl;
+
     return perte;
 }
 
@@ -170,7 +177,6 @@ void pcdim::calculate()
         inputs[0]->setText(QString::number(debit));
         return;
     }
-
 
 }
 

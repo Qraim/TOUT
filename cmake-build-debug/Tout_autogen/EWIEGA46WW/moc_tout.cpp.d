@@ -512,6 +512,7 @@
   /usr/include/qt/QtWidgets/QScrollArea \
   /usr/include/qt/QtWidgets/QScrollBar \
   /usr/include/qt/QtWidgets/QShortcut \
+  /usr/include/qt/QtWidgets/QSpacerItem \
   /usr/include/qt/QtWidgets/QStackedWidget \
   /usr/include/qt/QtWidgets/QTableWidget \
   /usr/include/qt/QtWidgets/QTableWidgetItem \
