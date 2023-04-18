@@ -87,6 +87,17 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     QLabel *labelSigmaPerte = new QLabel("ΣJ");
     QLabel *labelSigmaPiezo = new QLabel("ΣPiezo");
 
+    labelNumero->setAlignment(Qt::AlignCenter);
+    labelDebit2->setAlignment(Qt::AlignCenter);
+    labelEspacement2->setAlignment(Qt::AlignCenter);
+    labelDiametre2->setAlignment(Qt::AlignCenter);
+    labelLongueur2->setAlignment(Qt::AlignCenter);
+    labelHauteur2->setAlignment(Qt::AlignCenter);
+    labelPerte->setAlignment(Qt::AlignCenter);
+    labelPiezo->setAlignment(Qt::AlignCenter);
+    labelSigmaPerte->setAlignment(Qt::AlignCenter);
+    labelSigmaPiezo->setAlignment(Qt::AlignCenter);
+
     topLayout->addWidget(labelNumero, 4, 0, Qt::AlignCenter);
     topLayout->addWidget(labelDebit2, 4, 1, Qt::AlignCenter);
     topLayout->addWidget(labelEspacement2, 4, 2, Qt::AlignCenter);
@@ -99,6 +110,8 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     topLayout->addWidget(labelSigmaPiezo,4, 9, Qt::AlignCenter);
 
     // Ajout de label pour les unités
+
+    QLabel *numero = new QLabel("");
     QLabel *unitDebit2 = new QLabel("l/h");
     QLabel *unitEspacement2 = new QLabel("m");
     QLabel *unitDiametre2 = new QLabel("mm");
@@ -109,8 +122,19 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     QLabel *unitSigmaPerte = new QLabel("m");
     QLabel *unitSigmaPiezo = new QLabel("m");
 
+    numero->setAlignment(Qt::AlignCenter);
+    unitDebit2->setAlignment(Qt::AlignCenter);
+    unitEspacement2->setAlignment(Qt::AlignCenter);
+    unitDiametre2->setAlignment(Qt::AlignCenter);
+    unitLongueur2->setAlignment(Qt::AlignCenter);
+    unitHauteur2->setAlignment(Qt::AlignCenter);
+    unitPerte->setAlignment(Qt::AlignCenter);
+    unitPiezo->setAlignment(Qt::AlignCenter);
+    unitSigmaPerte->setAlignment(Qt::AlignCenter);
+    unitSigmaPiezo->setAlignment(Qt::AlignCenter);
 
     // Ajout des unités au layout
+    topLayout->addWidget(numero, 5, 0, Qt::AlignCenter);
     topLayout->addWidget(unitDebit2, 5, 1, Qt::AlignCenter);
     topLayout->addWidget(unitEspacement2, 5, 2, Qt::AlignCenter);
     topLayout->addWidget(unitDiametre2, 5, 3, Qt::AlignCenter);
@@ -135,9 +159,10 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     topLayout->addWidget(Hauteur, 2, 4, Qt::AlignCenter);
 
     // On fixe la taille
-    int fixedWidth = 180;
+    int fixedWidth = 170;
     int fixedHeight = 40;
 
+    labelNumero->setFixedSize(fixedWidth, fixedHeight);
     labelDebit2->setFixedSize(fixedWidth, fixedHeight);
     labelEspacement2->setFixedSize(fixedWidth, fixedHeight);
     labelDiametre2->setFixedSize(fixedWidth, fixedHeight);
@@ -147,7 +172,7 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     labelPiezo->setFixedSize(fixedWidth, fixedHeight);
     labelSigmaPerte->setFixedSize(fixedWidth, fixedHeight);
     labelSigmaPiezo->setFixedSize(fixedWidth, fixedHeight);
-
+    numero->setFixedSize(fixedWidth, fixedHeight);
     unitDebit2->setFixedSize(fixedWidth, fixedHeight);
     unitEspacement2->setFixedSize(fixedWidth, fixedHeight);
     unitDiametre2->setFixedSize(fixedWidth, fixedHeight);
@@ -158,12 +183,13 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     unitSigmaPerte->setFixedSize(fixedWidth, fixedHeight);
     unitSigmaPiezo->setFixedSize(fixedWidth, fixedHeight);
 
+
+
     for (int col = 0; col < 10; ++col) {
         topLayout->setColumnStretch(col, 1);
     }
 
     mainLayout->addLayout(topLayout);
-
 
     // Section du milieu
     QScrollArea *scrollArea = new QScrollArea;
@@ -419,7 +445,7 @@ void gag::calcul() {
         hauteur = _Donnees[i][5];
 
         // Calcule la perte de charge.
-        perteCharge = k * pow(sigmaDebit / 3600, a) * pow(diametre, b) * longueur;
+        perteCharge = k * pow(sigmaDebit / 3600, a) * pow(diametre, b) * longueur ;
 
         // Calcule la hauteur piezométrique.
         piezo = perteCharge + hauteur;

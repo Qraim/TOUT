@@ -61,25 +61,17 @@ pcdim::pcdim(std::shared_ptr<bdd> db,QWidget *parent)
         inputs[i]->installEventFilter(this);
     }
 
-    QLabel *Warning = new QLabel("<p align='center'>Attention, le diametre doit correspondre à un diametre intérieur présent<br>dans la base de données</p>");
-    Warning->setAlignment(Qt::AlignCenter);
-    mainLayout->addWidget(Warning, 8, 0, 1, 4);
-
     diametersButton = new QPushButton("Diamètre", this);
     mainLayout->addWidget(diametersButton, 0, 4);
     connect(diametersButton, &QPushButton::clicked, this, &pcdim::showDiametersTable);
 
 }
 
-
-
-
 pcdim::~pcdim() = default;
 
 void pcdim::showDiametersTable() {
     database->afficher_tableaux();
 }
-
 
 void pcdim::clearInput()
 {
@@ -100,7 +92,6 @@ void pcdim::clearAll()
         inputs[i]->clear();
     }
 }
-
 
 float pcdim::calculdebit()
 {
@@ -201,9 +192,6 @@ void pcdim::calculate()
         return;
     }
 }
-
-
-
 
 bool pcdim::eventFilter(QObject *obj, QEvent *event)
 {

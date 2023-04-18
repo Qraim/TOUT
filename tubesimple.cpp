@@ -4,6 +4,7 @@
 
 #include "tubesimple.h"
 #include <math.h>
+#include <memory>
 
 tubesimple::tubesimple(std::shared_ptr<bdd> db, QWidget *parent)
         : QWidget(parent), database(db) {
@@ -12,7 +13,6 @@ tubesimple::tubesimple(std::shared_ptr<bdd> db, QWidget *parent)
     for (const auto& matiere_name : matiere_names) {
         materiau.addItem(QString::fromStdString(matiere_name));
     }
-
 
     // Créé la grille
     QGridLayout *gridLayout = new QGridLayout;
@@ -61,7 +61,7 @@ tubesimple::tubesimple(std::shared_ptr<bdd> db, QWidget *parent)
     resultFieldsLayout->addWidget(&Vitesse);
 
     // Ajoute des champs non écrivable
-    QHBoxLayout *nonEditableFieldsLayout = new QHBoxLayout;
+    std::unique_ptr<QHBoxLayout> nonEditableFieldsLayout = std::make_unique<QHBoxLayout>();
 
     // Ajoute le bouton Calculer
     Calcul.setText("Calculer");

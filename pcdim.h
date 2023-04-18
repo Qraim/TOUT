@@ -33,7 +33,6 @@ public:
      pcdim(std::shared_ptr<bdd> db,QWidget *parent = nullptr);
     ~pcdim();
 
-
 private:
 
     void clearInput();
@@ -53,7 +52,6 @@ private:
     QComboBox *materialComboBox;
     QComboBox *pressureComboBox;
     QComboBox *innerDiameterComboBox;
-
 
     ///
     /// @return
@@ -107,6 +105,5 @@ private slots:
     void onPressureComboBoxIndexChanged(int index);
 
 };
-
 
 #endif //PCDIM_PCDIM_H
