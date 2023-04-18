@@ -4,16 +4,11 @@
 
 #include "gag.h"
 
-float QStringToFloat3(const QString &str) {
-    QString modifiedStr = str;
-    modifiedStr.replace(',', '.');
-    return modifiedStr.toFloat();
-}
 
 gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db){
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
 
-    // Top section
+    // Top layout
     QGridLayout *topLayout = new QGridLayout;
     topLayout->setSpacing(10);
     topLayout->setAlignment(Qt::AlignCenter);
@@ -29,18 +24,17 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
 
     topLayout->addWidget(Materiau);
 
-    // Create QLineEdit pointers and corresponding labels for the top section
+    // QlineEdit et labels pour la section du haut
     Debit = new QLineEdit;
     Espacement = new QLineEdit;
     Diametre = new QLineEdit;
     Longueur = new QLineEdit;
     Hauteur = new QLineEdit;
 
-    // Create a custom locale with a period as the decimal separator
-    // Create a custom locale with a period as the decimal separator
+    // séparateur décimal
     QLocale customLocale = QLocale::French;
 
-    // Add input validators to QLineEdit widgets with the custom locale
+    // On ajoute des validator pour restreindre l'input à un nombre
     QDoubleValidator *debitValidator = new QDoubleValidator(0, std::numeric_limits<double>::max(), 2, this);
     debitValidator->setLocale(customLocale);
     Debit->setValidator(debitValidator);
@@ -81,7 +75,7 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     topLayout->addWidget(Hauteur, 2, 6, Qt::AlignCenter);
 
 
-    // Add additional labels under the QLineEdit widgets
+    // Ajout des labels en dessous des inputs
     QLabel *labelNumero = new QLabel("Numéro");
     QLabel *labelDebit2 = new QLabel("Debit");
     QLabel *labelEspacement2 = new QLabel("Espacement");
@@ -104,7 +98,7 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     topLayout->addWidget(labelSigmaPerte,4, 8, Qt::AlignCenter);
     topLayout->addWidget(labelSigmaPiezo,4, 9, Qt::AlignCenter);
 
-    // Create QLabel objects for units
+    // Ajout de label pour les unités
     QLabel *unitDebit2 = new QLabel("l/h");
     QLabel *unitEspacement2 = new QLabel("m");
     QLabel *unitDiametre2 = new QLabel("mm");
@@ -116,7 +110,7 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     QLabel *unitSigmaPiezo = new QLabel("m");
 
 
-    // Add the units to the layout, placing them in the row below the labels
+    // Ajout des unités au layout
     topLayout->addWidget(unitDebit2, 5, 1, Qt::AlignCenter);
     topLayout->addWidget(unitEspacement2, 5, 2, Qt::AlignCenter);
     topLayout->addWidget(unitDiametre2, 5, 3, Qt::AlignCenter);
@@ -128,7 +122,7 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     topLayout->addWidget(unitSigmaPiezo, 5, 9, Qt::AlignCenter);
 
 
-    // Add labels and QLineEdit widgets to the topLayout
+    // Ajout des label et des QlineEdit au layout
     topLayout->addWidget(labelDebit, 1, 0, Qt::AlignCenter);
     topLayout->addWidget(Debit, 2, 0, Qt::AlignCenter);
     topLayout->addWidget(labelEspacement, 1, 1, Qt::AlignCenter);
@@ -140,60 +134,7 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     topLayout->addWidget(labelHauteur, 1, 4, Qt::AlignCenter);
     topLayout->addWidget(Hauteur, 2, 4, Qt::AlignCenter);
 
-
-    // Add labels and QLineEdit widgets to the topLayout
-    topLayout->addWidget(labelDebit, 1, 0, Qt::AlignCenter);
-    topLayout->addWidget(Debit, 2, 0, Qt::AlignCenter);
-    topLayout->addWidget(labelEspacement, 1, 1, Qt::AlignCenter);
-    topLayout->addWidget(Espacement, 2, 1, Qt::AlignCenter);
-    topLayout->addWidget(labelDiametre, 1, 2, Qt::AlignCenter);
-    topLayout->addWidget(Diametre, 2, 2, Qt::AlignCenter);
-    topLayout->addWidget(labelLongueur, 1, 3, Qt::AlignCenter);
-    topLayout->addWidget(Longueur, 2, 3, Qt::AlignCenter);
-    topLayout->addWidget(labelHauteur, 1, 4, Qt::AlignCenter);
-    topLayout->addWidget(Hauteur, 2, 4, Qt::AlignCenter);
-
-    // Add labels and QLineEdit widgets to the topLayout
-    topLayout->addWidget(labelDebit, 1, 0, Qt::AlignCenter);
-    topLayout->addWidget(Debit, 2, 0, Qt::AlignCenter);
-    topLayout->addWidget(labelEspacement, 1, 1, Qt::AlignCenter);
-    topLayout->addWidget(Espacement, 2, 1, Qt::AlignCenter);
-    topLayout->addWidget(labelDiametre, 1, 2, Qt::AlignCenter);
-    topLayout->addWidget(Diametre, 2, 2, Qt::AlignCenter);
-    topLayout->addWidget(labelLongueur, 1, 3, Qt::AlignCenter);
-    topLayout->addWidget(Longueur, 2, 3, Qt::AlignCenter);
-    topLayout->addWidget(labelHauteur, 1, 4, Qt::AlignCenter);
-    topLayout->addWidget(Hauteur, 2, 4, Qt::AlignCenter);
-
-    // Add labels and QLineEdit widgets to the topLayout
-    topLayout->addWidget(labelDebit, 1, 0, Qt::AlignCenter);
-    topLayout->addWidget(Debit, 2, 0, Qt::AlignCenter);
-    topLayout->addWidget(labelEspacement, 1, 1, Qt::AlignCenter);
-    topLayout->addWidget(Espacement, 2, 1, Qt::AlignCenter);
-    topLayout->addWidget(labelDiametre, 1, 2, Qt::AlignCenter);
-    topLayout->addWidget(Diametre, 2, 2, Qt::AlignCenter);
-    topLayout->addWidget(labelLongueur, 1, 3, Qt::AlignCenter);
-    topLayout->addWidget(Longueur, 2, 3, Qt::AlignCenter);
-    topLayout->addWidget(labelHauteur, 1, 4, Qt::AlignCenter);
-    topLayout->addWidget(Hauteur, 2, 4, Qt::AlignCenter);
-
-    int fixedwidth = 180;
-    int fixedheigth = 40;
-
-    // Add labels and QLineEdit widgets to the topLayout
-    topLayout->addWidget(labelDebit, 1, 0, Qt::AlignCenter);
-    topLayout->addWidget(Debit, 2, 0, Qt::AlignCenter);
-    topLayout->addWidget(labelEspacement, 1, 1, Qt::AlignCenter);
-    topLayout->addWidget(Espacement, 2, 1, Qt::AlignCenter);
-    topLayout->addWidget(labelDiametre, 1, 2, Qt::AlignCenter);
-    topLayout->addWidget(Diametre, 2, 2, Qt::AlignCenter);
-    topLayout->addWidget(labelLongueur, 1, 3, Qt::AlignCenter);
-    topLayout->addWidget(Longueur, 2, 3, Qt::AlignCenter);
-    topLayout->addWidget(labelHauteur, 1, 4, Qt::AlignCenter);
-    topLayout->addWidget(Hauteur, 2, 4, Qt::AlignCenter);
-
-
-    // Set the fixed size for QLabel objects
+    // On fixe la taille
     int fixedWidth = 180;
     int fixedHeight = 40;
 
@@ -224,7 +165,7 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     mainLayout->addLayout(topLayout);
 
 
-    // Mid section
+    // Section du milieu
     QScrollArea *scrollArea = new QScrollArea;
     mainLayout->addWidget(scrollArea);
 
@@ -233,12 +174,12 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     scrollArea->setWidget(scrollAreaContents);
     scrollArea->setWidgetResizable(true);
 
-    // Bottom section
+    // Section du bas
     QGridLayout *bottomLayout = new QGridLayout;
     bottomLayout->setSpacing(10);
     bottomLayout->setAlignment(Qt::AlignCenter);
 
-    // Create QLineEdit pointers and corresponding labels for the bottom section
+    // QLineEdit et label pour la section du bas
     CumulLongueur = new QLineEdit;
     Cumulhauteur = new QLineEdit;
     CumulPerte = new QLineEdit;
@@ -273,6 +214,7 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
 }
 
 void gag::AjoutDonnee() {
+    // Vérifier si tous les champs sont remplis
     if (!Debit->text().isEmpty() && !Espacement->text().isEmpty() &&
         !Diametre->text().isEmpty() && !Longueur->text().isEmpty() &&
         !Hauteur->text().isEmpty()) {
@@ -280,8 +222,10 @@ void gag::AjoutDonnee() {
         std::vector<float> temp;
         temp.resize(10);
 
+        // Obtenir le numéro de la ligne en ajoutant 1 à la taille des données existantes
         float numero = _Donnees.size()+1;
 
+        // Convertir les valeurs de texte en float et remplacer les virgules par des points
         QString debitText = Debit->text();
         debitText.replace(',', '.');
         float debit = debitText.toFloat();
@@ -302,7 +246,7 @@ void gag::AjoutDonnee() {
         hauteurText.replace(',', '.');
         float hauteur = hauteurText.toFloat();
 
-
+        // Stocker les valeurs dans le vecteur temporaire
         temp[0] = numero;
         temp[1] = debit;
         temp[2] = espacement;
@@ -310,28 +254,31 @@ void gag::AjoutDonnee() {
         temp[4] = longueur;
         temp[5] = hauteur;
 
+        // Ajouter le vecteur temporaire aux données
         _Donnees.push_back(temp);
 
+        // Ajouter une nouvelle ligne avec les données saisies
         AjoutLigne();
 
     } else {
+        // Si tous les champs ne sont pas remplis, passez au champ suivant non rempli
         focusNextInput();
     }
 }
 
 void gag::AjoutLigne() {
-    // Add a new row in the scroll area with the corresponding values
-    int row = _Donnees.size(); // Get the row number for the new row by adding 1 to the size of the "_Donnees" data vector.
-    const std::vector<float>& temp = _Donnees[row - 1]; // Copy the values of the last row for use as default values for the new row.
+    // Ajouter une nouvelle ligne dans la zone de défilement avec les valeurs correspondantes
+    int row = _Donnees.size(); // Obtenez le numéro de ligne pour la nouvelle ligne en ajoutant 1 à la taille du vecteur de données "_Donnees".
+    const std::vector<float>& temp = _Donnees[row - 1]; // Copiez les valeurs de la dernière ligne pour les utiliser comme valeurs par défaut pour la nouvelle ligne.
 
-    // Define the properties for the QLineEdit objects
+    // Définir les propriétés pour les objets QLineEdit
     QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     sizePolicy.setHeightForWidth(true);
     int fixedHeight = 40;
     Qt::Alignment alignment = Qt::AlignCenter;
 
-    for (int col = 0; col < temp.size(); ++col) { // For each column
-        // Create a QLineEdit object to display the value and set its read-only, alignment, and size properties.
+    for (int col = 0; col < temp.size(); ++col) { // Pour chaque colonne
+        // Créez un objet QLineEdit pour afficher la valeur et définir ses propriétés en lecture seule, son alignement et sa taille.
         QLineEdit *valueLabel = new QLineEdit(QString::number(temp[col]));
         valueLabel->setReadOnly(true);
         valueLabel->setAlignment(alignment);
@@ -339,15 +286,16 @@ void gag::AjoutLigne() {
         valueLabel->setFixedHeight(fixedHeight);
         valueLabel->setFixedWidth(180);
 
-        // Add the QLineEdit object into the scroll area using the appropriate row and column number.
+        // Ajoutez l'objet QLineEdit dans la zone de défilement en utilisant le numéro de ligne et de colonne approprié.
         scrollAreaLayout->addWidget(valueLabel, row, col, Qt::AlignTop);
     }
 
-    // Set the vertical spacing and alignment for the scroll area layout.
+    // Définir l'espacement vertical et l'alignement pour la disposition de la zone de défilement.
     scrollAreaLayout->setVerticalSpacing(15);
     scrollAreaLayout->setAlignment(Qt::AlignTop);
 
-    Debit->setFocus(); // Set focus on the "Debit" object after adding the new row.
+    Debit->setFocus(); // Définir le focus sur l'objet "Debit" après avoir ajouté la nouvelle ligne.
+
 }
 
 
@@ -486,35 +434,36 @@ void gag::clear(){
 }
 
 void gag::RafraichirTableau() {
-    clear(); // Clear the current content of the scroll area.
+    clear(); // Efface le contenu actuel de la zone de défilement.
 
-    // Define the properties for the QLineEdit objects
+    // Définit les propriétés des objets QLineEdit
     QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     int fixedHeight = 40;
     Qt::Alignment alignment = Qt::AlignCenter;
 
-    // Iterate through the "_Donnees" data vector and add the data to the scroll area.
+    // Parcourt le vecteur de données "_Donnees" et ajoute les données à la zone de défilement.
     for (int i = 0; i < _Donnees.size(); ++i) {
         for (int j = 0; j < _Donnees[i].size(); ++j) {
             QLineEdit *value;
-            if (j == 0) { // If we are on the first column, display the value as an integer.
+            if (j == 0) { // Si nous sommes sur la première colonne, affichez la valeur en tant qu'entier.
                 value = new QLineEdit(QString::number(static_cast<int>(_Donnees[i][j])));
-            } else { // Otherwise, display the value with two decimal places.
+            } else { // Sinon, affichez la valeur avec deux décimales.
                 value = new QLineEdit(QString::number(_Donnees[i][j], 'f', 2));
             }
             value->setReadOnly(true);
             value->setAlignment(alignment);
-            value->setFixedHeight(fixedHeight); // Set the line size.
+            value->setFixedHeight(fixedHeight); // Définir la taille de la ligne.
             value->setFixedWidth(180);
             value->setSizePolicy(sizePolicy);
             scrollAreaLayout->addWidget(value, i + 1, j, Qt::AlignTop);
         }
     }
 
-    // Set the vertical spacing and alignment for the scroll area layout.
+    // Définit l'espacement vertical et l'alignement pour la disposition de la zone de défilement.
     scrollAreaLayout->setVerticalSpacing(15);
     scrollAreaLayout->setAlignment(Qt::AlignTop);
 }
+
 
 
 
@@ -524,15 +473,20 @@ void gag::keyPressEvent(QKeyEvent *event) {
         // Appelle la fonction calcul().
         calcul();
     } else if (event->key() == Qt::Key_R) {
+        // Appelle la fonction recopie
         recopiederniereligne();
     } else if (event->key() == Qt::Key_M) {
+        // Appelle la fonction modifier
         showUpdateDialog();
     } else if (event->key() == Qt::Key_Z) {
+        // Appelle la fonction enlever ligne
         enleverLigne();
     } else if (event->key() == Qt::Key_E) {
+        // Efface les données et le tableau
         _Donnees.clear();
         clear();
     } else if (event->key() == Qt::Key_Control) {
+        // permet de changer la case active pour la precedente
         focusPreviousInput();
     }
 }

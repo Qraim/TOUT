@@ -26,16 +26,16 @@ tout::tout(QWidget *parent) : QWidget(parent) {
     goutte = std::make_unique<gag>(database,nullptr);
     goutte->setWindowFlags(Qt::Window);
 
-    // Create the first QComboBox with main options
+// Créez le premier QComboBox avec des options principales
     QComboBox *mainOptionsComboBox = new QComboBox(this);
     mainOptionsComboBox->addItem("Perte");
     mainOptionsComboBox->addItem("Diametre");
     mainOptionsComboBox->addItem("Débit");
 
-    // Create the second QComboBox for sub-options
+    // Créez le deuxième QComboBox pour les sous-options
     QComboBox *subOptionsComboBox = new QComboBox(this);
 
-    // Connect the first QComboBox's currentIndexChanged signal to update the second QComboBox
+    // Connectez le signal currentIndexChanged du premier QComboBox pour mettre à jour le deuxième QComboBox
     connect(mainOptionsComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), [=](int index) {
         subOptionsComboBox->clear();
         switch (index) {
@@ -53,20 +53,19 @@ tout::tout(QWidget *parent) : QWidget(parent) {
         }
     });
 
-// Create the QPushButton for opening the database
+    // Créez le QPushButton pour ouvrir la base de données
     QPushButton *openDatabaseButton = new QPushButton("Base de données", this);
 
-// Set the style for the openDatabaseButton
+    // Définir le style pour openDatabaseButton
     QString openDatabaseButtonStyle = "QPushButton { font-weight: bold; font-size: 12px; padding: 6px 12px; }";
     openDatabaseButton->setStyleSheet(openDatabaseButtonStyle);
 
-// Position the openDatabaseButton in the top right corner of the window
+    // Positionner le openDatabaseButton dans le coin supérieur droit de la fenêtre
     openDatabaseButton->setGeometry(width() - openDatabaseButton->width() - 20, 20, openDatabaseButton->width(), openDatabaseButton->height());
     openDatabaseButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
-// Connect the openDatabaseButton's clicked signal to the on_show_database_button_clicked() slot
+    // Connectez le signal cliqué de openDatabaseButton au slot on_show_database_button_clicked()
     connect(openDatabaseButton, &QPushButton::clicked, this, &tout::on_show_database_button_clicked);
-
 
     QPushButton *startButton = new QPushButton("Lancer", this);
 
@@ -100,43 +99,44 @@ tout::tout(QWidget *parent) : QWidget(parent) {
     subOptionsComboBox->addItem("Goutte à goutte");
     subOptionsComboBox->addItem("Tube simple");
 
-    // Set up the main layout
+    // Configurez le layout principal
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
     mainLayout->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
     mainLayout->setSpacing(20);
 
-    // Create a horizontal layout for the two QComboBox widgets
+    // Créez un layout horizontal pour les deux widgets QComboBox
     QHBoxLayout *comboBoxLayout = new QHBoxLayout();
     comboBoxLayout->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
     comboBoxLayout->setSpacing(10);
 
-    // Add mainOptionsComboBox and subOptionsComboBox to the comboBoxLayout
+    // Ajoutez mainOptionsComboBox et subOptionsComboBox au comboBoxLayout
     comboBoxLayout->addWidget(mainOptionsComboBox);
     comboBoxLayout->addWidget(subOptionsComboBox);
 
-    // Add comboBoxLayout and startButton to the mainLayout
+    // Ajoutez comboBoxLayout et startButton au mainLayout
     mainLayout->addLayout(comboBoxLayout);
     mainLayout->addWidget(startButton, 0, Qt::AlignHCenter);
 
-// Create a horizontal layout for the openDatabaseButton
+    // Créez un layout horizontal pour openDatabaseButton
     QHBoxLayout *bottomLeftLayout = new QHBoxLayout();
     bottomLeftLayout->setAlignment(Qt::AlignBottom | Qt::AlignLeft);
     bottomLeftLayout->addWidget(openDatabaseButton);
 
-// Add the bottomLeftLayout to the mainLayout
+    // Ajoutez bottomLeftLayout au mainLayout
     mainLayout->addLayout(bottomLeftLayout);
 
-// Set the layout for the widget
+    // Définir le layout pour le widget
     setLayout(mainLayout);
     layout()->setSizeConstraint(QLayout::SetFixedSize);
 
-    // Set some styles for the QComboBox widgets and the start button
+    // Définir des styles pour les widgets QComboBox et le bouton de démarrage
     QString comboBoxStyle = "QComboBox { font-weight: bold; font-size: 14px; padding: 6px 12px; min-width: 150px; }";
     QString buttonStyle = "QPushButton { font-weight: bold; font-size: 14px; padding: 6px 12px; min-width: 100px; }";
 
     mainOptionsComboBox->setStyleSheet(comboBoxStyle);
     subOptionsComboBox->setStyleSheet(comboBoxStyle);
     startButton->setStyleSheet(buttonStyle);
+
 }
 
 void tout::on_show_tubesimple_button_clicked() {

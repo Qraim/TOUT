@@ -45,7 +45,6 @@
 #ifndef BDD_BDD_H
 #define BDD_BDD_H
 
-
 struct pression {
     int bar;
     std::vector<std::pair<int, float>> diametre;
@@ -76,35 +75,120 @@ struct tableau {
 
 class bdd : public QWidget {
 Q_OBJECT
-public :
+public:
+    ///
+    /// Constructeur de la classe 'bdd', prend un pointeur vers le widget parent en paramètre.
+    ///
     bdd(QWidget *parent);
-    ~bdd();
-     std::string find_matiere_for_diametre(float diametre_interieur);
 
+    ///
+    /// Destructeur de la classe 'bdd'.
+    ///
+    ~bdd();
+
+    ///
+    /// @param diametre_interieur : Diamètre interne du tuyau
+    /// @return
+    /// Renvoie le nom de la matière du tuyau en fonction du diamètre interne fourni
+    ///
+    std::string find_matiere_for_diametre(float diametre_interieur);
+
+    ///
+    /// @param m : Référence vers un objet 'matiere'
+    /// @param bar : Pression en bar
+    /// @return
+    /// Renvoie un vecteur de paires contenant les diamètres internes et externes possibles pour la matière et la pression données
+    ///
     std::vector<std::pair<int, float>> get_possible_tuyaux(const matiere& m, int bar);
 
-    std::tuple<float, float, float> get_material_coefficients(const std::string& material_name);
+    ///
+    /// @param material_name : Nom de la matière
+    /// @return
+    /// Renvoie un tuple contenant les coefficients A, B et K de la matière spécifiée
+    ///
+    std::tuple<float, float, double> get_material_coefficients(const std::string& material_name);
 
+    ///
+    /// @param inner_diameter : Diamètre interne du tuyau
+    /// @return
+    /// Renvoie une paire contenant le nom de la matière et le diamètre externe du tuyau en fonction du diamètre interne fourni
+    ///
     std::pair<std::string, float> find_matiere_and_outer_diameter(float inner_diameter);
 
-private :
-    std::vector<tableau> materials;
-
+    ///
+    /// Affiche les tableaux des matériaux dans l'application
+    ///
     void afficher_tableaux();
 
+    ///
+    /// @param material_name : Nom de la matière
+    /// @return
+    /// Renvoie un objet 'matiere' correspondant au nom de la matière donné
+    ///
+    matiere findMatiereByName(const std::string &material_name);
+
+    ///
+    /// @return
+    /// Renvoie un vecteur contenant tous les noms des matériaux disponibles
+    ///
+    std::vector<std::string> getAllMatiereNames();
+
+    ///
+    /// @param inner_diameter : Diamètre interne du tuyau
+    /// @return
+    /// Renvoie une paire contenant le nom de la matière et la pression du tuyau en fonction du diamètre interne fourni
+    ///
+    std::pair<std::string, QString> find_matiere_and_pressure_for_diametre(float inner_diameter);
+
+    ///
+    /// @param material_name : Nom de la matière
+    /// @return
+    /// Renvoie un vecteur contenant toutes les pressions disponibles pour la matière spécifiée
+    ///
+    std::vector<int> getAllPressuresForMatiere(const std::string &material_name);
+
+private:
+    std::vector<tableau> materials;
+
+    std::tuple<std::string, int, int>find_matiere_pressure_and_outer_diameter(float inner_diameter);
+
+    ///
+    /// @brief Modifie les tableaux des matériaux
+    ///
     void modifier_tableaux();
 
+    ///
+    /// @brief Ajoute des tableaux de matériaux
+    ///
     void ajouter_tableaux();
 
+    ///
+    /// @brief Supprime des tableaux de matériaux
+    ///
     void suprimmer_tableaux();
 
+    ///
+    /// @brief Affiche les tuyaux disponibles en fonction des critères sélectionnés
+    ///
     void tuyau_dispo();
 
+    ///
+    /// @brief Trouve le tuyau approprié en fonction des critères sélectionnés
+    ///
     void trouver_tuyau();
 
+    ///
+    /// @brief Affiche les coefficients du matériau sélectionné
+    ///
     void montre_coef();
 
-   };
+    ///
+    /// @param diametre : diametre intérieur nécéssaire renvoyé par le calcul
+    /// @brief Renvoie parmi un std::map de tuyau celui qui a le diamètre intérieur supérieur le plus proche
+    ///
+    void Gettuyau(float diametre);
+
+};
 
 
 #endif //BDD_BDD_H

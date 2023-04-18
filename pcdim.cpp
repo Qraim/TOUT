@@ -112,12 +112,12 @@ float pcdim::calculdiametre()
     float debit = inputs[0]->text().toFloat(); // Debit de QLineEdit
     float vitesse = inputs[2]->text().toFloat(); // Vitesse de QLineEdit
 
-    float debits_m3s = debit / 3600; // Convert m³/h to m³/s
-    float diametre = std::sqrt((4 * debits_m3s) / (M_PI * vitesse))*1000; // formula for calculating the diameter in meters
+    float debits_m3s = debit / 3600; // Converti m³/h en m³/s
+    float diametre = std::sqrt((4 * debits_m3s) / (M_PI * vitesse))*1000; // Calcul du diametre
 
-    float diametre_mm = diametre * 1000; // Convert diameter from meters to millimeters
+    float diametre_mm = diametre * 1000; // Converti le diameter en millimetres
 
-    return diametre; // For two decimal places
+    return diametre;
 
 }
 std::string pcdim::gettableau(float inner_diameter) {
@@ -134,9 +134,9 @@ std::tuple<float, float, float> pcdim::getMaterialProperties(const std::string &
 
 float pcdim::calculperte() {
 
-    float debit_ls = inputs[0]->text().toFloat() / 3600; // Convert debit from m3/h to l/s
-    float diametre = inputs[1]->text().toFloat(); // Convert diametre from mm to m
-    float longueur = inputs[3]->text().toFloat(); // Longueur in meters
+    float debit_ls = inputs[0]->text().toFloat() / 3600; // Convertit le débit de m3/h en l/s
+    float diametre = inputs[1]->text().toFloat(); // Convertit le diamètre de mm en m
+    float longueur = inputs[3]->text().toFloat(); // Longueur en mètres
 
     std::string pipe_material = gettableau(diametre);
 
@@ -149,34 +149,43 @@ float pcdim::calculperte() {
     float perte = k * std::pow(debit_ls, a) * std::pow(diametre, b) * std::pow(longueur, 1.0);
 
     return perte;
+
 }
 
 void pcdim::calculate()
 {
+    // Vérifie si les valeurs ont été entrées pour les différents champs
     bool debitEntered = !inputs[0]->text().isEmpty();
     bool diametreEntered = !inputs[1]->text().isEmpty();
     bool vitesseEntered = !inputs[2]->text().isEmpty();
     bool longueurEntered = !inputs[3]->text().isEmpty();
 
+    // Si toutes les valeurs sont entrées, calculez la perte et affichez-la
     if (debitEntered && diametreEntered && vitesseEntered && longueurEntered) {
         float perte = calculperte();
         inputs[4]->setText(QString::number(perte));
         return;
     }
 
+    // Si le débit et le diamètre sont entrés, calculez la vitesse et affichez-la
     if (debitEntered && diametreEntered) {
         float vitesse = calculvitesse();
         inputs[2]->setText(QString::number(vitesse));
         return;
-    } else if (debitEntered && vitesseEntered) {
+    }
+    // Sinon, si le débit et la vitesse sont entrés, calculez le diamètre et affichez-le
+    else if (debitEntered && vitesseEntered) {
         float diametre = calculdiametre();
         inputs[1]->setText(QString::number(diametre));
         return;
-    } else if (diametreEntered && vitesseEntered) {
+    }
+    // Sinon, si le diamètre et la vitesse sont entrés, calculez le débit et affichez-le
+    else if (diametreEntered && vitesseEntered) {
         float debit = calculdebit();
         inputs[0]->setText(QString::number(debit));
         return;
     }
+
 
 }
 

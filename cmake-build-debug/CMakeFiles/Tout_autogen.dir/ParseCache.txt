@@ -3,8 +3,8 @@
 /home/qraim/CLionProjects/Tout/pcdim.cpp
 /home/qraim/CLionProjects/Tout/tout.cpp
 /home/qraim/CLionProjects/Tout/tableau.cpp
-/home/qraim/CLionProjects/Tout/tubesimple.cpp
 /home/qraim/CLionProjects/Tout/main.cpp
+/home/qraim/CLionProjects/Tout/tubesimple.cpp
 /home/qraim/CLionProjects/Tout/tubesimple.h
  mmc:Q_OBJECT
  mdp:/home/qraim/CLionProjects/Tout/tubesimple.h
@@ -1716,6 +1716,7 @@
  mdp:/usr/lib/gcc/x86_64-pc-linux-gnu/12.2.1/include/stdarg.h
  mdp:/usr/lib/gcc/x86_64-pc-linux-gnu/12.2.1/include/stddef.h
  mdp:/usr/lib/gcc/x86_64-pc-linux-gnu/12.2.1/include/stdint.h
+/home/qraim/CLionProjects/Tout/bdd.cpp
 /home/qraim/CLionProjects/Tout/tout.h
  mmc:Q_OBJECT
  mdp:/home/qraim/CLionProjects/Tout/tout.h
@@ -2302,7 +2303,6 @@
  mdp:/usr/lib/gcc/x86_64-pc-linux-gnu/12.2.1/include/stdarg.h
  mdp:/usr/lib/gcc/x86_64-pc-linux-gnu/12.2.1/include/stddef.h
  mdp:/usr/lib/gcc/x86_64-pc-linux-gnu/12.2.1/include/stdint.h
-/home/qraim/CLionProjects/Tout/bdd.cpp
 /home/qraim/CLionProjects/Tout/tableau.h
  mmc:Q_OBJECT
  mdp:/home/qraim/CLionProjects/Tout/tableau.h

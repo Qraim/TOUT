@@ -63,65 +63,50 @@ private:
 
     std::vector<std::vector<float>> _Donnees;
 
-    ///
-    /// Ajoute les données saisies dans les champs de saisie à la dernière ligne du tableau
+    /// @brief Ajoute une nouvelle donnée à la base de données.
     void AjoutDonne();
 
-    ///
-    /// Ajoute une ligne vide à la fin du tableau
+    /// @brief Ajoute une nouvelle ligne dans le tableau de données.
     void AjoutLigne();
 
-    ///
-    /// Change le champ actif pour le champ suivant
+    /// @brief Déplace le focus vers l'élément d'entrée suivant.
     void focusNextInput();
 
-    ///
-    /// Change le champ actif pour le champ précédent
+    /// @brief Déplace le focus vers l'élément d'entrée précédent.
     void focusPreviousInput();
 
-    ///
-    /// Traite l'appui sur une touche du clavier
-    /// @param event : L'événement clavier qui a été détecté
+    /// @brief Gère les événements de pression des touches pour les éléments de l'interface utilisateur.
+    /// @param event : Événement de pression de touche
     void keyPressEvent(QKeyEvent *event);
 
-    ///
-    /// Vérifie si tous les champs de saisie sont remplis
-    /// @return : Vrai si tous les champs sont remplis, faux sinon
+    /// @brief Vérifie si toutes les entrées sont remplies.
     bool Allinputfill();
 
-    ///
-    /// Effectue les calculs nécessaires et affiche les résultats
+    /// @brief Calcule et affiche les résultats en fonction des entrées.
     void calcul();
 
-    ///
-    /// Actualise l'affichage du tableau
+    /// @brief Rafraîchit le tableau de données.
     void RafraichirTableau();
 
-    ///
-    /// Supprime tous les widgets enfants du layout principal
+    /// @brief Efface les données des éléments enfants (par exemple, les entrées).
     void clearchild();
 
-    ///
-    /// Copie les valeurs de la dernière ligne dans la ligne courante
+    /// @brief Copie les données de la dernière ligne du tableau.
     void recopiederniereligne();
 
-    ///
-    /// Affiche une fenêtre de dialogue permettant de modifier une ligne du tableau
+    /// @brief Affiche une boîte de dialogue permettant de mettre à jour les données d'une ligne.
     void showUpdateDialog();
 
-    ///
-    /// Met à jour les données de la ligne spécifiée dans le tableau
+    /// @brief Met à jour les données d'une ligne spécifiée dans le tableau.
     /// @param rowNumber : Numéro de la ligne à mettre à jour
-    /// @param debit : Valeur du champ Débit de la ligne
-    /// @param diameter : Valeur du champ Diamètre de la ligne
-    /// @param length : Valeur du champ Longueur de la ligne
-    /// @param height : Valeur du champ Hauteur de la ligne
+    /// @param debit : Valeur de débit à mettre à jour
+    /// @param diameter : Valeur de diamètre à mettre à jour
+    /// @param length : Valeur de longueur à mettre à jour
+    /// @param height : Valeur de hauteur à mettre à jour
     void updateData(int rowNumber, float debit, float diameter, float length, float height);
 
-    ///
-    /// Supprime une ligne du tableau
+    /// @brief Supprime une ligne du tableau.
     void enleverLigne();
-
 
 };
 

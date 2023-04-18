@@ -37,6 +37,7 @@ public:
     tout(QWidget *parent = nullptr);
     ~tout();
 private:
+
     std::shared_ptr<bdd> database;
     std::unique_ptr<tubesimple> tube;
     std::unique_ptr<pertechargeherse> perteherse;
