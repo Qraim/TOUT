@@ -202,6 +202,12 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db,QWidget *parent) : QW
     // Définir l'espacement des inputsLayout et bottomLayout
     inputsLayout->setSpacing(10);
     bottomLayout->setSpacing(5);
+
+    inputD->installEventFilter(this);
+    inputQ->installEventFilter(this);
+    inputH->installEventFilter(this);
+    inputL->installEventFilter(this);
+
 }
 
 pertechargeherse::~pertechargeherse() {
@@ -331,6 +337,30 @@ void pertechargeherse::focusNextInput() {
     }
 }
 
+bool pertechargeherse::eventFilter(QObject *obj, QEvent *event) {
+    if (event->type() == QEvent::KeyPress) {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+        if (keyEvent->key() == Qt::Key_R) {
+            recopiederniereligne();
+            return true; // Mark the event as handled
+        }
+        // Si la touche E est appuyée, supprime toutes les données.
+        else if(keyEvent->key() == Qt::Key_E){
+            _Donnees.clear();
+            clearchild();
+        }
+        // Si la touche M est appuyée, ouvre la boîte de dialogue pour modifier une ligne.
+        else if(keyEvent->key() == Qt::Key_M){
+            showUpdateDialog();
+        }
+        // Si la touche Z est appuyée, enlève une ligne.
+        else if(keyEvent->key() == Qt::Key_Z){
+            enleverLigne();
+        }
+    }
+    // Pass the event to the base class event filter
+    return QWidget::eventFilter(obj, event);
+}
 
 // La fonction "keyPressEvent" gère les événements clavier dans la fenêtre.
 void pertechargeherse::keyPressEvent(QKeyEvent *event) {
@@ -363,25 +393,25 @@ void pertechargeherse::keyPressEvent(QKeyEvent *event) {
         return;
     }
 
-        // Si la touche E est appuyée, supprime toutes les données.
+    // Si la touche E est appuyée, supprime toutes les données.
     else if(event->key() == Qt::Key_E){
         _Donnees.clear();
         clearchild();
     }
 
-        // Si la touche R est appuyée et qu'il y a des données, recopie la dernière ligne.
+    // Si la touche R est appuyée et qu'il y a des données, recopie la dernière ligne.
     else if(event->key() == Qt::Key_R){
         if(_Donnees.size() > 0){
             recopiederniereligne();
         }
     }
 
-        // Si la touche M est appuyée, ouvre la boîte de dialogue pour modifier une ligne.
+    // Si la touche M est appuyée, ouvre la boîte de dialogue pour modifier une ligne.
     else if(event->key() == Qt::Key_M){
         showUpdateDialog();
     }
 
-        // Si la touche Z est appuyée, enlève une ligne.
+    // Si la touche Z est appuyée, enlève une ligne.
     else if(event->key() == Qt::Key_Z){
         enleverLigne();
     }

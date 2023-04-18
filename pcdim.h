@@ -50,6 +50,11 @@ private:
     QPushButton *bottomButtons[2];
     QPushButton *diametersButton;
 
+    QComboBox *materialComboBox;
+    QComboBox *pressureComboBox;
+    QComboBox *innerDiameterComboBox;
+
+
     ///
     /// @return
     /// Calcule le débit en fonction des champs de l'interface utilisateur et renvoie le résultat
@@ -92,6 +97,14 @@ private:
     ///
     /// Affiche le tableau des diamètres de la canalisation dans une nouvelle fenêtre
     void showDiametersTable();
+
+    void updateComboBoxes();
+
+private slots:
+
+    void onMaterialComboBoxIndexChanged(int index);
+
+    void onPressureComboBoxIndexChanged(int index);
 
 };
 

@@ -107,6 +107,8 @@ private:
 
     /// @brief Supprime une ligne du tableau.
     void enleverLigne();
+protected :
+    bool eventFilter(QObject *obj, QEvent *event);
 
 };
 

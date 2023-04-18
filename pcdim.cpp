@@ -12,6 +12,15 @@ pcdim::pcdim(std::shared_ptr<bdd> db,QWidget *parent)
 {
 
 
+    materialComboBox = new QComboBox(this);
+    pressureComboBox = new QComboBox(this);
+    innerDiameterComboBox = new QComboBox(this);
+
+    updateComboBoxes();
+
+    connect(materialComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onMaterialComboBoxIndexChanged(int)));
+    connect(pressureComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onPressureComboBoxIndexChanged(int)));
+
     // Ajoutez les noms souhaités pour les labels dans ce tableau
     QString labelNames[] = {"Débit", "Diametre", "Vitesse", "Longueur", "Perte"};
     QString units[] = {"(m3/h)", "(mm)", "(m/s)", "(m)", "(m)"};
@@ -33,6 +42,10 @@ pcdim::pcdim(std::shared_ptr<bdd> db,QWidget *parent)
         mainLayout->addWidget(buttons[i], i, 3);
         connect(buttons[i], &QPushButton::clicked, this, &pcdim::clearInput);
     }
+
+    mainLayout->addWidget(materialComboBox, 5, 0);
+    mainLayout->addWidget(pressureComboBox, 5, 1);
+    mainLayout->addWidget(innerDiameterComboBox, 5, 2);
 
     // Renommer les deux boutons
     bottomButtons[0] = new QPushButton("Calculer", this);
@@ -135,18 +148,20 @@ std::tuple<float, float, float> pcdim::getMaterialProperties(const std::string &
 float pcdim::calculperte() {
 
     float debit_ls = inputs[0]->text().toFloat() / 3600; // Convertit le débit de m3/h en l/s
-    float diametre = inputs[1]->text().toFloat(); // Convertit le diamètre de mm en m
     float longueur = inputs[3]->text().toFloat(); // Longueur en mètres
+    float diametre = innerDiameterComboBox->currentText().toFloat();
+    float pressure = pressureComboBox->currentText().toFloat();
+    std::string materiel = materialComboBox->currentText().toStdString();
 
-    std::string pipe_material = gettableau(diametre);
+    float diametre_interieur = database->getInnerDiameterForMatierePressureAndOuterDiameter(materiel, pressure, diametre);
 
-    std::tuple<float, float, double> material_properties = getMaterialProperties(pipe_material);
+    std::tuple<float, float, double> material_properties = getMaterialProperties(materiel);
 
     float a = std::get<0>(material_properties);
     float b = std::get<1>(material_properties);
     double k = std::get<2>(material_properties);
 
-    float perte = k * std::pow(debit_ls, a) * std::pow(diametre, b) * std::pow(longueur, 1.0);
+    float perte = k * std::pow(debit_ls, a) * std::pow(diametre_interieur, b) * std::pow(longueur, 1.0);
 
     return perte;
 
@@ -160,34 +175,34 @@ void pcdim::calculate()
     bool vitesseEntered = !inputs[2]->text().isEmpty();
     bool longueurEntered = !inputs[3]->text().isEmpty();
 
-    // Si toutes les valeurs sont entrées, calculez la perte et affichez-la
-    if (debitEntered && diametreEntered && vitesseEntered && longueurEntered) {
+    // Si le débit, la vitesse et la longueur sont renseignés, calcule la perte et l'affiche
+    if (debitEntered && vitesseEntered && longueurEntered) {
         float perte = calculperte();
         inputs[4]->setText(QString::number(perte));
         return;
     }
 
-    // Si le débit et le diamètre sont entrés, calculez la vitesse et affichez-la
+    // Si le débit et le diamètre sont renseignés, calcule la vitesse et l'affiche
     if (debitEntered && diametreEntered) {
         float vitesse = calculvitesse();
         inputs[2]->setText(QString::number(vitesse));
         return;
     }
-    // Sinon, si le débit et la vitesse sont entrés, calculez le diamètre et affichez-le
+    // Sinon, si le débit et la vitesse sont renseignés, calcule le diamètre et l'affiche
     else if (debitEntered && vitesseEntered) {
         float diametre = calculdiametre();
         inputs[1]->setText(QString::number(diametre));
         return;
     }
-    // Sinon, si le diamètre et la vitesse sont entrés, calculez le débit et affichez-le
+    // Sinon, si le diamètre et la vitesse sont renseignés, calcule le débit et l'affiche
     else if (diametreEntered && vitesseEntered) {
         float debit = calculdebit();
         inputs[0]->setText(QString::number(debit));
         return;
     }
-
-
 }
+
+
 
 
 bool pcdim::eventFilter(QObject *obj, QEvent *event)
@@ -242,5 +257,48 @@ bool pcdim::eventFilter(QObject *obj, QEvent *event)
 }
 
 
+void pcdim::onMaterialComboBoxIndexChanged(int index) {
+    // Get the selected material and retrieve the list of pressures for the material
+    QString selectedMaterial = materialComboBox->itemText(index);
+    std::vector<int> pressures = database->getAllPressuresForMatiere(selectedMaterial.toStdString());
 
+    // Update the pressure QComboBox with the retrieved data
+    pressureComboBox->clear();
+    for (int pressure : pressures) {
+        pressureComboBox->addItem(QString::number(pressure));
+    }
 
+    // Update the inner diameter QComboBox based on the first pressure in the list
+    if (!pressures.empty()) {
+        onPressureComboBoxIndexChanged(0);
+    }
+}
+
+void pcdim::onPressureComboBoxIndexChanged(int index) {
+    // Get the selected material and pressure, and retrieve the list of inner diameters for the material and pressure
+    QString selectedMaterial = materialComboBox->currentText();
+    int selectedPressure = pressureComboBox->itemText(index).toInt();
+    std::vector<float> innerDiameters = database->getInnerDiametersForMatiereAndPressure(selectedMaterial.toStdString(), selectedPressure);
+
+    // Update the inner diameter QComboBox with the retrieved data
+    innerDiameterComboBox->clear();
+    for (float innerDiameter : innerDiameters) {
+        innerDiameterComboBox->addItem(QString::number(innerDiameter));
+    }
+}
+
+void pcdim::updateComboBoxes() {
+    // Retrieve the list of materials from the database
+    std::vector<std::string> materials = database->getAllMatiereNames();
+
+    // Update the material QComboBox with the retrieved data
+    materialComboBox->clear();
+    for (const auto &material : materials) {
+        materialComboBox->addItem(QString::fromStdString(material));
+    }
+
+    // Update the pressure and inner diameter QComboBoxes based on the first material in the list
+    if (!materials.empty()) {
+        onMaterialComboBoxIndexChanged(0);
+    }
+}

@@ -972,3 +972,66 @@ std::tuple<std::string, int, int> bdd::find_matiere_pressure_and_outer_diameter(
 
 
 
+std::tuple<double, float, float, float> bdd::getInnerDiameterAndCoefficients(const QString& material, double pressure, double outerDiameter) {
+
+    std::string material_name = material.toStdString();
+
+    float a, b, k;
+    std::tie(a, b, k) = get_material_coefficients(material_name);
+
+    double innerDiameter = outerDiameter - (2 * a * pressure / b);
+
+    return std::make_tuple(innerDiameter, a, b, k);
+}
+
+std::vector<float> bdd::getInnerDiametersForMatiereAndPressure(const std::string &material_name, int pressure) {
+    std::vector<float> innerDiameters;
+
+    // Find the matching material
+    for (const auto &table : materials) {
+        for (const auto &material : table.matieres) {
+            if (material.nom == material_name) {
+                // Find the matching pressure
+                for (const auto &pressure_obj : material.pressions) {
+                    if (pressure_obj.bar == pressure) {
+                        // Extract the inner diameters from the matching tuyaux
+                        for (const auto &inner_outer_diameters_pair : pressure_obj.diametre) {
+                            innerDiameters.push_back(inner_outer_diameters_pair.first);
+                        }
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+    }
+    return innerDiameters;
+}
+
+
+float bdd::getInnerDiameterForMatierePressureAndOuterDiameter(const std::string &material_name, int pressure, float outer_diameter) {
+    // Find the matching material
+    for (const auto &tableau : materials) {
+        for (const auto &material : tableau.matieres) {
+            if (material.nom == material_name) {
+                // Find the matching pressure
+                for (const auto &pressure_tuyaux_pair : material.pressions) {
+                    if (pressure_tuyaux_pair.bar == pressure) {
+                        // Find the matching outer diameter and return the corresponding inner diameter
+                        for (const auto &outer_inner_diameters_pair : pressure_tuyaux_pair.diametre) {
+                            if (outer_inner_diameters_pair.first == outer_diameter) {
+                                return outer_inner_diameters_pair.second;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    // Return -1 if no matching inner diameter is found
+    return -1;
+}
+
+
+
+

@@ -210,8 +210,40 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
 
     this->setLayout(mainLayout);
 
+    Debit->installEventFilter(this);
+    Espacement->installEventFilter(this);
+    Diametre->installEventFilter(this);
+    Longueur->installEventFilter(this);
+    Hauteur->installEventFilter(this);
+
     Debit->setFocus();
 }
+
+bool gag::eventFilter(QObject *watched, QEvent *event) {
+    if (event->type() == QEvent::KeyPress) {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+
+        if (keyEvent->key() == Qt::Key_R) {
+            recopiederniereligne();
+            return true;
+        } else if (keyEvent->key() == Qt::Key_M) {
+            showUpdateDialog();
+            return true;
+        } else if (keyEvent->key() == Qt::Key_Z) {
+            enleverLigne();
+            return true;
+        } else if (keyEvent->key() == Qt::Key_E) {
+            _Donnees.clear();
+            clear();
+            return true;
+        } else if (keyEvent->key() == Qt::Key_Control) {
+            focusPreviousInput();
+            return true;
+        }
+    }
+    return QWidget::eventFilter(watched, event);
+}
+
 
 void gag::AjoutDonnee() {
     // Vérifier si tous les champs sont remplis

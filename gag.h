@@ -105,6 +105,10 @@ private:
     /// @brief Efface toutes les données saisies.
     void clear();
 
+protected:
+    bool eventFilter(QObject *obj, QEvent *event) override;
+
+
 };
 
 

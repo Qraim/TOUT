@@ -147,7 +147,15 @@ public:
     ///
     std::vector<int> getAllPressuresForMatiere(const std::string &material_name);
 
+    std::tuple<double, float, float, float> getInnerDiameterAndCoefficients(const QString& material, double pressure, double outerDiameter);
+
+    std::vector<float> getInnerDiametersForMatiereAndPressure(const std::string &material_name, int pressure);
+
+    float getInnerDiameterForMatierePressureAndOuterDiameter(const std::string &material_name, int pressure, float outer_diameter);
+
 private:
+
+
     std::vector<tableau> materials;
 
     std::tuple<std::string, int, int>find_matiere_pressure_and_outer_diameter(float inner_diameter);
