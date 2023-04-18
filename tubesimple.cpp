@@ -7,10 +7,11 @@
 
 tubesimple::tubesimple(std::shared_ptr<bdd> db, QWidget *parent)
         : QWidget(parent), database(db) {
-    materiau.addItem("PVC");
-    materiau.addItem("PEHD");
-    materiau.addItem("Fonte");
-    materiau.addItem("Aluminium");
+
+    std::vector<std::string> matiere_names = database->getAllMatiereNames();
+    for (const auto& matiere_name : matiere_names) {
+        materiau.addItem(QString::fromStdString(matiere_name));
+    }
 
 
     // Créé la grille
@@ -185,7 +186,7 @@ void tubesimple::calculer() {
     float Dia = diametre.text().toFloat(); // Récupère la valeur de diametre de la QLineEdit et la convertit en float
     float L = longueur.text().toFloat(); // Récupère la valeur de longueur de la QLineEdit et la convertit en float
     float deniveles = 0;
-    float  k =0;
+    double  k =0;
     float a=0;
     float b = 0 ;
 
@@ -202,13 +203,12 @@ void tubesimple::calculer() {
 
     QString material = materiau.currentText(); // Récupère la valeur sélectionnée dans la liste déroulante "materiau"
 
-    std::tuple<float, float, float> coefficients = database->get_material_coefficients(materiau.currentText().toStdString());
+    std::tuple<float, float, double> coefficients = database->get_material_coefficients(materiau.currentText().toStdString());
     a = std::get<0>(coefficients);
     b = std::get<1>(coefficients);
     k = std::get<2>(coefficients);
-    std::cout<<k<<a<<b<<std::endl;
-    float pertecharge = k*pow((D*1000/3600),a)*pow((Dia),b)*L; // Calcule la perte de charge en Pa
 
+    float pertecharge = k * pow(D * 0.277778, a) * pow(Dia, b) * L; // Calcule la perte de charge en Pa
     float variation = pertecharge+deniveles; // Calcule la variation de charge en Pa
 
     Perte.setText(QString::number(pertecharge, 'f', 2)); // Met à jour le texte de la QLineEdit "Perte"
