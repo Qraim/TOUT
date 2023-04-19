@@ -181,10 +181,19 @@ void tubesimple::focusNextInput() {
 }
 
 void tubesimple::calculer() {
+    
+    QString debitText = debit.text();
+    debitText.replace(',', '.');
+    float D = debitText.toFloat();
 
-    float D = debit.text().toFloat(); // Récupère la valeur de debit de la QLineEdit et la convertit en float
-    float Dia = diametre.text().toFloat(); // Récupère la valeur de diametre de la QLineEdit et la convertit en float
-    float L = longueur.text().toFloat(); // Récupère la valeur de longueur de la QLineEdit et la convertit en float
+    QString espacementText = diametre.text();
+    espacementText.replace(',', '.');
+    float Dia = espacementText.toFloat();
+
+    QString diametreText = longueur.text();
+    diametreText.replace(',', '.');
+    float L = diametreText.toFloat();
+
     float deniveles = 0;
     double  k =0;
     float a=0;
@@ -236,10 +245,19 @@ void tubesimple::checkInputs() {
     diametre.setStyleSheet("");
     longueur.setStyleSheet("");
 
-    // On récupère les valeurs des champs d'entrée
-    float D = debit.text().toFloat();
-    float Dia = diametre.text().toFloat();
-    float L = longueur.text().toFloat();
+    QString debitText = debit.text();
+    debitText.replace(',', '.');
+    float D = debitText.toFloat();
+
+    QString espacementText = diametre.text();
+    espacementText.replace(',', '.');
+    float Dia = espacementText.toFloat();
+
+    QString diametreText = longueur.text();
+    diametreText.replace(',', '.');
+    float L = diametreText.toFloat();
+
+    std::cout<<D<<" "<<Dia<<" "<<L<<std::endl;
 
     // On vérifie si les valeurs des champs d'entrée sont correctes
     bool deb = D<=0;

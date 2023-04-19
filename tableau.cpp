@@ -228,10 +228,21 @@ pertechargeherse::~pertechargeherse() {
 
 void pertechargeherse::AjoutDonne() {
 
-    float debit = QStringToFloat2(inputQ->text()); // récupération des inputs
-    float diametre = QStringToFloat2(inputD->text());
-    float longueur = QStringToFloat2(inputL->text());
-    float hauteur = QStringToFloat2(inputH->text());
+    QString debitText = inputQ->text();
+    debitText.replace(',', '.');
+    float debit = debitText.toFloat();
+
+    QString espacementText = inputD->text();
+    espacementText.replace(',', '.');
+    float diametre = espacementText.toFloat();
+
+    QString diametreText = inputL->text();
+    diametreText.replace(',', '.');
+    float longueur = diametreText.toFloat();
+
+    QString hauteurtext = inputH->text();
+    diametreText.replace(',', '.');
+    float hauteur = diametreText.toFloat();
 
     int numero = _Donnees.size()+1; // numéro
 
@@ -475,14 +486,14 @@ void pertechargeherse::calcul() {
         // Calcule l'aire du tuyau.
         aireTuyau = (M_PI * pow((diametre / 1000) / 2, 2));
 
-        // Calcule le débit en m3/s.
-        debitM3 = sigmaDebit * 0.000277778;
+        // Calcule le débit en m3/h.
+        debitM3 = sigmaDebit / 1000;
 
         // Calcule la vitesse.
-        vitesse = debitM3 / aireTuyau;
+        vitesse = (debitM3/3600) / aireTuyau;
 
         // Convertit le débit en l/s.
-        float sigmaDebitLs = sigmaDebit / 3.6;
+        float sigmaDebitLs = sigmaDebit / 3600;
 
         // Calcule la perte de charge.
         perteCharge = k * pow(sigmaDebitLs, a) * pow(diametre, b) * longueur;

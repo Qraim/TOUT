@@ -421,6 +421,7 @@ void gag::calcul() {
     float perteCharge = 0;
     float piezo = 0;
     float sigmaDebit = 0; // Cumul débit
+    float debitLS = 0;
 
     std::string material_name = Materiau->currentText().toStdString();
     auto coefficients = database->get_material_coefficients(material_name);
@@ -444,8 +445,10 @@ void gag::calcul() {
         longueur = _Donnees[i][4];
         hauteur = _Donnees[i][5];
 
+        debitLS = sigmaDebit / 3600;
+
         // Calcule la perte de charge.
-        perteCharge = k * pow(sigmaDebit / 3600, a) * pow(diametre, b) * longueur ;
+        perteCharge = k * std::pow(debitLS, a) * std::pow(diametre, b) * longueur ;
 
         // Calcule la hauteur piezométrique.
         piezo = perteCharge + hauteur;

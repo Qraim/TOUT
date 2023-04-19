@@ -95,8 +95,14 @@ void pcdim::clearAll()
 
 float pcdim::calculdebit()
 {
-    float vitesse = inputs[2]->text().toFloat(); // Vitesse de QLineEdit
-    float diametre = inputs[1]->text().toFloat(); // Diametre intérieur de QLineEdit
+
+    QString vitessetext = inputs[2]->text();
+    vitessetext.replace(',', '.');
+    float vitesse = (vitessetext.toFloat()*1000)/3600;
+
+    QString diametretext = inputs[1]->text();
+    diametretext.replace(',', '.');
+    float diametre = diametretext.toFloat();
 
     float debit = (vitesse * M_PI * std::pow((diametre / 2), 2)) / 1000; // Debit m³/h
     return debit;
@@ -104,8 +110,13 @@ float pcdim::calculdebit()
 
 float pcdim::calculvitesse()
 {
-    float debit = inputs[0]->text().toFloat(); // Debit de QLineEdit
-    float diametre = inputs[1]->text().toFloat(); // Diametre intérieur de QLineEdit
+    QString debittext = inputs[0]->text();
+    debittext.replace(',', '.');
+    float debit = (debittext.toFloat()*1000)/3600;
+
+    QString diametretext = inputs[1]->text();
+    diametretext.replace(',', '.');
+    float diametre = diametretext.toFloat();
 
     float vitesse = (1000 * debit) / (M_PI * std::pow((diametre / 2), 2)); // Vitesse m/s
     return vitesse;
@@ -113,8 +124,13 @@ float pcdim::calculvitesse()
 
 float pcdim::calculdiametre()
 {
-    float debit = inputs[0]->text().toFloat(); // Debit de QLineEdit
-    float vitesse = inputs[2]->text().toFloat(); // Vitesse de QLineEdit
+    QString debittext = inputs[0]->text();
+    debittext.replace(',', '.');
+    float debit = (debittext.toFloat()*1000)/3600;
+
+    QString vitessetext = inputs[2]->text();
+    vitessetext.replace(',', '.');
+    float vitesse = vitessetext.toFloat();
 
     float debits_m3s = debit / 3600; // Converti m³/h en m³/s
     float diametre = std::sqrt((4 * debits_m3s) / (M_PI * vitesse))*1000; // Calcul du diametre
@@ -138,10 +154,23 @@ std::tuple<float, float, float> pcdim::getMaterialProperties(const std::string &
 
 float pcdim::calculperte() {
 
-    float debit_ls = inputs[0]->text().toFloat() / 3600; // Convertit le débit de m3/h en l/s
-    float longueur = inputs[3]->text().toFloat(); // Longueur en mètres
-    float diametre = innerDiameterComboBox->currentText().toFloat();
-    float pressure = pressureComboBox->currentText().toFloat();
+
+    QString diametretext = innerDiameterComboBox->currentText();
+    diametretext.replace(',', '.');
+    float diametre = diametretext.toFloat();
+
+    QString pressiontext = pressureComboBox->currentText();
+    pressiontext.replace(',', '.');
+    float pressure = pressiontext.toFloat();
+
+    QString longueurtext = inputs[3]->text();
+    longueurtext.replace(',', '.');
+    float longueur = longueurtext.toFloat();
+
+    QString debittext = inputs[0]->text();
+    debittext.replace(',', '.');
+    float debit_ls = debittext.toFloat() / 3600;
+
     std::string materiel = materialComboBox->currentText().toStdString();
 
     float diametre_interieur = database->getInnerDiameterForMatierePressureAndOuterDiameter(materiel, pressure, diametre);

@@ -161,9 +161,17 @@ float MainWindow::calcullongueurdeniv() {
     b = std::get<1>(coefficients);
     k = std::get<2>(coefficients);
 
-    float debits = (debit.text().toFloat() * 1000) / 3600;
-    float deniveles = denivele.text().toFloat();
-    float longueurs = longueur.text().toFloat();
+    QString debitText = debit.text();
+    debitText.replace(',', '.');
+    float debits = (debitText.toFloat()*1000)/3600;
+
+    QString espacementText = longueur.text();
+    espacementText.replace(',', '.');
+    float deniveles = espacementText.toFloat();
+
+    QString diametreText = longueur.text();
+    diametreText.replace(',', '.');
+    float longueurs = diametreText.toFloat();
 
     float vitesses = (debits / 3600) / ((std::pow((deniveles / 2000), 2)) * M_PI);
     float diametre = k * std::pow(debits, a) * std::pow(deniveles, b) * longueurs;
