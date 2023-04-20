@@ -33,7 +33,6 @@ Q_OBJECT
 
 public:
     pertechargeherse(std::shared_ptr<bdd> db,QWidget *parent = nullptr);
-    ~pertechargeherse();
     void refresh(){
         Materiau->clear();
         std::vector<std::string> matiere_names = database->getAllMatiereNames();

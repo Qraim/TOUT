@@ -71,8 +71,6 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db,QWidget *parent) : QW
     }
 
 
-
-
     // Ajouter le layout des inputs, la zone de scroll, et le layout du bas au layout principal
     mainLayout->addWidget(inputsWidget);
     mainLayout->addWidget(headersWidget);
@@ -176,15 +174,36 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db,QWidget *parent) : QW
     QHBoxLayout *hbox3 = new QHBoxLayout();
     QHBoxLayout *hbox4 = new QHBoxLayout();
 
-    // Ajouter les étiquettes et les widgets QLineEdit aux QHBoxLayouts.
+    sigmadebitcase->setFixedWidth(100);
+    sigmalongueurcase->setFixedWidth(100);
+    sigmapertecase->setFixedWidth(100);
+    sigmapiezocase->setFixedWidth(100);
+
+    QHBoxLayout *bottomHBox = new QHBoxLayout();
+    bottomLayout->addLayout(bottomHBox);
+
+    bottomHBox->addStretch(); // Add stretch before the QHBoxLayouts
+
+    // Place labels before QLineEdit boxes in each QHBoxLayout
     hbox1->addWidget(label1);
-    hbox1->addWidget(sigmadebitcase);
+    hbox1->addWidget(sigmadebitcase, 0, Qt::AlignCenter);
+    bottomHBox->addLayout(hbox1);
+
     hbox2->addWidget(label2);
-    hbox2->addWidget(sigmalongueurcase);
+    hbox2->addWidget(sigmalongueurcase, 0, Qt::AlignCenter);
+    bottomHBox->addLayout(hbox2);
+
     hbox3->addWidget(label3);
-    hbox3->addWidget(sigmapertecase);
+    hbox3->addWidget(sigmapertecase, 0, Qt::AlignCenter);
+    bottomHBox->addLayout(hbox3);
+
     hbox4->addWidget(label4);
-    hbox4->addWidget(sigmapiezocase);
+    hbox4->addWidget(sigmapiezocase, 0, Qt::AlignCenter);
+    bottomHBox->addLayout(hbox4);
+
+    bottomHBox->addStretch(); // Add stretch after the QHBoxLayouts
+
+
 
     QPushButton *saveAsPdfButton = new QPushButton("Save as PDF", this);
 
@@ -193,19 +212,16 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db,QWidget *parent) : QW
     topLayout->addWidget(saveAsPdfButton);
     mainLayout->insertLayout(0, topLayout);
 
-    connect(saveAsPdfButton, &QPushButton::clicked, this, &pertechargeherse::saveAsPdf);
 
     QPushButton *saveDataButton = new QPushButton("Save Data", this);
     QPushButton *loadDataButton = new QPushButton("Load Data", this);
 
-
-    QVBoxLayout *buttonsLayout = new QVBoxLayout();
+    QHBoxLayout *buttonsLayout = new QHBoxLayout();
     buttonsLayout->addWidget(saveAsPdfButton);
     buttonsLayout->addWidget(saveDataButton);
     buttonsLayout->addWidget(loadDataButton);
-    topLayout->addLayout(buttonsLayout);
 
-
+    connect(saveAsPdfButton, &QPushButton::clicked, this, &pertechargeherse::saveAsPdf);
     connect(saveDataButton, &QPushButton::clicked, this, &pertechargeherse::saveDataWrapper);
     connect(loadDataButton, &QPushButton::clicked, this, &pertechargeherse::loadDataWrapper);
 
@@ -221,6 +237,9 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db,QWidget *parent) : QW
     // Définir l'espacement des inputsLayout et bottomLayout
     inputsLayout->setSpacing(10);
     bottomLayout->setSpacing(5);
+
+    // Add buttonsLayout to the inputsLayout
+    bottomLayout->addLayout(buttonsLayout);
 
     inputD->installEventFilter(this);
     inputQ->installEventFilter(this);
@@ -251,22 +270,6 @@ void pertechargeherse::loadDataWrapper() {
     if (!fileName.isEmpty()) {
         loadData(fileName);
     }
-}
-
-
-pertechargeherse::~pertechargeherse() {
-    delete gridLayout;
-    delete inputD;
-    delete inputH;
-    delete inputL;
-    delete inputQ;
-    delete Materiau;
-    delete scrollWidget;
-    delete scrollArea;
-    delete sigmapiezocase;
-    delete sigmapertecase;
-    delete sigmalongueurcase;
-    delete sigmadebitcase;
 }
 
 
@@ -305,7 +308,6 @@ void pertechargeherse::AjoutDonne() {
 }
 
 // La fonction "AjoutLigne" est appelée pour ajouter une nouvelle ligne au pertechargeherse.
-
 void pertechargeherse::AjoutLigne() {
 
     if (_Donnees.empty()) { // Si le vecteur "_Donnees" est vide, sort de la fonction.
@@ -859,20 +861,23 @@ void pertechargeherse::enleverLigne() {
 #include <QLineEdit>
 #include <QDialogButtonBox>
 #include <QFormLayout>
+#include <QDateEdit>
 
 void pertechargeherse::createPdfReport(const QString &fileName) {
     calcul();
-    // Create QDialog for user input
+    // Créez QDialog pour la saisie de l'utilisateur
     QDialog inputDialog;
-    inputDialog.setWindowTitle("Enter Information");
+    inputDialog.setWindowTitle("Entrez les informations");
 
     QLabel *nomLabel = new QLabel("Nom:");
-    QLabel *prenomLabel = new QLabel("Prenom:");
-    QLabel *referenceLabel = new QLabel("Reference:");
+    QLabel *prenomLabel = new QLabel("Prénom:");
+    QLabel *referenceLabel = new QLabel("Référence:");
+    QLabel *dateLabel = new QLabel("Date:");
 
     QLineEdit *nomLineEdit = new QLineEdit;
     QLineEdit *prenomLineEdit = new QLineEdit;
     QLineEdit *referenceLineEdit = new QLineEdit;
+    QDateEdit *dateEdit = new QDateEdit(QDate::currentDate());
 
     QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
     connect(buttonBox, &QDialogButtonBox::accepted, &inputDialog, &QDialog::accept);
@@ -882,6 +887,7 @@ void pertechargeherse::createPdfReport(const QString &fileName) {
     layout->addRow(nomLabel, nomLineEdit);
     layout->addRow(prenomLabel, prenomLineEdit);
     layout->addRow(referenceLabel, referenceLineEdit);
+    layout->addRow(dateLabel, dateEdit);
     layout->addWidget(buttonBox);
 
     inputDialog.setLayout(layout);
@@ -893,6 +899,7 @@ void pertechargeherse::createPdfReport(const QString &fileName) {
     QString nom = nomLineEdit->text();
     QString prenom = prenomLineEdit->text();
     QString reference = referenceLineEdit->text();
+    QString date = dateEdit->date().toString(Qt::DefaultLocaleShortDate);
 
     QPdfWriter pdfWriter(fileName);
     pdfWriter.setPageMargins(QMarginsF(20, 20, 20, 20));
@@ -904,10 +911,11 @@ void pertechargeherse::createPdfReport(const QString &fileName) {
 
     const int lineHeight = 300;
 
-    // Draw the user input above the table
+    //
     painter.drawText(0, lineHeight, QString("Nom: %1").arg(nom));
-    painter.drawText(0, lineHeight * 2, QString("Prenom: %1").arg(prenom));
-    painter.drawText(0, lineHeight * 3, QString("Reference: %1").arg(reference));
+    painter.drawText(0, lineHeight * 2, QString("Prénom: %1").arg(prenom));
+    painter.drawText(0, lineHeight * 3, QString("Référence: %1").arg(reference));
+    painter.drawText(pdfWriter.width() - 1000, lineHeight-200, QString("Date: %1").arg(date));
 
     const QStringList headerLabels = {
             "Index", "Debit", "Cumul", "Diametre", "Longueur", "Hauteur", "Vitesse", "Perte", "Piezo", "Cumul Perte", "Cumul Piezo"
@@ -919,16 +927,18 @@ void pertechargeherse::createPdfReport(const QString &fileName) {
         tableWidth += width;
     }
 
-    // Set the font size for the header
+    // Définir la taille de police pour l'en-tête
     QFont headerFont = painter.font();
     headerFont.setPointSize(10);
     painter.setFont(headerFont);
 
     int yOffset = lineHeight * 5;
+    int currentPage = 1;
 
     auto drawHeaderAndLines = [&](int yOffset) {
         int xPos = 0;
-        for (int i = 0; i < headerLabels.size(); ++i) {
+        for (int i = 0; i < headerLabels.size(); ++i)
+        {
             QRect headerRect(xPos, yOffset - lineHeight, columnWidths[i], lineHeight);
             painter.drawText(headerRect, Qt::AlignCenter, headerLabels[i]);
             xPos += columnWidths[i];
@@ -936,19 +946,22 @@ void pertechargeherse::createPdfReport(const QString &fileName) {
 
         yOffset += lineHeight;
 
-        // Draw horizontal line to separate header and numbers
+        // Dessiner une ligne horizontale pour séparer l'en-tête et les nombres
         painter.setPen(QPen(Qt::black, 1));
-        painter.drawLine(0, yOffset-300, tableWidth, yOffset-300);
+        painter.drawLine(0, yOffset - lineHeight, tableWidth, yOffset - lineHeight);
 
-        // Draw vertical lines to separate columns
+        // Determine the maximum number of rows per page based on the available space before the footer
+        int maxRowsPerPage = (pdfWriter.height() - yOffset - 150) / lineHeight;
+
+        // Dessinez des lignes verticales pour séparer les colonnes
         xPos = 0;
         for (int i = 0; i < columnWidths.size(); ++i) {
-            painter.drawLine(xPos, yOffset - lineHeight, xPos, yOffset + (lineHeight * _Donnees.size()));
+            painter.drawLine(xPos, yOffset - lineHeight, xPos, yOffset + (lineHeight * (maxRowsPerPage - 1)));
             xPos += columnWidths[i];
         }
-        painter.drawLine(xPos, yOffset - lineHeight, xPos, yOffset + (lineHeight * _Donnees.size()));
+        painter.drawLine(xPos, yOffset - lineHeight, xPos, yOffset + (lineHeight * (maxRowsPerPage - 1)));
 
-        // Reset the font size for the rest of the content
+        // Réinitialiser la taille de police pour le reste du contenu
         painter.setFont(font);
 
         return yOffset;
@@ -975,15 +988,30 @@ void pertechargeherse::createPdfReport(const QString &fileName) {
         yOffset += lineHeight;
 
         if (yOffset > pdfWriter.height() - 2 * lineHeight) {
+            // Draw the footer with the current page number
+            QString footerText = QString("Page %1").arg(currentPage);
+            QRect footerRect(0, pdfWriter.height() - lineHeight, pdfWriter.width(), lineHeight);
+            painter.drawText(footerRect, Qt::AlignCenter, footerText);
+            QString referenceText = QString("Reference: %1").arg(reference);
+            QRect referenceRect(pdfWriter.width() - 1500, pdfWriter.height() - lineHeight, 1500, lineHeight);
+            painter.drawText(referenceRect, Qt::AlignCenter, referenceText);
+
+            // Create a new page
             pdfWriter.newPage();
             yOffset = lineHeight * 2;
             yOffset = drawHeaderAndLines(yOffset);
+            currentPage++;
         }
     }
 
-    painter.end();
-}
+    // Ajouter un pied de page sur la dernière page
+    QString footerText = QString("Page %1").arg(currentPage);
+    painter.drawText(QRect(0, pdfWriter.height() - 50, pdfWriter.width(), 20), Qt::AlignCenter, footerText);
+    painter.drawText(QRect(0, pdfWriter.height() - 50, pdfWriter.width() - 20, 20), Qt::AlignRight, QString("Référence: %1").arg(reference));
 
+    painter.end();
+
+}
 
 
 
