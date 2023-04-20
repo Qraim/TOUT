@@ -747,16 +747,12 @@ void bdd::montre_coef() {
     }
     layout->addWidget(matiereComboBox);
 
-    // Ajout d'un bouton pour soumettre la sélection
-    QPushButton *submitButton = new QPushButton("Soumettre", dialog);
-    layout->addWidget(submitButton);
-
     // Ajout d'un label pour afficher les résultats
     QLabel *resultLabel = new QLabel(dialog);
     layout->addWidget(resultLabel);
 
-    // Connecter le bouton Soumettre pour afficher les coefficients
-    QObject::connect(submitButton, &QPushButton::clicked, [&]() {
+    // Connecter le changement d'index pour afficher les coefficients
+    QObject::connect(matiereComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), [&]() {
         // Récupérer le nom de la matière sélectionnée
         std::string matiere_name = matiereComboBox->currentText().toStdString();
         // Récupérer les coefficients de la matière
@@ -782,6 +778,7 @@ void bdd::montre_coef() {
     dialog->exec();
 
 }
+
 
 
 void bdd::trouver_tuyau() {
