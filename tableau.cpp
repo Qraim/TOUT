@@ -255,7 +255,6 @@ void pertechargeherse::loadDataWrapper() {
 
 
 pertechargeherse::~pertechargeherse() {
-    createPdfReport("output.pdf");
     delete gridLayout;
     delete inputD;
     delete inputH;
@@ -855,17 +854,60 @@ void pertechargeherse::enleverLigne() {
 #include <QPdfWriter>
 #include <QPainter>
 
+#include <QDialog>
+#include <QLabel>
+#include <QLineEdit>
+#include <QDialogButtonBox>
+#include <QFormLayout>
+
 void pertechargeherse::createPdfReport(const QString &fileName) {
+    calcul();
+    // Create QDialog for user input
+    QDialog inputDialog;
+    inputDialog.setWindowTitle("Enter Information");
+
+    QLabel *nomLabel = new QLabel("Nom:");
+    QLabel *prenomLabel = new QLabel("Prenom:");
+    QLabel *referenceLabel = new QLabel("Reference:");
+
+    QLineEdit *nomLineEdit = new QLineEdit;
+    QLineEdit *prenomLineEdit = new QLineEdit;
+    QLineEdit *referenceLineEdit = new QLineEdit;
+
+    QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    connect(buttonBox, &QDialogButtonBox::accepted, &inputDialog, &QDialog::accept);
+    connect(buttonBox, &QDialogButtonBox::rejected, &inputDialog, &QDialog::reject);
+
+    QFormLayout *layout = new QFormLayout;
+    layout->addRow(nomLabel, nomLineEdit);
+    layout->addRow(prenomLabel, prenomLineEdit);
+    layout->addRow(referenceLabel, referenceLineEdit);
+    layout->addWidget(buttonBox);
+
+    inputDialog.setLayout(layout);
+
+    if (inputDialog.exec() == QDialog::Rejected) {
+        return;
+    }
+
+    QString nom = nomLineEdit->text();
+    QString prenom = prenomLineEdit->text();
+    QString reference = referenceLineEdit->text();
+
     QPdfWriter pdfWriter(fileName);
     pdfWriter.setPageMargins(QMarginsF(20, 20, 20, 20));
 
     QPainter painter(&pdfWriter);
     QFont font = painter.font();
-    font.setPointSize(10); // Diminue la taille de police des chiffres
+    font.setPointSize(10);
     painter.setFont(font);
 
     const int lineHeight = 300;
-    int yOffset = lineHeight * 2;
+
+    // Draw the user input above the table
+    painter.drawText(0, lineHeight, QString("Nom: %1").arg(nom));
+    painter.drawText(0, lineHeight * 2, QString("Prenom: %1").arg(prenom));
+    painter.drawText(0, lineHeight * 3, QString("Reference: %1").arg(reference));
 
     const QStringList headerLabels = {
             "Index", "Debit", "Cumul", "Diametre", "Longueur", "Hauteur", "Vitesse", "Perte", "Piezo", "Cumul Perte", "Cumul Piezo"
@@ -882,33 +924,40 @@ void pertechargeherse::createPdfReport(const QString &fileName) {
     headerFont.setPointSize(10);
     painter.setFont(headerFont);
 
-    int xPos = 0;
-    for (int i = 0; i < headerLabels.size(); ++i) {
-        QRect headerRect(xPos, yOffset - lineHeight, columnWidths[i], lineHeight);
-        painter.drawText(headerRect, Qt::AlignCenter, headerLabels[i]);
-        xPos += columnWidths[i];
-    }
+    int yOffset = lineHeight * 5;
 
-    yOffset += lineHeight;
+    auto drawHeaderAndLines = [&](int yOffset) {
+        int xPos = 0;
+        for (int i = 0; i < headerLabels.size(); ++i) {
+            QRect headerRect(xPos, yOffset - lineHeight, columnWidths[i], lineHeight);
+            painter.drawText(headerRect, Qt::AlignCenter, headerLabels[i]);
+            xPos += columnWidths[i];
+        }
 
-    // Reset the font size for the rest of the content
-    painter.setFont(font);
+        yOffset += lineHeight;
 
-    painter.setPen(QPen(Qt::black, 1));
-    painter.drawLine(0, yOffset, tableWidth, yOffset);
+        // Draw horizontal line to separate header and numbers
+        painter.setPen(QPen(Qt::black, 1));
+        painter.drawLine(0, yOffset-300, tableWidth, yOffset-300);
 
-    // Draw vertical lines to separate columns
-    xPos = 0;
-    for (int i = 0; i < columnWidths.size(); ++i) {
+        // Draw vertical lines to separate columns
+        xPos = 0;
+        for (int i = 0; i < columnWidths.size(); ++i) {
+            painter.drawLine(xPos, yOffset - lineHeight, xPos, yOffset + (lineHeight * _Donnees.size()));
+            xPos += columnWidths[i];
+        }
         painter.drawLine(xPos, yOffset - lineHeight, xPos, yOffset + (lineHeight * _Donnees.size()));
-        xPos += columnWidths[i];
-    }
-    painter.drawLine(xPos, yOffset - lineHeight, xPos, yOffset + (lineHeight * _Donnees.size()));
 
-    yOffset += lineHeight;
+        // Reset the font size for the rest of the content
+        painter.setFont(font);
+
+        return yOffset;
+    };
+
+    yOffset = drawHeaderAndLines(yOffset);
 
     for (const std::vector<float> &donneesLigne : _Donnees) {
-        xPos = 0;
+        int xPos = 0;
 
         for (int i = 0; i < donneesLigne.size(); ++i) {
             QString cellText;
@@ -928,11 +977,14 @@ void pertechargeherse::createPdfReport(const QString &fileName) {
         if (yOffset > pdfWriter.height() - 2 * lineHeight) {
             pdfWriter.newPage();
             yOffset = lineHeight * 2;
+            yOffset = drawHeaderAndLines(yOffset);
         }
     }
 
     painter.end();
 }
+
+
 
 
 

@@ -32,7 +32,7 @@
 #include <string>
 #include <vector>
 #include <QStandardItemModel>
-#include<bits/stdc++.h>
+#include <set>
 #include <QDialog>
 #include <QFormLayout>
 #include <QComboBox>
