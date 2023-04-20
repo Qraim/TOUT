@@ -81,12 +81,6 @@ private:
     bool eventFilter(QObject *obj, QEvent *event);
 
     ///
-    /// @param inner_diameter : Diamètre interne de la canalisation
-    /// @return
-    /// Renvoie une chaîne de caractères représentant le tableau des diamètres de la canalisation en fonction de son diamètre interne
-    std::string gettableau(float inner_diameter);
-
-    ///
     /// @param pipe_material : Matériau de la canalisation
     /// @return
     /// Renvoie un tuple contenant les propriétés matérielles de la canalisation en fonction du matériau de la canalisation

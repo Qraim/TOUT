@@ -87,13 +87,6 @@ public:
     ~bdd();
 
     ///
-    /// @param diametre_interieur : Diamètre interne du tuyau
-    /// @return
-    /// Renvoie le nom de la matière du tuyau en fonction du diamètre interne fourni
-    ///
-    std::string find_matiere_for_diametre(float diametre_interieur);
-
-    ///
     /// @param m : Référence vers un objet 'matiere'
     /// @param bar : Pression en bar
     /// @return
@@ -107,13 +100,6 @@ public:
     /// Renvoie un tuple contenant les coefficients A, B et K de la matière spécifiée
     ///
     std::tuple<float, float, double> get_material_coefficients(const std::string& material_name);
-
-    ///
-    /// @param inner_diameter : Diamètre interne du tuyau
-    /// @return
-    /// Renvoie une paire contenant le nom de la matière et le diamètre externe du tuyau en fonction du diamètre interne fourni
-    ///
-    std::pair<std::string, float> find_matiere_and_outer_diameter(float inner_diameter);
 
     ///
     /// Affiche les tableaux des matériaux dans l'application
@@ -134,20 +120,11 @@ public:
     std::vector<std::string> getAllMatiereNames();
 
     ///
-    /// @param inner_diameter : Diamètre interne du tuyau
-    /// @return
-    /// Renvoie une paire contenant le nom de la matière et la pression du tuyau en fonction du diamètre interne fourni
-    ///
-    std::pair<std::string, QString> find_matiere_and_pressure_for_diametre(float inner_diameter);
-
-    ///
     /// @param material_name : Nom de la matière
     /// @return
     /// Renvoie un vecteur contenant toutes les pressions disponibles pour la matière spécifiée
     ///
     std::vector<int> getAllPressuresForMatiere(const std::string &material_name);
-
-    std::tuple<double, float, float, float> getInnerDiameterAndCoefficients(const QString& material, double pressure, double outerDiameter);
 
     std::vector<float> getInnerDiametersForMatiereAndPressure(const std::string &material_name, int pressure);
 
@@ -189,12 +166,6 @@ private:
     /// @brief Affiche les coefficients du matériau sélectionné
     ///
     void montre_coef();
-
-    ///
-    /// @param diametre : diametre intérieur nécéssaire renvoyé par le calcul
-    /// @brief Renvoie parmi un std::map de tuyau celui qui a le diamètre intérieur supérieur le plus proche
-    ///
-    void Gettuyau(float diametre);
 
 };
 

@@ -66,11 +66,6 @@ private:
 
     ///
     /// @return
-    /// Renvoie un std::map (diametre extérieur, intérieur ) du tuyau de la matiere/pression choisis
-    std::map<float, float> gettableau();
-
-    ///
-    /// @return
     /// Permet de lancer la fonction calculer() sur le boutton est pressé
     void onButtonClicked();
 

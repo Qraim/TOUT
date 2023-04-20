@@ -124,6 +124,7 @@ float pcdim::calculvitesse()
 
 float pcdim::calculdiametre()
 {
+
     QString debittext = inputs[0]->text();
     debittext.replace(',', '.');
     float debit = (debittext.toFloat()*1000)/3600;
@@ -135,15 +136,10 @@ float pcdim::calculdiametre()
     float debits_m3s = debit / 3600; // Converti m³/h en m³/s
     float diametre = std::sqrt((4 * debits_m3s) / (M_PI * vitesse))*1000; // Calcul du diametre
 
-    float diametre_mm = diametre * 1000; // Converti le diameter en millimetres
+    float diametre_mm; // Converti le diameter en millimetres
 
     return diametre;
 
-}
-std::string pcdim::gettableau(float inner_diameter) {
-    auto result = database->find_matiere_and_pressure_for_diametre(inner_diameter);
-
-    return result.first;
 }
 
 
@@ -151,9 +147,7 @@ std::tuple<float, float, float> pcdim::getMaterialProperties(const std::string &
     return database->get_material_coefficients(pipe_material);
 }
 
-
 float pcdim::calculperte() {
-
 
     QString diametretext = innerDiameterComboBox->currentText();
     diametretext.replace(',', '.');

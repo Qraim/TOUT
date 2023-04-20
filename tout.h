@@ -48,13 +48,6 @@ private:
     std::unique_ptr<MainWindow> MW;
     std::unique_ptr<gag> goutte;
 
-    QPushButton *show_tubesimple_button;
-    QPushButton *show_database_button;
-    QPushButton *show_pertechargeherse_button;
-    QPushButton *show_pcdim_button;
-    QPushButton *show_MW_button;
-    QPushButton *show_gag_button;
-
     /// @brief Affiche la fenêtre de l'outil de calcul de perte de charge pour une herse d'alimentation.
     void on_show_pertechargeherse_button_clicked();
 

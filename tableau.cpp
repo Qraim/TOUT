@@ -2,6 +2,8 @@
 // Created by qraim on 05/04/23.
 //
 
+#include <QFileDialog>
+#include <QDir>
 #include "tableau.h"
 
 
@@ -13,13 +15,6 @@ void espacementColonne(QGridLayout *layout) {
         layout->setColumnStretch(i, 1); // Étire la colonne i avec une proportion de 1
     }
 }
-
-float QStringToFloat2(const QString &str) {
-    QString modifiedStr = str;
-    modifiedStr.replace(',', '.');
-    return modifiedStr.toFloat();
-}
-
 
 
 pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db) {
@@ -191,6 +186,30 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db,QWidget *parent) : QW
     hbox4->addWidget(label4);
     hbox4->addWidget(sigmapiezocase);
 
+    QPushButton *saveAsPdfButton = new QPushButton("Save as PDF", this);
+
+    QHBoxLayout *topLayout = new QHBoxLayout();
+    topLayout->addStretch();
+    topLayout->addWidget(saveAsPdfButton);
+    mainLayout->insertLayout(0, topLayout);
+
+    connect(saveAsPdfButton, &QPushButton::clicked, this, &pertechargeherse::saveAsPdf);
+
+    QPushButton *saveDataButton = new QPushButton("Save Data", this);
+    QPushButton *loadDataButton = new QPushButton("Load Data", this);
+
+
+    QVBoxLayout *buttonsLayout = new QVBoxLayout();
+    buttonsLayout->addWidget(saveAsPdfButton);
+    buttonsLayout->addWidget(saveDataButton);
+    buttonsLayout->addWidget(loadDataButton);
+    topLayout->addLayout(buttonsLayout);
+
+
+    connect(saveDataButton, &QPushButton::clicked, this, &pertechargeherse::saveDataWrapper);
+    connect(loadDataButton, &QPushButton::clicked, this, &pertechargeherse::loadDataWrapper);
+
+
     // Ajouter les QHBoxLayouts au layout inférieur (bottomLayout)
     bottomLayout->addLayout(hbox1);
     bottomLayout->addLayout(hbox2);
@@ -210,7 +229,33 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db,QWidget *parent) : QW
 
 }
 
+void pertechargeherse::saveAsPdf() {
+    QString fileName = QFileDialog::getSaveFileName(this, "Save as PDF", QDir::homePath(), "PDF Files (*.pdf)");
+
+    if (!fileName.isEmpty()) {
+        createPdfReport(fileName);
+    }
+}
+
+void pertechargeherse::saveDataWrapper() {
+    QString fileName = QFileDialog::getSaveFileName(this, "Save Data", QDir::homePath(), "Data Files (*.dat)");
+
+    if (!fileName.isEmpty()) {
+        saveData(fileName);
+    }
+}
+
+void pertechargeherse::loadDataWrapper() {
+    QString fileName = QFileDialog::getOpenFileName(this, "Load Data", QDir::homePath(), "Data Files (*.dat)");
+
+    if (!fileName.isEmpty()) {
+        loadData(fileName);
+    }
+}
+
+
 pertechargeherse::~pertechargeherse() {
+    createPdfReport("output.pdf");
     delete gridLayout;
     delete inputD;
     delete inputH;
@@ -712,7 +757,6 @@ void pertechargeherse::showUpdateDialog() {
     handleEnterKeyPress(lengthLineEdit, heightLineEdit);
     handleEnterKeyPress(heightLineEdit, nullptr); // Le dernier champ n'a pas de champ suivant, donc next est nul
 
-
     // Fonction qui met à jour les données de la ligne avec les nouvelles données saisies par l'utilisateur et ferme la fenêtre de dialogue
     auto updateDataAndClose = [this, rowNumberLineEdit, debitLineEdit, diameterLineEdit, lengthLineEdit, heightLineEdit, updateDialog]() {
         // Récupère
@@ -808,4 +852,140 @@ void pertechargeherse::enleverLigne() {
 }
 
 
+#include <QPdfWriter>
+#include <QPainter>
 
+void pertechargeherse::createPdfReport(const QString &fileName) {
+    QPdfWriter pdfWriter(fileName);
+    pdfWriter.setPageMargins(QMarginsF(20, 20, 20, 20));
+
+    QPainter painter(&pdfWriter);
+    QFont font = painter.font();
+    font.setPointSize(10); // Diminue la taille de police des chiffres
+    painter.setFont(font);
+
+    const int lineHeight = 300;
+    int yOffset = lineHeight * 2;
+
+    const QStringList headerLabels = {
+            "Index", "Debit", "Cumul", "Diametre", "Longueur", "Hauteur", "Vitesse", "Perte", "Piezo", "Cumul Perte", "Cumul Piezo"
+    };
+
+    QVector<int> columnWidths = {600, 600, 600, 1000, 1000, 800, 800, 800, 800, 1200, 1200};
+    int tableWidth = 0;
+    for (int width : columnWidths) {
+        tableWidth += width;
+    }
+
+    // Set the font size for the header
+    QFont headerFont = painter.font();
+    headerFont.setPointSize(10);
+    painter.setFont(headerFont);
+
+    int xPos = 0;
+    for (int i = 0; i < headerLabels.size(); ++i) {
+        QRect headerRect(xPos, yOffset - lineHeight, columnWidths[i], lineHeight);
+        painter.drawText(headerRect, Qt::AlignCenter, headerLabels[i]);
+        xPos += columnWidths[i];
+    }
+
+    yOffset += lineHeight;
+
+    // Reset the font size for the rest of the content
+    painter.setFont(font);
+
+    painter.setPen(QPen(Qt::black, 1));
+    painter.drawLine(0, yOffset, tableWidth, yOffset);
+
+    // Draw vertical lines to separate columns
+    xPos = 0;
+    for (int i = 0; i < columnWidths.size(); ++i) {
+        painter.drawLine(xPos, yOffset - lineHeight, xPos, yOffset + (lineHeight * _Donnees.size()));
+        xPos += columnWidths[i];
+    }
+    painter.drawLine(xPos, yOffset - lineHeight, xPos, yOffset + (lineHeight * _Donnees.size()));
+
+    yOffset += lineHeight;
+
+    for (const std::vector<float> &donneesLigne : _Donnees) {
+        xPos = 0;
+
+        for (int i = 0; i < donneesLigne.size(); ++i) {
+            QString cellText;
+            if (i == 0) {
+                cellText = QString::number(donneesLigne[i], 'f', 0);
+            } else {
+                cellText = QString::number(donneesLigne[i], 'f', 2);
+            }
+
+            QRect cellRect(xPos, yOffset - lineHeight, columnWidths[i], lineHeight);
+            painter.drawText(cellRect, Qt::AlignCenter, cellText);
+            xPos += columnWidths[i];
+        }
+
+        yOffset += lineHeight;
+
+        if (yOffset > pdfWriter.height() - 2 * lineHeight) {
+            pdfWriter.newPage();
+            yOffset = lineHeight * 2;
+        }
+    }
+
+    painter.end();
+}
+
+
+
+
+
+
+
+
+
+
+#include <QFile>
+#include <QDataStream>
+
+void pertechargeherse::saveData(const QString &fileName) {
+    QFile file(fileName);
+    if (!file.open(QIODevice::WriteOnly)) {
+        qWarning("Cannot open file for writing");
+        return;
+    }
+
+    QDataStream out(&file);
+    out.setVersion(QDataStream::Qt_5_9);
+
+    for (const std::vector<float> &row : _Donnees) {
+        for (float value : row) {
+            out << value;
+        }
+    }
+}
+
+void pertechargeherse::loadData(const QString &fileName) {
+    QFile file(fileName);
+    if (!file.open(QIODevice::ReadOnly)) {
+        qWarning("Cannot open file for reading");
+        return;
+    }
+
+    QDataStream in(&file);
+    in.setVersion(QDataStream::Qt_5_9);
+
+    _Donnees.clear();
+
+    while (!in.atEnd()) {
+        std::vector<float> row;
+        for (int i = 0; i < 11; ++i) {
+            float value;
+            in >> value;
+            row.push_back(value);
+        }
+        _Donnees.push_back(row);
+    }
+
+    // Refresh the display and recalculate the data after loading
+    RafraichirTableau();
+    calcul();
+}

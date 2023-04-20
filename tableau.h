@@ -107,9 +107,27 @@ private:
 
     /// @brief Supprime une ligne du tableau.
     void enleverLigne();
+
+    void createPdfReport(const QString &fileName);
+
+    void drawTableHeader(QPainter &painter, int yOffset, int lineHeight, const QVector<int> &columnWidths,
+                         const QStringList &headerLabels);
+
+    void loadData(const QString &fileName);
+
+    void saveData(const QString &fileName);
+
+
 protected :
+
     bool eventFilter(QObject *obj, QEvent *event);
 
+
+    void saveAsPdf();
+
+    void saveDataWrapper();
+
+    void loadDataWrapper();
 };
 
 #endif //PERTEDECHARGEHERSE_TABLEAU_H

@@ -49,7 +49,7 @@ std::vector<tableau> read_materials_from_csv(const std::string& filename) {
 
         std::getline(ss, token, ';');
         std::replace(token.begin(), token.end(), ',', '.');
-        k = std::stod(token); ;
+        k = std::stod(token);
 
         std::getline(ss, token, ';');
         bar = std::stoi(token);
@@ -247,21 +247,6 @@ void bdd::afficher_tableaux() {
     window->showMaximized();
 }
 
-
-std::string bdd::find_matiere_for_diametre(float diametre_interieur) {
-    for (const auto& tab : materials) {
-        for (const auto& mat : tab.matieres) {
-            for (const auto& press : mat.pressions) {
-                for (const auto& diam : press.diametre) {
-                    if (diam.first == diametre_interieur) {
-                        return mat.nom;
-                    }
-                }
-            }
-        }
-    }
-    return "";
-}
 
 std::vector<std::pair<int, float>> bdd::get_possible_tuyaux(const matiere& m, int bar) {
     std::vector<std::pair<int, float>> possible_tuyaux;
@@ -799,29 +784,6 @@ void bdd::montre_coef() {
 }
 
 
-std::pair<std::string, float> bdd::find_matiere_and_outer_diameter(float inner_diameter) {
-    // Parcourir les matériaux
-    for (const auto& tab : materials) {
-        // Parcourir les matières
-        for (const auto& mat : tab.matieres) {
-            // Parcourir les pressions
-            for (const auto& press : mat.pressions) {
-                // Parcourir les diamètres
-                for (const auto& diam : press.diametre) {
-                    // Si le diamètre intérieur correspond à celui recherché
-                    if (diam.second == inner_diameter) {
-                        // Retourner le nom de la matière et le diamètre extérieur correspondants
-                        return {mat.nom, diam.first};
-                    }
-                }
-            }
-        }
-    }
-    // Retourner une paire vide si aucune correspondance n'est trouvée
-    return {"", 0.0f};
-}
-
-
 void bdd::trouver_tuyau() {
     // Créer une nouvelle boîte de dialogue
     QDialog *dialog = new QDialog;
@@ -907,29 +869,6 @@ std::vector<int> bdd::getAllPressuresForMatiere(const std::string &material_name
 }
 
 
-
-std::pair<std::string, QString> bdd::find_matiere_and_pressure_for_diametre(float inner_diameter) {
-    // Parcourir les matériaux
-    for(const auto& tab : materials){
-    // Parcourir les matières
-        for(const auto& mat : tab.matieres){
-            // Parcourir les pressions
-            for(auto& press : mat.pressions){
-                // Parcourir les diamètres
-                for(const auto& diam : press.diametre){
-                    // Si le diamètre intérieur correspond à la valeur recherchée
-                    if(diam.second == inner_diameter){
-                        // Retourner le nom de la matière et la pression correspondante
-                        return {mat.nom,QString::number(press.bar)};
-                    }
-                }
-            }
-        }
-    }
-    // Retourner une paire vide si aucune correspondance n'est trouvée
-    return {"",""};
-}
-
 std::vector<std::string> bdd::getAllMatiereNames() {
     std::vector<std::string> matieres;
     // Parcourir les matériaux
@@ -970,19 +909,6 @@ std::tuple<std::string, int, int> bdd::find_matiere_pressure_and_outer_diameter(
     return std::make_tuple("", 0, 0);
 }
 
-
-
-std::tuple<double, float, float, float> bdd::getInnerDiameterAndCoefficients(const QString& material, double pressure, double outerDiameter) {
-
-    std::string material_name = material.toStdString();
-
-    float a, b, k;
-    std::tie(a, b, k) = get_material_coefficients(material_name);
-
-    double innerDiameter = outerDiameter - (2 * a * pressure / b);
-
-    return std::make_tuple(innerDiameter, a, b, k);
-}
 
 std::vector<float> bdd::getInnerDiametersForMatiereAndPressure(const std::string &material_name, int pressure) {
     std::vector<float> innerDiameters;
