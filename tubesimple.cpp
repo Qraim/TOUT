@@ -257,8 +257,6 @@ void tubesimple::checkInputs() {
     diametreText.replace(',', '.');
     float L = diametreText.toFloat();
 
-    std::cout<<D<<" "<<Dia<<" "<<L<<std::endl;
-
     // On vérifie si les valeurs des champs d'entrée sont correctes
     bool deb = D<=0;
     bool diam = Dia<=0;

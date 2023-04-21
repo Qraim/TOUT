@@ -100,7 +100,7 @@ float pcdim::calculdebit()
     vitessetext.replace(',', '.');
     float vitesse = (vitessetext.toFloat()*1000)/3600;
 
-    QString diametretext = inputs[1]->text();
+    QString diametretext = innerDiameterComboBox->currentText();
     diametretext.replace(',', '.');
     float diametre = diametretext.toFloat();
 
@@ -114,7 +114,7 @@ float pcdim::calculvitesse()
     debittext.replace(',', '.');
     float debit = (debittext.toFloat()*1000)/3600;
 
-    QString diametretext = inputs[1]->text();
+    QString diametretext = innerDiameterComboBox->currentText();;
     diametretext.replace(',', '.');
     float diametre = diametretext.toFloat();
 
@@ -185,7 +185,6 @@ void pcdim::calculate()
 {
     // Vérifie si les valeurs ont été entrées pour les différents champs
     bool debitEntered = !inputs[0]->text().isEmpty();
-    bool diametreEntered = !inputs[1]->text().isEmpty();
     bool vitesseEntered = !inputs[2]->text().isEmpty();
     bool longueurEntered = !inputs[3]->text().isEmpty();
 
@@ -197,7 +196,7 @@ void pcdim::calculate()
     }
 
     // Si le débit et le diamètre sont renseignés, calcule la vitesse et l'affiche
-    if (debitEntered && diametreEntered) {
+    if (debitEntered) {
         float vitesse = calculvitesse();
         inputs[2]->setText(QString::number(vitesse));
         return;
@@ -209,7 +208,7 @@ void pcdim::calculate()
         return;
     }
     // Sinon, si le diamètre et la vitesse sont renseignés, calcule le débit et l'affiche
-    else if (diametreEntered && vitesseEntered) {
+    else if (vitesseEntered) {
         float debit = calculdebit();
         inputs[0]->setText(QString::number(debit));
         return;

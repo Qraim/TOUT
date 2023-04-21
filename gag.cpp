@@ -2,6 +2,10 @@
 // Created by qraim on 07/04/23.
 //
 
+#include <QDateEdit>
+#include <QPdfWriter>
+#include <QPainter>
+#include <QFileDialog>
 #include "gag.h"
 
 
@@ -242,8 +246,54 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     Longueur->installEventFilter(this);
     Hauteur->installEventFilter(this);
 
+
+    // Create buttons
+    QPushButton *button1 = new QPushButton("Save ad pdf");
+    QPushButton *button2 = new QPushButton("Save data");
+    QPushButton *button3 = new QPushButton("Load data");
+
+// Add buttons to the bottomLayout
+    bottomLayout->addWidget(button1, 4, 0, Qt::AlignCenter);
+    bottomLayout->addWidget(button2, 4, 1, Qt::AlignCenter);
+    bottomLayout->addWidget(button3, 4, 2, Qt::AlignCenter);
+
+// Connect buttons to their respective slots (functions)
+    connect(button1, &QPushButton::clicked, this, &gag::saveAsPdf);
+    connect(button2, &QPushButton::clicked, this, &gag::saveDataWrapper);
+    connect(button3, &QPushButton::clicked, this, &gag::loadDataWrapper);
+
+
     Debit->setFocus();
 }
+
+
+
+void gag::saveAsPdf() {
+    QString fileName = QFileDialog::getSaveFileName(this, "Save as PDF", QDir::homePath(), "PDF Files (*.pdf)");
+
+    if (!fileName.isEmpty()) {
+        createPdfReport(fileName);
+    }
+}
+
+void gag::saveDataWrapper() {
+    QString fileName = QFileDialog::getSaveFileName(this, "Save Data", QDir::homePath(), "Data Files (*.dat)");
+
+    if (!fileName.isEmpty()) {
+        saveData(fileName);
+    }
+}
+
+void gag::loadDataWrapper() {
+    QString fileName = QFileDialog::getOpenFileName(this, "Load Data", QDir::homePath(), "Data Files (*.dat)");
+
+    if (!fileName.isEmpty()) {
+        loadData(fileName);
+    }
+}
+
+
+
 
 bool gag::eventFilter(QObject *watched, QEvent *event) {
     if (event->type() == QEvent::KeyPress) {
@@ -342,7 +392,7 @@ void gag::AjoutLigne() {
         valueLabel->setAlignment(alignment);
         valueLabel->setSizePolicy(sizePolicy);
         valueLabel->setFixedHeight(fixedHeight);
-        valueLabel->setFixedWidth(180);
+        valueLabel->setFixedWidth(131);
 
         // Ajoutez l'objet QLineEdit dans la zone de défilement en utilisant le numéro de ligne et de colonne approprié.
         scrollAreaLayout->addWidget(valueLabel, row, col, Qt::AlignTop);
@@ -514,7 +564,7 @@ void gag::RafraichirTableau() {
             value->setReadOnly(true);
             value->setAlignment(alignment);
             value->setFixedHeight(fixedHeight); // Définir la taille de la ligne.
-            value->setFixedWidth(180);
+            value->setFixedWidth(131);
             value->setSizePolicy(sizePolicy);
             scrollAreaLayout->addWidget(value, i + 1, j, Qt::AlignTop);
         }
@@ -582,27 +632,27 @@ void gag::showUpdateDialog() {
     // Ajoute un champ pour entrer le numéro de ligne à modifier
     QLineEdit *rowNumberLineEdit = new QLineEdit(updateDialog);
     rowNumberLineEdit->setValidator(new QIntValidator(0, _Donnees.size() - 1,updateDialog)); // Permet de limiter la saisie à un nombre entier valide
-    formLayout->addRow("Ligne :", rowNumberLineEdit);
+    formLayout->addRow("Ligne : ", rowNumberLineEdit);
 
     // Ajoute un champ pour entrer le nouveau débit de la ligne
     QLineEdit *debitLineEdit = new QLineEdit(updateDialog);
-    formLayout->addRow("Debit:", debitLineEdit);
+    formLayout->addRow("Debit : ", debitLineEdit);
 
     // Ajoute un champ pour entrer le nouvel espacement de la ligne
     QLineEdit *espacementLineEdit = new QLineEdit(updateDialog);
-    formLayout->addRow("Espacement:", espacementLineEdit);
+    formLayout->addRow("Espacement : ", espacementLineEdit);
 
     // Ajoute un champ pour entrer le nouveau diamètre de la ligne
     QLineEdit *diameterLineEdit = new QLineEdit(updateDialog);
-    formLayout->addRow("Diametre :", diameterLineEdit);
+    formLayout->addRow("Diametre : ", diameterLineEdit);
 
     // Ajoute un champ pour entrer la nouvelle longueur de la ligne
     QLineEdit *lengthLineEdit = new QLineEdit(updateDialog);
-    formLayout->addRow("Longueur :", lengthLineEdit);
+    formLayout->addRow("Longueur : ", lengthLineEdit);
 
     // Ajoute un champ pour entrer la nouvelle hauteur de la ligne
     QLineEdit *heightLineEdit = new QLineEdit(updateDialog);
-    formLayout->addRow("Hauteur :", heightLineEdit);
+    formLayout->addRow("Hauteur : ", heightLineEdit);
 
     // Ajoute un bouton pour valider les nouvelles données et fermer la fenêtre de dialogue
     QPushButton *updateButton = new QPushButton("Modifier", updateDialog);
@@ -691,7 +741,7 @@ void gag::enleverLigne() {
     supprimerDialog->setFixedSize(300, 100);
 
     // Ajoute un label et un champ de saisie pour entrer le numéro de la ligne à supprimer
-    QLabel *numeroLigneLabel = new QLabel("Numéro de ligne :", supprimerDialog);
+    QLabel *numeroLigneLabel = new QLabel("Numéro de ligne : ", supprimerDialog);
     QLineEdit *numeroLigneLineEdit = new QLineEdit(supprimerDialog);
     numeroLigneLineEdit->setValidator(new QIntValidator(1, _Donnees.size(), supprimerDialog)); // Permet de limiter la saisie à un nombre entier valide
     numeroLigneLineEdit->setFixedWidth(50);
@@ -730,3 +780,199 @@ void gag::enleverLigne() {
     calcul();
     RafraichirTableau();
 }
+
+
+void gag::saveData(const QString &fileName) {
+    QFile file(fileName);
+    if (!file.open(QIODevice::WriteOnly)) {
+        qWarning("Cannot open file for writing");
+        return;
+    }
+
+    QDataStream out(&file);
+    out.setVersion(QDataStream::Qt_5_9);
+
+    for (const std::vector<float> &row : _Donnees) {
+        for (float value : row) {
+            out << value;
+        }
+    }
+}
+
+void gag::loadData(const QString &fileName) {
+    QFile file(fileName);
+    if (!file.open(QIODevice::ReadOnly)) {
+        qWarning("Cannot open file for reading");
+        return;
+    }
+
+    QDataStream in(&file);
+    in.setVersion(QDataStream::Qt_5_9);
+
+    _Donnees.clear();
+
+    while (!in.atEnd()) {
+        std::vector<float> row;
+        for (int i = 0; i < 10; ++i) { // Change the loop limit to 10 instead of 11
+            float value;
+            in >> value;
+            row.push_back(value);
+        }
+        _Donnees.push_back(row);
+    }
+
+    // Refresh the display and recalculate the data after loading
+    RafraichirTableau();
+    calcul();
+}
+
+
+void gag::createPdfReport(const QString &fileName) {
+    calcul();
+    // Create QDialog for user input
+    QDialog inputDialog;
+    inputDialog.setWindowTitle("Entrez les informations");
+
+    QLabel *nomLabel = new QLabel("Nom : ");
+    QLabel *prenomLabel = new QLabel("Prénom : ");
+    QLabel *referenceLabel = new QLabel("Référence : ");
+    QLabel *dateLabel = new QLabel("Date : ");
+
+    QLineEdit *nomLineEdit = new QLineEdit;
+    QLineEdit *prenomLineEdit = new QLineEdit;
+    QLineEdit *referenceLineEdit = new QLineEdit;
+    QDateEdit *dateEdit = new QDateEdit(QDate::currentDate());
+
+    QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    connect(buttonBox, &QDialogButtonBox::accepted, &inputDialog, &QDialog::accept);
+    connect(buttonBox, &QDialogButtonBox::rejected, &inputDialog, &QDialog::reject);
+
+    QFormLayout *layout = new QFormLayout;
+    layout->addRow(nomLabel, nomLineEdit);
+    layout->addRow(prenomLabel, prenomLineEdit);
+    layout->addRow(referenceLabel, referenceLineEdit);
+    layout->addRow(dateLabel, dateEdit);
+    layout->addWidget(buttonBox);
+
+    inputDialog.setLayout(layout);
+
+    if (inputDialog.exec() == QDialog::Rejected) {
+        return;
+    }
+
+    QString nom = nomLineEdit->text();
+    QString prenom = prenomLineEdit->text();
+    QString reference = referenceLineEdit->text();
+    QString date = dateEdit->date().toString(Qt::DefaultLocaleShortDate);
+
+    QPdfWriter pdfWriter(fileName);
+    pdfWriter.setPageMargins(QMarginsF(20, 20, 20, 20));
+
+    QPainter painter(&pdfWriter);
+    QFont font = painter.font();
+    font.setPointSize(10);
+    painter.setFont(font);
+
+    const int lineHeight = 300;
+
+    painter.drawText(0, lineHeight, QString("Nom: %1").arg(nom));
+    painter.drawText(0, lineHeight * 2, QString("Prénom: %1").arg(prenom));
+    painter.drawText(0, lineHeight * 3, QString("Référence: %1").arg(reference));
+    painter.drawText(pdfWriter.width() - 1000, lineHeight-200, QString("Date: %1").arg(date));
+
+    // Modify headerLabels to include Espacement
+    const QStringList headerLabels = {
+            "Index", "Debit", "Espacement", "Diametre", "Longueur", "Hauteur", "Perte", "Piezo", "Cumul Perte", "Cumul Piezo"
+    };
+
+    // Modify columnWidths to include Espacement
+    QVector<int> columnWidths = {600, 600, 1000, 1000, 1000, 800, 800, 800, 1200, 1200};
+    int tableWidth = 0;
+    for (int width : columnWidths) {
+        tableWidth += width;
+    }
+
+    // The rest of the code for setting up the QPainter and drawing the table remains the same
+
+    int yOffset = lineHeight * 5;
+    int currentPage = 1;
+
+    auto drawHeaderAndLines = [&](int yOffset) {
+        int xPos = 0;
+        for (int i = 0; i < headerLabels.size(); ++i)
+        {
+            QRect headerRect(xPos, yOffset - lineHeight, columnWidths[i], lineHeight);
+            painter.drawText(headerRect, Qt::AlignCenter, headerLabels[i]);
+            xPos += columnWidths[i];
+        }
+
+        yOffset += lineHeight;
+
+        // Draw a horizontal line to separate the header and the numbers
+        painter.setPen(QPen(Qt::black, 1));
+        painter.drawLine(0, yOffset - lineHeight, tableWidth, yOffset - lineHeight);
+
+        // Determine the maximum number of rows per page based on the available space before the footer
+        int maxRowsPerPage = (pdfWriter.height() - yOffset - 150) / lineHeight;
+
+        // Draw vertical lines to separate the columns
+        xPos = 0;
+        for (int i = 0; i < columnWidths.size(); ++i) {
+            painter.drawLine(xPos, yOffset - lineHeight, xPos, yOffset + (lineHeight * (maxRowsPerPage - 1)));
+            xPos += columnWidths[i];
+        }
+        painter.drawLine(xPos, yOffset - lineHeight, xPos, yOffset + (lineHeight * (maxRowsPerPage - 1)));
+
+        // Reset the font size for the remaining content
+        painter.setFont(font);
+
+        return yOffset;
+    };
+
+    yOffset = drawHeaderAndLines(yOffset);
+
+    for (const std::vector<float> &donneesLigne : _Donnees) {
+        int xPos = 0;
+
+        for (int i = 0; i < donneesLigne.size(); ++i) {
+            QString cellText;
+            if (i == 0) {
+                cellText = QString::number(donneesLigne[i], 'f', 0);
+            } else {
+                cellText = QString::number(donneesLigne[i], 'f', 2);
+            }
+
+            QRect cellRect(xPos, yOffset - lineHeight, columnWidths[i], lineHeight);
+            painter.drawText(cellRect, Qt::AlignCenter, cellText);
+            xPos += columnWidths[i];
+        }
+
+        yOffset += lineHeight;
+
+        if (yOffset > pdfWriter.height() - 2 * lineHeight) {
+            // Draw the footer with the current page number
+            QString footerText = QString("Page %1").arg(currentPage);
+            QRect footerRect(0, pdfWriter.height() - lineHeight, pdfWriter.width(), lineHeight);
+            painter.drawText(footerRect, Qt::AlignCenter, footerText);
+            QString referenceText = QString("Reference: %1").arg(reference);
+            QRect referenceRect(pdfWriter.width() - 1500, pdfWriter.height() - lineHeight, 1500, lineHeight);
+            painter.drawText(referenceRect, Qt::AlignCenter, referenceText);
+
+            // Create a new page
+            pdfWriter.newPage();
+            yOffset = lineHeight * 2;
+            yOffset = drawHeaderAndLines(yOffset);
+            currentPage++;
+        }
+    }
+
+    // Add a footer on the last page
+    QString footerText = QString("Page %1").arg(currentPage);
+    painter.drawText(QRect(0, pdfWriter.height() - 80, pdfWriter.width(), 20), Qt::AlignCenter, footerText);
+    painter.drawText(QRect(0, pdfWriter.height() - 80, pdfWriter.width() - 20, 20), Qt::AlignRight, QString("Référence: %1").arg(reference));
+
+    painter.end();
+}
+
+
+

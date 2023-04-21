@@ -105,9 +105,19 @@ private:
     /// @brief Efface toutes les données saisies.
     void clear();
 
-protected:
     bool eventFilter(QObject *obj, QEvent *event) override;
 
+    void loadData(const QString &fileName);
+
+    void saveData(const QString &fileName);
+
+    void createPdfReport(const QString &fileName);
+
+    void saveAsPdf();
+
+    void loadDataWrapper();
+
+    void saveDataWrapper();
 
 };
 

@@ -2,7 +2,7 @@
 
 
 MainWindow::MainWindow(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db), Calcul("Calculer", this) {
-    setFixedSize(500, 310);
+    setFixedSize(500, 400);
 
     setWindowTitle(QString::fromStdString("Calcul du diametre intérieur d'un tube simple"));
 
@@ -60,25 +60,29 @@ MainWindow::MainWindow(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent
     gridLayout->addWidget(new QLabel("Résultat (en mm):"), 7, 0);
     gridLayout->addWidget(&Champresultat, 7, 1);
 
-    Champligne.setReadOnly(true);
-    Champligne.setFixedWidth(400);
-    gridLayout->addWidget(&Champligne, 8, 0, 1, 4);
 
     Champligne.setReadOnly(true);
     Champligne.setFixedWidth(480);
-    gridLayout->addWidget(&Champligne, 8, 0, 1, 4);
+    gridLayout->addWidget(&ChampVitesse, 8, 0, 1, 4);
 
     ChampVitesse.setReadOnly(true);
     ChampVitesse.setFixedWidth(480);
-    gridLayout->addWidget(&ChampVitesse, 9, 0, 1, 4);
+    gridLayout->addWidget(&Champligne, 9, 0, 1, 4);
 
+    Champligne2.setReadOnly(true);
+    Champligne2.setFixedWidth(600);
+    gridLayout->addWidget(&Champligne2, 10, 0, 1, 4);
+
+    // Configuration of the third QLineEdit widget (Champligne3)
+    Champligne3.setReadOnly(true);
+    Champligne3.setFixedWidth(600);
+    gridLayout->addWidget(&Champligne3, 11, 0, 1, 4);
 
     setLayout(gridLayout);
 
     Calcul.setEnabled(false);
 
     ChampVitesse.setReadOnly(true);
-    ChampVitesse.setVisible(false);
 
     // Cache les champs servant dans l'autre mode
     longueur.setVisible(false);
@@ -173,7 +177,9 @@ float MainWindow::calcullongueurdeniv() {
     diametreText.replace(',', '.');
     float longueurs = diametreText.toFloat();
 
-    float vitesses = (debits / 3600) / ((std::pow((deniveles / 2000), 2)) * M_PI);
+    float area = (M_PI * std::pow(deniveles, 2)) / 4; // Calculate the cross-sectional area
+    float vitesses = debits / area; // Calculate the flow speed
+
     float diametre = k * std::pow(debits, a) * std::pow(deniveles, b) * longueurs;
 
     // écris le champ vitesse
@@ -204,8 +210,10 @@ float MainWindow::calculdebitvitesse() {
 
 
 void MainWindow::Gettuyau(float diametre) {
+    std::pair<int, float> smallerDuo;
     std::pair<int, float> closestDuo;
-    float minValue = std::numeric_limits<float>::max();
+    std::pair<int, float> largerDuo;
+    int closestIndex = -1;
 
     QString selected_material = Materiau.currentText();
     QString selected_pressure = Pression.currentText();
@@ -213,31 +221,59 @@ void MainWindow::Gettuyau(float diametre) {
     // Retrieve the corresponding material object from the database
     matiere selected_matiere = database->findMatiereByName(selected_material.toStdString());
 
-    // Find the closest diameter
+    const pression* found_pression_obj = nullptr;
+
     for (const auto &pression_obj : selected_matiere.pressions) {
         if (pression_obj.bar == selected_pressure.toInt()) {
-            for (const auto &diametre_obj : pression_obj.diametre) {
-                float current_diametre = diametre_obj.second;
-                if (current_diametre > diametre && current_diametre < minValue) {
-                    minValue = current_diametre;
-                    closestDuo = {diametre_obj.first, current_diametre};
-                    break; // On coupe la boucle quand on a trouvé
-                }
-            }
+            found_pression_obj = &pression_obj;
+            break;
         }
     }
 
-    // Set the result text
-    QString str;
-    if (closestDuo.first == 0 && closestDuo.second == 0) {
-        str = "Calcul Invalide";
-    } else {
-        str = "Il faut un tuyau de " + selected_material + " en " +
-              selected_pressure + " bar, de [ " + QString::number(closestDuo.first) + " ; " +
-              QString::number(closestDuo.second, 'f', 1) + " ] mm";
+    if (found_pression_obj != nullptr) {
+        float min_diff = std::numeric_limits<float>::max();
+        for (int i = 0; i < found_pression_obj->diametre.size(); ++i) {
+            float current_diametre = found_pression_obj->diametre[i].second;
+            float diff = std::abs(current_diametre - diametre);
+
+            if (diff < min_diff) {
+                min_diff = diff;
+                closestDuo = {found_pression_obj->diametre[i].first, current_diametre};
+                closestIndex = i;
+            }
+        }
+
+        if (closestIndex > 0) {
+            smallerDuo = {found_pression_obj->diametre[closestIndex - 1].first, found_pression_obj->diametre[closestIndex - 1].second};
+        }
+
+        if (closestIndex + 1 < found_pression_obj->diametre.size()) {
+            largerDuo = {found_pression_obj->diametre[closestIndex + 1].first, found_pression_obj->diametre[closestIndex + 1].second};
+        }
     }
-    Champligne.setText(str);
+
+    QString str1, str2, str3;
+
+    if (smallerDuo.first != 0 || smallerDuo.second != 0) {
+        str1 = "Plus petit diamètre: [ " + QString::number(smallerDuo.first) + " ; " + QString::number(smallerDuo.second, 'f', 1) + " ] mm";
+    }
+    if (closestDuo.first != 0 || closestDuo.second != 0) {
+        str2 = "Diamètre exact: [ " + QString::number(closestDuo.first) + " ; " + QString::number(closestDuo.second, 'f', 1) + " ] mm";
+    }
+    if (largerDuo.first != 0 || largerDuo.second != 0) {
+        str3 = "Plus grand diamètre: [ " + QString::number(largerDuo.first) + " ; " + QString::number(largerDuo.second, 'f', 1) + " ] mm";
+    }
+
+    Champligne.setText(str1);
+    Champligne2.setText(str2);
+    Champligne3.setText(str3);
 }
+
+
+
+
+
+
 
 void MainWindow::keyPressEvent(QKeyEvent *event) {
 

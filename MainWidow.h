@@ -50,6 +50,9 @@ private:
     QLabel Champresultat;
     QLineEdit Champligne;
     QLineEdit ChampVitesse;
+    QLineEdit Champligne2; // Add this line
+    QLineEdit Champligne3; // Add this line
+
 
     QPushButton Changer;
     QPushButton Calcul;
