@@ -325,8 +325,8 @@ void pertechargeherse::AjoutLigne() {
         lineEdit->setReadOnly(true);
         lineEdit->setAlignment(Qt::AlignCenter);
         lineEdit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-        lineEdit->setFixedHeight(40); // Fixe la taille de la ligne.
         lineEdit->setFixedWidth(200);
+        lineEdit->setFixedHeight(40);
 
         if (indices[i] != -1) { // Si l'indice n'est pas égal à -1, on remplit la case correspondante avec la donnée.
             if (i == 0) {
@@ -343,15 +343,25 @@ void pertechargeherse::AjoutLigne() {
 
     ligne++; // On incrémente la valeur de "ligne" pour la prochaine ligne à ajouter.
 
-    // On ajoute la taille de la barre de scrolling en fonction du nombre de lignes.
-    int scrollWidgetHeight = ligne * ROW_HEIGHT;
+    // Set the row height for the grid layout.
+    gridLayout->setRowMinimumHeight(ligne - 1, 40);
+    gridLayout->setRowStretch(ligne - 1, 0);
+
+    // Calculate the scroll widget height based on the number of lines, row height, and vertical spacing.
+    int rowHeight = 40;
+    int verticalSpacing = 10;
+    int scrollWidgetHeight = (ligne * rowHeight) + ((ligne - 1) * verticalSpacing);
+
+    // Set the minimum and maximum height of the scroll widget.
     scrollWidget->setMinimumHeight(scrollWidgetHeight);
     scrollWidget->setMaximumHeight(scrollWidgetHeight);
 
-    // On fixe l'espacement vertical et l'alignement.
-    gridLayout->setVerticalSpacing(15);
+    // Set the vertical spacing and alignment.
+    gridLayout->setVerticalSpacing(verticalSpacing);
     gridLayout->setAlignment(Qt::AlignTop);
 }
+
+
 
 
 
@@ -397,52 +407,72 @@ void pertechargeherse::focusNextInput() {
 bool pertechargeherse::eventFilter(QObject *obj, QEvent *event) {
     if (event->type() == QEvent::KeyPress) {
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+
+        // Modifier keys status
+        bool controlPressed = keyEvent->modifiers() & Qt::ControlModifier;
+        bool shiftPressed = keyEvent->modifiers() & Qt::ShiftModifier;
+
         if (keyEvent->key() == Qt::Key_R) {
             recopiederniereligne();
             return true; // Mark the event as handled
         }
-        // Si la touche E est appuyée, supprime toutes les données.
         else if(keyEvent->key() == Qt::Key_E){
             _Donnees.clear();
             clearchild();
         }
-        // Si la touche M est appuyée, ouvre la boîte de dialogue pour modifier une ligne.
         else if(keyEvent->key() == Qt::Key_M){
             showUpdateDialog();
         }
-        // Si la touche Z est appuyée, enlève une ligne.
         else if(keyEvent->key() == Qt::Key_Z){
             enleverLigne();
         }
+            // Save as PDF (Ctrl + S)
+        else if (controlPressed && keyEvent->key() == Qt::Key_S && !shiftPressed) {
+            saveAsPdf();
+            return true;
+        }
+            // Save data (Ctrl + Shift + S)
+        else if (controlPressed && keyEvent->key() == Qt::Key_S && shiftPressed) {
+            saveDataWrapper();
+            return true;
+        }
+            // Load data (Ctrl + L)
+        else if (controlPressed && keyEvent->key() == Qt::Key_L && !shiftPressed) {
+            loadDataWrapper();
+            return true;
+        }
     }
-    // Pass the event to the base class event filter
     return QWidget::eventFilter(obj, event);
 }
 
-// La fonction "keyPressEvent" gère les événements clavier dans la fenêtre.
+
 void pertechargeherse::keyPressEvent(QKeyEvent *event) {
 
-    // Si la touche Contrôle est appuyée, passe le focus à l'entrée précédente.
+    // Modifier keys status
+    bool controlPressed = event->modifiers() & Qt::ControlModifier;
+    bool shiftPressed = event->modifiers() & Qt::ShiftModifier;
+
+    // If the Control key is pressed, focus the previous input.
     if (event->key() == Qt::Key_Control) {
         focusPreviousInput();
         return;
     }
 
-        // Si la touche Tab ou Entrée est appuyée.
+        // If the Tab or Enter key is pressed.
     else if (event->key() == Qt::Key_Tab || event->key() == Qt::Key_Return) {
 
-        // Si la touche Shift+Entrée est appuyée et que toutes les données sont remplies, effectue le calcul.
-        if (event->modifiers() == Qt::ShiftModifier && event->key() == Qt::Key_Return && Allinputfill()) {
+        // If Shift+Enter is pressed and all data is filled, perform the calculation.
+        if (shiftPressed && event->key() == Qt::Key_Return && Allinputfill()) {
             calcul();
             return;
         }
 
-            // Si Entrée est appuyée et que toutes les données sont remplies, ajoute les données.
+            // If Enter is pressed and all data is filled, add the data.
         else if(event->key() == Qt::Key_Return && Allinputfill()){
             AjoutDonne();
         }
 
-            // Sinon, passe le focus à l'entrée suivante.
+            // Otherwise, focus the next input.
         else {
             focusNextInput();
         }
@@ -450,30 +480,48 @@ void pertechargeherse::keyPressEvent(QKeyEvent *event) {
         return;
     }
 
-    // Si la touche E est appuyée, supprime toutes les données.
+        // If the E key is pressed, delete all data.
     else if(event->key() == Qt::Key_E){
         _Donnees.clear();
         clearchild();
     }
 
-    // Si la touche R est appuyée et qu'il y a des données, recopie la dernière ligne.
+        // If the R key is pressed and there is data, copy the last line.
     else if(event->key() == Qt::Key_R){
         if(_Donnees.size() > 0){
             recopiederniereligne();
         }
     }
 
-    // Si la touche M est appuyée, ouvre la boîte de dialogue pour modifier une ligne.
+        // If the M key is pressed, open the dialog box to modify a line.
     else if(event->key() == Qt::Key_M){
         showUpdateDialog();
     }
 
-    // Si la touche Z est appuyée, enlève une ligne.
+        // If the Z key is pressed, remove a line.
     else if(event->key() == Qt::Key_Z){
         enleverLigne();
     }
 
+        // Save as PDF (Ctrl + S)
+    else if (controlPressed && event->key() == Qt::Key_S && !shiftPressed) {
+        saveAsPdf();
+        return;
+    }
+
+        // Save data (Ctrl + Shift + S)
+    else if (controlPressed && event->key() == Qt::Key_S && shiftPressed) {
+        saveDataWrapper();
+        return;
+    }
+
+        // Load data (Ctrl + L)
+    else if (controlPressed && event->key() == Qt::Key_L && !shiftPressed) {
+        loadDataWrapper();
+        return;
+    }
 }
+
 
 
 bool pertechargeherse::Allinputfill() {
@@ -903,7 +951,7 @@ void pertechargeherse::createPdfReport(const QString &fileName) {
     QString nom = nomLineEdit->text();
     QString prenom = prenomLineEdit->text();
     QString reference = referenceLineEdit->text();
-    QString date = dateEdit->date().toString(Qt::DefaultLocaleShortDate);
+    QString date = QLocale().toString(dateEdit->date(), QLocale::ShortFormat);
 
     QPdfWriter pdfWriter(fileName);
     pdfWriter.setPageMargins(QMarginsF(20, 20, 20, 20));

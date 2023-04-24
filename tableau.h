@@ -78,7 +78,7 @@ private:
 
     /// @brief Gère les événements de pression des touches pour les éléments de l'interface utilisateur.
     /// @param event : Événement de pression de touche
-    void keyPressEvent(QKeyEvent *event);
+    void keyPressEvent(QKeyEvent *event) override;
 
     /// @brief Vérifie si toutes les entrées sont remplies.
     bool Allinputfill();

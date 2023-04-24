@@ -316,6 +316,21 @@ bool gag::eventFilter(QObject *watched, QEvent *event) {
             focusPreviousInput();
             return true;
         }
+            // Ajoute le raccourci Ctrl + S pour enregistrer en PDF
+        else if (keyEvent->modifiers() & Qt::ControlModifier && keyEvent->key() == Qt::Key_S && !(keyEvent->modifiers() & Qt::ShiftModifier)) {
+            saveAsPdf();
+            return true;
+        }
+            // Ajoute le raccourci Ctrl + Shift + S pour enregistrer les données
+        else if (keyEvent->modifiers() & Qt::ControlModifier && keyEvent->key() == Qt::Key_S && keyEvent->modifiers() & Qt::ShiftModifier) {
+            saveDataWrapper();
+            return true;
+        }
+            // Ajoute le raccourci Ctrl + L pour charger les données
+        else if (keyEvent->modifiers() & Qt::ControlModifier && keyEvent->key() == Qt::Key_L) {
+            loadDataWrapper();
+            return true;
+        }
     }
     return QWidget::eventFilter(watched, event);
 }
@@ -579,9 +594,6 @@ void gag::RafraichirTableau() {
     scrollAreaLayout->setAlignment(Qt::AlignTop);
 }
 
-
-
-
 void gag::keyPressEvent(QKeyEvent *event) {
     // Vérifie si la touche Shift est enfoncée et si la touche Entrée est également enfoncée.
     if (event->modifiers() & Qt::ShiftModifier && event->key() == Qt::Key_Return) {
@@ -601,10 +613,23 @@ void gag::keyPressEvent(QKeyEvent *event) {
         _Donnees.clear();
         clear();
     } else if (event->key() == Qt::Key_Control) {
-        // permet de changer la case active pour la precedente
+        // Permet de changer la case active pour la precedente
         focusPreviousInput();
     }
+        // Ajoute le raccourci Ctrl + S pour enregistrer en PDF
+    else if (event->modifiers() & Qt::ControlModifier && event->key() == Qt::Key_S && !(event->modifiers() & Qt::ShiftModifier)) {
+        saveAsPdf();
+    }
+        // Ajoute le raccourci Ctrl + Shift + S pour enregistrer les données
+    else if (event->modifiers() & Qt::ControlModifier && event->key() == Qt::Key_S && event->modifiers() & Qt::ShiftModifier) {
+        saveDataWrapper();
+    }
+        // Ajoute le raccourci Ctrl + L pour charger les données
+    else if (event->modifiers() & Qt::ControlModifier && event->key() == Qt::Key_L) {
+        loadDataWrapper();
+    }
 }
+
 
 void gag::recopiederniereligne() { // Fonction déclenché par la touche 'R' qui permet de recopier la derniere ligne entrée
 
