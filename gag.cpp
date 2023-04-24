@@ -542,6 +542,7 @@ void gag::calcul() {
         sigmaLongueur += longueur;
         sigmaHauteur += hauteur;
 
+
         // Stocke les cumuls dans le vecteur.
         _Donnees[i][8] = sigmaPerte;
         _Donnees[i][9] = sigmaPiezo;
