@@ -196,7 +196,6 @@ void bdd::afficher_tableaux() {
             matiereTable->verticalHeader()->setVisible(false);
             tabLayout->addWidget(matiereTable);
 
-            // Get the set of unique inner diameters
             std::set<int> unique_inner_diameters;
             for (const auto &p : mat.pressions) {
                 for (const auto &d : p.diametre) {
@@ -204,21 +203,18 @@ void bdd::afficher_tableaux() {
                 }
             }
 
-            // Create the table
             int rows = unique_inner_diameters.size();
-            int cols = mat.pressions.size() + 1;
+            int cols = 2 * mat.pressions.size() + 1;
             matiereTable->setRowCount(rows);
             matiereTable->setColumnCount(cols);
 
-            // Set header labels
             QStringList headerLabels;
             headerLabels << "Diametre exterieur";
             for (const auto &p : mat.pressions) {
-                headerLabels << QString::number(p.bar) + " bar";
+                headerLabels << QString::number(p.bar) + " bar" << "Epaisseur";
             }
             matiereTable->setHorizontalHeaderLabels(headerLabels);
 
-            // Fill the table
             int row = 0;
             for (const int inner_diameter : unique_inner_diameters) {
                 QTableWidgetItem *item = new QTableWidgetItem(QString::number(inner_diameter));
@@ -227,14 +223,19 @@ void bdd::afficher_tableaux() {
                 int col = 1;
                 for (const auto &p : mat.pressions) {
                     auto it = std::find_if(p.diametre.begin(), p.diametre.end(), [inner_diameter](const std::pair<int, float> &d) {
-                        return d.first == inner_diameter;
+                      return d.first == inner_diameter;
                     });
                     if (it != p.diametre.end()) {
-                        QTableWidgetItem *item = new QTableWidgetItem(QString::number(it->second, 'f', 2));
-                        item->setTextAlignment(Qt::AlignCenter);
-                        matiereTable->setItem(row, col, item);
+                      QTableWidgetItem *item = new QTableWidgetItem(QString::number(it->second, 'f', 2));
+                      item->setTextAlignment(Qt::AlignCenter);
+                      matiereTable->setItem(row, col, item);
+
+                      float epaisseur = -(it->second - inner_diameter) / 2;
+                      QTableWidgetItem *thicknessItem = new QTableWidgetItem(QString::number(epaisseur, 'f', 2));
+                      thicknessItem->setTextAlignment(Qt::AlignCenter);
+                      matiereTable->setItem(row, col + 1, thicknessItem);
                     }
-                    col++;
+                    col += 2;
                 }
                 row++;
             }
@@ -637,92 +638,87 @@ void bdd::suprimmer_tableaux() {
 
 
 void bdd::tuyau_dispo() {
-    // Création d'une boîte de dialogue
     QDialog *dialog = new QDialog;
     dialog->setWindowTitle("Tuyaux disponibles");
 
-    // Création d'un layout de formulaire
     QFormLayout *formLayout = new QFormLayout(dialog);
     dialog->setLayout(formLayout);
 
-    // Ajout de ComboBox pour les matières et les pressions
     QComboBox *matiereComboBox = new QComboBox(dialog);
     QComboBox *pressureComboBox = new QComboBox(dialog);
 
-    // Remplir le ComboBox des matières
     for (const auto &table: materials) {
         for (const auto &mat: table.matieres) {
             matiereComboBox->addItem(QString::fromStdString(mat.nom));
         }
     }
 
-    // Fonction pour mettre à jour le ComboBox des pressions en fonction de la matière sélectionnée
     auto updatePressureComboBox = [&]() {
-        pressureComboBox->clear();
-        std::string selectedMatiere = matiereComboBox->currentText().toStdString();
-        for (const auto &table: materials) {
-            for (const auto &mat: table.matieres) {
-                if (mat.nom == selectedMatiere) {
-                    for (const auto &p: mat.pressions) {
-                        pressureComboBox->addItem(QString::number(p.bar));
-                    }
-                }
+      pressureComboBox->clear();
+      std::string selectedMatiere = matiereComboBox->currentText().toStdString();
+      for (const auto &table: materials) {
+        for (const auto &mat: table.matieres) {
+          if (mat.nom == selectedMatiere) {
+            for (const auto &p: mat.pressions) {
+              pressureComboBox->addItem(QString::number(p.bar));
             }
+          }
         }
+      }
     };
 
-    // Connexion du signal pour mettre à jour le ComboBox des pressions
     QObject::connect(matiereComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), updatePressureComboBox);
     matiereComboBox->currentIndexChanged(matiereComboBox->currentIndex());
 
-    // Ajout des ComboBox au layout de formulaire
     formLayout->addRow("Matiere:", matiereComboBox);
     formLayout->addRow("Pression:", pressureComboBox);
 
-    // Création d'un tableau pour afficher les tuyaux disponibles
     QTableWidget *tableWidget = new QTableWidget(dialog);
-    tableWidget->setColumnCount(2);
-    tableWidget->setHorizontalHeaderLabels(QStringList() << "Diametre extérieur" << "Diametre intérieur");
+    tableWidget->setColumnCount(3);
+    tableWidget->setHorizontalHeaderLabels(QStringList() << "Diametre extérieur" << "Diametre intérieur" << "Epaisseur");
     tableWidget->verticalHeader()->setVisible(false);
     tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     formLayout->addRow(tableWidget);
 
-    // Fonction pour mettre à jour le tableau avec les tuyaux disponibles en fonction de la matière et de la pression sélectionnées
     auto updateTableWidget = [&]() {
-        tableWidget->clearContents();
-        std::string selectedMatiere = matiereComboBox->currentText().toStdString();
-        int selectedPressure = pressureComboBox->currentText().toInt();
-        for (const auto &table: materials) {
-            for (const auto &mat: table.matieres) {
-                if (mat.nom == selectedMatiere) {
-                    std::vector<std::pair<int, float>> tuyaux = get_possible_tuyaux(mat, selectedPressure);
-                    tableWidget->setRowCount(tuyaux.size());
-                    int row = 0;
-                    for (const auto &tuyau : tuyaux) {
-                        tableWidget->setItem(row, 0, new QTableWidgetItem(QString::number(tuyau.first)));
-                        tableWidget->setItem(row, 1, new QTableWidgetItem(QString::number(tuyau.second)));
-                        row++;
-                    }
-                }
+      tableWidget->clearContents();
+      std::string selectedMatiere = matiereComboBox->currentText().toStdString();
+      int selectedPressure = pressureComboBox->currentText().toInt();
+      for (const auto &table: materials) {
+        for (const auto &mat: table.matieres) {
+          if (mat.nom == selectedMatiere) {
+            std::vector<std::pair<int, float>> tuyaux = get_possible_tuyaux(mat, selectedPressure);
+            tableWidget->setRowCount(tuyaux.size());
+            int row = 0;
+            for (const auto &tuyau : tuyaux) {
+              tableWidget->setItem(row, 0, new QTableWidgetItem(QString::number(tuyau.first)));
+              tableWidget->setItem(row, 1, new QTableWidgetItem(QString::number(tuyau.second)));
+
+              float epaisseur = (tuyau.first - tuyau.second) / 2;
+              QTableWidgetItem *thicknessItem = new QTableWidgetItem(QString::number(epaisseur, 'f', 2));
+              thicknessItem->setTextAlignment(Qt::AlignCenter);
+              tableWidget->setItem(row, 2, thicknessItem);
+
+              row++;
             }
+          }
         }
+      }
     };
 
-    // Connexion des signaux pour mettre à jour le tableau
     QObject::connect(matiereComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), updateTableWidget);
     QObject::connect(pressureComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), updateTableWidget);
     pressureComboBox->currentIndexChanged(pressureComboBox->currentIndex());
 
     QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok, dialog);
     formLayout->addWidget(buttonBox);
-    // Connecter le bouton Ok pour fermer la boîte de dialogue
+
+    // Connect the Ok button to close the dialog
     QObject::connect(buttonBox, &QDialogButtonBox::accepted, dialog, &QDialog::accept);
 
-    dialog->resize(400,400);
+    dialog->resize(500, 400);
     dialog->exec();
 }
-
-
 
 void bdd::montre_coef() {
     // Création d'une boîte de dialogue
@@ -811,16 +807,17 @@ void bdd::trouver_tuyau() {
 
     // Connecter le bouton de soumission pour effectuer la recherche
     QObject::connect(submitButton, &QPushButton::clicked, [&]() {
-        float inner_diameter = QStringToFloat(diameterInput->text());
-        auto [matiere_name, pressure, outer_diameter] = find_matiere_pressure_and_outer_diameter(inner_diameter);
+      float inner_diameter = QStringToFloat(diameterInput->text());
+      auto [matiere_name, pressure, outer_diameter] = find_matiere_pressure_and_outer_diameter(inner_diameter);
 
-        // Si un tuyau est trouvé, afficher les informations
-        if (!matiere_name.empty()) {
-            resultLabel->setText("Matière: " + QString::fromStdString(matiere_name) + "\nPression: " + QString::number(pressure) + "\nDiamètre extérieur: " + QString::number(outer_diameter));
-        } else {
-            // Sinon, afficher un message d'erreur
-            resultLabel->setText("Tuyau non trouvé. Veuillez entrer un diamètre intérieur valide.");
-        }
+      // Si un tuyau est trouvé, afficher les informations
+      if (!matiere_name.empty()) {
+        float epaisseur = (outer_diameter - inner_diameter) / 2;
+        resultLabel->setText("Matière: " + QString::fromStdString(matiere_name) + "\nPression: " + QString::number(pressure) + "\nDiamètre extérieur: " + QString::number(outer_diameter) + "\nÉpaisseur: " + QString::number(epaisseur));
+      } else {
+        // Sinon, afficher un message d'erreur
+        resultLabel->setText("Tuyau non trouvé. Veuillez entrer un diamètre intérieur valide.");
+      }
     });
 
     // Créer et ajouter un bouton pour fermer la boîte de dialogue
@@ -831,6 +828,7 @@ void bdd::trouver_tuyau() {
     // Afficher la boîte de dialogue
     dialog->exec();
 }
+
 
 
 

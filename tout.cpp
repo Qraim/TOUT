@@ -60,7 +60,7 @@ tout::tout(QWidget *parent) : QWidget(parent) {
     QString openDatabaseButtonStyle = "QPushButton { font-weight: bold; font-size: 12px; padding: 6px 12px; }";
     openDatabaseButton->setStyleSheet(openDatabaseButtonStyle);
 
-    // Positionner le openDatabaseButton dans le coin supérieur droit de la fenêtre
+    // Positionner l'openDatabaseButton dans le coin supérieur droit de la fenêtre
     openDatabaseButton->setGeometry(width() - openDatabaseButton->width() - 20, 20, openDatabaseButton->width(), openDatabaseButton->height());
     openDatabaseButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 

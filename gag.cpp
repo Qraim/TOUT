@@ -892,7 +892,7 @@ void gag::createPdfReport(const QString &fileName) {
     QString nom = nomLineEdit->text();
     QString prenom = prenomLineEdit->text();
     QString reference = referenceLineEdit->text();
-    QString date = dateEdit->date().toString(Qt::DefaultLocaleShortDate);
+    QString date = QLocale().toString(dateEdit->date(), QLocale::ShortFormat);
 
     QPdfWriter pdfWriter(fileName);
     pdfWriter.setPageMargins(QMarginsF(20, 20, 20, 20));

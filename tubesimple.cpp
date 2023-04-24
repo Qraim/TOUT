@@ -3,7 +3,7 @@
 //
 
 #include "tubesimple.h"
-#include <math.h>
+#include <cmath>
 #include <memory>
 
 tubesimple::tubesimple(std::shared_ptr<bdd> db, QWidget *parent)
@@ -209,8 +209,6 @@ void tubesimple::calculer() {
 
     float pipeArea = M_PI * pow(pipeDiameter / 2, 2); // Calcule l'aire de la section transversale du tuyau en m²
     float v = flowRate / pipeArea; // Calcule la vitesse d'écoulement en m/s
-
-    QString material = materiau.currentText(); // Récupère la valeur sélectionnée dans la liste déroulante "materiau"
 
     std::tuple<float, float, double> coefficients = database->get_material_coefficients(materiau.currentText().toStdString());
     a = std::get<0>(coefficients);

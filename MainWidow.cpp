@@ -218,39 +218,33 @@ void MainWindow::Gettuyau(float diametre) {
     QString selected_material = Materiau.currentText();
     QString selected_pressure = Pression.currentText();
 
-    // On recupére le nom du materiel du tuyau
     matiere selected_matiere = database->findMatiereByName(selected_material.toStdString());
 
     const pression* found_pression_obj = nullptr;
 
-    // trouve le diametre supérieur le plus proche
     for (const auto &pression_obj : selected_matiere.pressions) {
         if (pression_obj.bar == selected_pressure.toInt()) {
-            found_pression_obj = &pression_obj;
-            break;
+          found_pression_obj = &pression_obj;
+          break;
         }
     }
 
-    // trouve celui en dessous et au dessus
     if (found_pression_obj != nullptr) {
-        float min_diff = std::numeric_limits<float>::max();
         for (int i = 0; i < found_pression_obj->diametre.size(); ++i) {
-            float current_diametre = found_pression_obj->diametre[i].second;
-            float diff = std::abs(current_diametre - diametre);
-
-            if (diff < min_diff) {
-                min_diff = diff;
-                closestDuo = {found_pression_obj->diametre[i].first, current_diametre};
-                closestIndex = i;
-            }
+          float current_diametre = found_pression_obj->diametre[i].second;
+          if (current_diametre > diametre) {
+            closestDuo = {found_pression_obj->diametre[i].first, current_diametre};
+            closestIndex = i;
+            break;
+          }
         }
 
         if (closestIndex > 0) {
-            smallerDuo = {found_pression_obj->diametre[closestIndex - 1].first, found_pression_obj->diametre[closestIndex - 1].second};
+          smallerDuo = {found_pression_obj->diametre[closestIndex - 1].first, found_pression_obj->diametre[closestIndex - 1].second};
         }
 
         if (closestIndex + 1 < found_pression_obj->diametre.size()) {
-            largerDuo = {found_pression_obj->diametre[closestIndex + 1].first, found_pression_obj->diametre[closestIndex + 1].second};
+          largerDuo = {found_pression_obj->diametre[closestIndex + 1].first, found_pression_obj->diametre[closestIndex + 1].second};
         }
     }
 
@@ -270,6 +264,7 @@ void MainWindow::Gettuyau(float diametre) {
     Champligne2.setText(str2);
     Champligne3.setText(str3);
 }
+
 
 
 void MainWindow::keyPressEvent(QKeyEvent *event) {

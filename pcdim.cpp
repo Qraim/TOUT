@@ -151,7 +151,7 @@ float pcdim::calculdebit()
 
     QString vitessetext = inputs[2]->text();
     vitessetext.replace(',', '.');
-    float vitesse = (vitessetext.toFloat()*1000)/3600;
+    float vitesse = vitessetext.toFloat();
 
     QString diametretext = innerDiameterComboBox->currentText();
     diametretext.replace(',', '.');
@@ -177,23 +177,20 @@ float pcdim::calculvitesse()
 
 float pcdim::calculdiametre()
 {
-
     QString debittext = inputs[0]->text();
     debittext.replace(',', '.');
-    float debit = (debittext.toFloat()*1000)/3600;
+    float debit_m3h = debittext.toFloat();
+    float debit_m3s = debit_m3h / 3600; // Convert m³/h to m³/s
 
     QString vitessetext = inputs[2]->text();
     vitessetext.replace(',', '.');
     float vitesse = vitessetext.toFloat();
 
-    float debits_m3s = debit / 3600; // Converti m³/h en m³/s
-    float diametre = std::sqrt((4 * debits_m3s) / (M_PI * vitesse))*1000; // Calcul du diametre
-
-    float diametre_mm; // Converti le diameter en millimetres
+    float diametre = std::sqrt((4 * debit_m3s) / (M_PI * vitesse)) * 1000; // Calculate the diameter in millimeters
 
     return diametre;
-
 }
+
 
 
 std::tuple<float, float, float> pcdim::getMaterialProperties(const std::string & pipe_material) {
@@ -216,7 +213,7 @@ float pcdim::calculperte() {
 
     QString debittext = inputs[0]->text();
     debittext.replace(',', '.');
-    float debit_ls = debittext.toFloat() / 3600;
+    float debit_ls = (debittext.toFloat()*1000) / 3600;
 
     std::string materiel = materialComboBox->currentText().toStdString();
 
@@ -228,7 +225,7 @@ float pcdim::calculperte() {
     float b = std::get<1>(material_properties);
     double k = std::get<2>(material_properties);
 
-    float perte = k * std::pow(debit_ls, a) * std::pow(diametre_interieur, b) * std::pow(longueur, 1.0);
+    float perte = roundf((k * std::pow(debit_ls, a) * std::pow(diametre_interieur, b) * std::pow(longueur, 1.0)) * 100) / 100;
 
     return perte;
 
@@ -247,19 +244,20 @@ void pcdim::calculate()
         inputs[4]->setText(QString::number(perte));
         return;
     }
-
-    // Si le débit et le diamètre sont renseignés, calcule la vitesse et l'affiche
-    if (debitEntered) {
-        float vitesse = calculvitesse();
-        inputs[2]->setText(QString::number(vitesse));
-        return;
-    }
     // Sinon, si le débit et la vitesse sont renseignés, calcule le diamètre et l'affiche
     else if (debitEntered && vitesseEntered) {
         float diametre = calculdiametre();
         inputs[1]->setText(QString::number(diametre));
         return;
     }
+
+    // Si le débit et le diamètre sont renseignés, calcule la vitesse et l'affiche
+    else if (debitEntered) {
+        float vitesse = calculvitesse();
+        inputs[2]->setText(QString::number(vitesse));
+        return;
+    }
+
     // Sinon, si le diamètre et la vitesse sont renseignés, calcule le débit et l'affiche
     else if (vitesseEntered) {
         float debit = calculdebit();
@@ -342,7 +340,7 @@ void pcdim::onPressureComboBoxIndexChanged(int index) {
     int selectedPressure = pressureComboBox->itemText(index).toInt();
     std::vector<float> innerDiameters = database->getInnerDiametersForMatiereAndPressure(selectedMaterial.toStdString(), selectedPressure);
 
-    // Mise à jours du diametre extérieur
+    // Mise à jour du diametre extérieur
     innerDiameterComboBox->clear();
     for (float innerDiameter : innerDiameters) {
         innerDiameterComboBox->addItem(QString::number(innerDiameter));
@@ -353,7 +351,7 @@ void pcdim::updateComboBoxes() {
     // Récupération des infos
     std::vector<std::string> materials = database->getAllMatiereNames();
 
-    // Mise à jours des infos
+    // Mise à jour des infos
     materialComboBox->clear();
     for (const auto &material : materials) {
         materialComboBox->addItem(QString::fromStdString(material));
