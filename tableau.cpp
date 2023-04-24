@@ -225,13 +225,6 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db,QWidget *parent) : QW
     connect(saveDataButton, &QPushButton::clicked, this, &pertechargeherse::saveDataWrapper);
     connect(loadDataButton, &QPushButton::clicked, this, &pertechargeherse::loadDataWrapper);
 
-
-    // Ajouter les QHBoxLayouts au layout inférieur (bottomLayout)
-    bottomLayout->addLayout(hbox1);
-    bottomLayout->addLayout(hbox2);
-    bottomLayout->addLayout(hbox3);
-    bottomLayout->addLayout(hbox4);
-
     inputQ->setFocus();
 
     // Définir l'espacement des inputsLayout et bottomLayout
