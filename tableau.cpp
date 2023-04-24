@@ -244,6 +244,14 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db, QWidget *parent)
   inputQ->installEventFilter(this);
   inputH->installEventFilter(this);
   inputL->installEventFilter(this);
+
+
+  // Get the available geometry of the screen
+  QDesktopWidget desktop;
+  QRect screenSize = desktop.availableGeometry(this);
+
+  // Set the window size to the screen size
+  this->setGeometry(screenSize);
 }
 
 void pertechargeherse::saveAsPdf() {
@@ -563,12 +571,6 @@ void pertechargeherse::calcul() {
   float sigmaPerte = 0; // Cumul perte
   float sigmaLongueur = 0;
 
-  // Calcule le cumul de débit.
-  for (int i = 0; i < _Donnees.size(); ++i) {
-    sigmaDebit += _Donnees[i][1];
-    _Donnees[i][2] = sigmaDebit;
-  }
-
   std::tuple<float, float, double> coefficients =
       database->get_material_coefficients(
           Materiau->currentText().toStdString());
@@ -578,15 +580,17 @@ void pertechargeherse::calcul() {
 
   // Effectue les calculs pour chaque ligne de données.
   for (int i = 0; i < _Donnees.size(); ++i) {
+    // Calcule le cumul de débit.
+    sigmaDebit += _Donnees[i][1];
+    _Donnees[i][2] = sigmaDebit;
 
     // Récupère les données de la ligne courante.
-    sigmaDebit = _Donnees[i][2];
     diametre = _Donnees[i][3];
     longueur = _Donnees[i][4];
     hauteur = _Donnees[i][5];
 
     // Calcule l'aire du tuyau.
-    aireTuyau = (M_PI * pow((diametre / 1000) / 2, 2));
+    aireTuyau = (M_PI * pow((diametre) / 2, 2));
 
     // Calcule le débit en m3/h.
     debitM3 = sigmaDebit * 1000;
@@ -607,10 +611,8 @@ void pertechargeherse::calcul() {
     _Donnees[i][6] = vitesse;
     _Donnees[i][7] = perteCharge;
     _Donnees[i][8] = piezo;
-  }
 
-  // Calcule les cumuls pour chaque ligne de données.
-  for (int i = 0; i < _Donnees.size(); ++i) {
+    // Calcule les cumuls pour chaque ligne de données.
     sigmaPerte += _Donnees[i][7];
     sigmaPiezo += _Donnees[i][8];
     sigmaLongueur += _Donnees[i][4];
@@ -632,6 +634,8 @@ void pertechargeherse::calcul() {
   // Rafraîchit le pertechargeherse.
   RafraichirTableau();
 }
+
+
 
 // La fonction "RafraichirTableau" permet de mettre à jour un pertechargeherse
 // en affichant les nouvelles données.
@@ -1166,3 +1170,19 @@ void pertechargeherse::loadData(const QString &fileName) {
   RafraichirTableau();
   calcul();
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

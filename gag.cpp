@@ -257,6 +257,8 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     bottomLayout->addWidget(button2, 4, 1, Qt::AlignCenter);
     bottomLayout->addWidget(button3, 4, 2, Qt::AlignCenter);
 
+    bottomLayout->setAlignment(Qt::AlignHCenter);
+
 // Connect buttons to their respective slots (functions)
     connect(button1, &QPushButton::clicked, this, &gag::saveAsPdf);
     connect(button2, &QPushButton::clicked, this, &gag::saveDataWrapper);
@@ -264,6 +266,14 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
 
 
     Debit->setFocus();
+
+    // Get the available geometry of the screen
+    QDesktopWidget desktop;
+    QRect screenSize = desktop.availableGeometry(this);
+
+    // Set the window size to the screen size
+    this->setGeometry(screenSize);
+
 }
 
 
@@ -527,18 +537,14 @@ void gag::calcul() {
         _Donnees[i][7] = piezo;
 
         // Calcule les cumuls pour chaque ligne de données.
-        if (i > 0) {
-            _Donnees[i][8] = _Donnees[i - 1][8] + perteCharge;
-            _Donnees[i][9] = _Donnees[i - 1][9] + piezo;
-        } else {
-            _Donnees[i][8] = perteCharge;
-            _Donnees[i][9] = piezo;
-        }
-
         sigmaPiezo += piezo;
         sigmaPerte += perteCharge;
         sigmaLongueur += longueur;
         sigmaHauteur += hauteur;
+
+        // Stocke les cumuls dans le vecteur.
+        _Donnees[i][8] = sigmaPerte;
+        _Donnees[i][9] = sigmaPiezo;
     }
 
     // Affiche les résultats dans les cases correspondantes en arrondissant à deux chiffres après la virgule.
@@ -553,6 +559,7 @@ void gag::calcul() {
 
     RafraichirTableau();
 }
+
 
 void gag::clear(){
     // Supprime les widgets existants dans le layout de la scrollArea.
