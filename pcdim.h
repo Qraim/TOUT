@@ -33,6 +33,12 @@ public:
      pcdim(std::shared_ptr<bdd> db,QWidget *parent = nullptr);
     ~pcdim();
 
+    void refresh(){
+      for(int i=0;i<5;++i){
+        inputs[i]->clear();
+      }
+    }
+
 private:
 
     void clearInput();

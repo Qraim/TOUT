@@ -33,6 +33,13 @@ public:
     tubesimple(std::shared_ptr<bdd> db, QWidget *parent = nullptr);
     ~tubesimple();
     void refresh(){
+        debit.clear();
+        diametre.clear();
+        longueur.clear();
+        denivele.clear();
+        Perte.clear();
+        Piezo.clear();
+        Vitesse.clear();
         materiau.clear();
         std::vector<std::string> matiere_names = database->getAllMatiereNames();
         for (const auto& matiere_name : matiere_names) {

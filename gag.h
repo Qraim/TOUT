@@ -36,8 +36,21 @@ public:
 
     void refresh(){
         _Donnees.clear();
+
         clear();
+
         Materiau->clear();
+        Debit->clear();
+        Espacement->clear();
+        Diametre->clear();
+        Longueur->clear();
+        Hauteur->clear();
+
+        CumulLongueur->clear();
+        CumulPerte->clear();
+        CumulPiezo->clear();
+        Cumulhauteur->clear();
+
         std::vector<std::string> matiere_names = database->getAllMatiereNames();
         for (const auto& matiere_name : matiere_names) {
             Materiau->addItem(QString::fromStdString(matiere_name));

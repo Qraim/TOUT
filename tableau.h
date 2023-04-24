@@ -37,6 +37,16 @@ public:
         _Donnees.clear();
         clearchild();
         Materiau->clear();
+        inputH->clear();
+        inputQ->clear();
+        inputD->clear();
+        inputL->clear();
+
+        sigmadebitcase->clear();
+        sigmalongueurcase->clear();
+        sigmapertecase->clear();
+        sigmapiezocase->clear();
+
         std::vector<std::string> matiere_names = database->getAllMatiereNames();
         for (const auto& matiere_name : matiere_names) {
             Materiau->addItem(QString::fromStdString(matiere_name));

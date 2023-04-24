@@ -34,6 +34,15 @@ public:
         for (const auto& matiere_name : matiere_names) {
             Materiau.addItem(QString::fromStdString(matiere_name));
         }
+        debit.clear();
+        vitesse.clear();
+        longueur.clear();
+        denivele.clear();
+        Champligne.clear();
+        ChampVitesse.clear();
+        Champligne2.clear();
+        Champligne3.clear();
+        Champresultat.clear();
     }
 private:
 
@@ -50,8 +59,8 @@ private:
     QLabel Champresultat;
     QLineEdit Champligne;
     QLineEdit ChampVitesse;
-    QLineEdit Champligne2; // Add this line
-    QLineEdit Champligne3; // Add this line
+    QLineEdit Champligne2;
+    QLineEdit Champligne3;
 
 
     QPushButton Changer;

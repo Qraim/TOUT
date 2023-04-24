@@ -154,6 +154,7 @@ void tout::on_show_pertechargeherse_button_clicked() {
 }
 
 void tout::on_show_pcdimm_button_clicked() {
+    pcdimm->refresh();
     pcdimm->show();
 }
 
