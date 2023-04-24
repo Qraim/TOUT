@@ -488,6 +488,10 @@ bool pertechargeherse::Allinputfill() {
 // La fonction "calcul" effectue des calculs sur les données du pertechargeherse.
 void pertechargeherse::calcul() {
 
+    if(inputD->text().isEmpty() || inputQ->text().isEmpty() || inputL->text().isEmpty() || inputH->text().isEmpty()){
+        return;
+    }
+
     // Initialise les paramètres.
     double k = 0;
     float a = 0;
@@ -911,7 +915,6 @@ void pertechargeherse::createPdfReport(const QString &fileName) {
 
     const int lineHeight = 300;
 
-    //
     painter.drawText(0, lineHeight, QString("Nom: %1").arg(nom));
     painter.drawText(0, lineHeight * 2, QString("Prénom: %1").arg(prenom));
     painter.drawText(0, lineHeight * 3, QString("Référence: %1").arg(reference));
@@ -950,16 +953,23 @@ void pertechargeherse::createPdfReport(const QString &fileName) {
         painter.setPen(QPen(Qt::black, 1));
         painter.drawLine(0, yOffset - lineHeight, tableWidth, yOffset - lineHeight);
 
-        // Determine the maximum number of rows per page based on the available space before the footer
+        // Détermine le nombre de ligne par page
         int maxRowsPerPage = (pdfWriter.height() - yOffset - 150) / lineHeight;
+
+        // Calculez le nombre de lignes restantes pour déterminer si vous êtes sur la dernière page
+        int remainingRows = _Donnees.size() - (currentPage - 1) * maxRowsPerPage;
+        bool isLastPage = (remainingRows <= maxRowsPerPage);
+
+        // Ajustez la hauteur des lignes verticales pour la dernière page en fonction du nombre de lignes restantes
+        int verticalLinesHeight = isLastPage ? (lineHeight * (remainingRows - 1)) : (lineHeight * (maxRowsPerPage - 1));
 
         // Dessinez des lignes verticales pour séparer les colonnes
         xPos = 0;
         for (int i = 0; i < columnWidths.size(); ++i) {
-            painter.drawLine(xPos, yOffset - lineHeight, xPos, yOffset + (lineHeight * (maxRowsPerPage - 1)));
+            painter.drawLine(xPos, yOffset - lineHeight, xPos, yOffset + verticalLinesHeight);
             xPos += columnWidths[i];
         }
-        painter.drawLine(xPos, yOffset - lineHeight, xPos, yOffset + (lineHeight * (maxRowsPerPage - 1)));
+        painter.drawLine(xPos, yOffset - lineHeight, xPos, yOffset + verticalLinesHeight);
 
         // Réinitialiser la taille de police pour le reste du contenu
         painter.setFont(font);
@@ -988,7 +998,7 @@ void pertechargeherse::createPdfReport(const QString &fileName) {
         yOffset += lineHeight;
 
         if (yOffset > pdfWriter.height() - 2 * lineHeight) {
-            // Draw the footer with the current page number
+            // Desinne le bas de page
             QString footerText = QString("Page %1").arg(currentPage);
             QRect footerRect(0, pdfWriter.height() - lineHeight, pdfWriter.width(), lineHeight);
             painter.drawText(footerRect, Qt::AlignCenter, footerText);
@@ -996,7 +1006,7 @@ void pertechargeherse::createPdfReport(const QString &fileName) {
             QRect referenceRect(pdfWriter.width() - 1500, pdfWriter.height() - lineHeight, 1500, lineHeight);
             painter.drawText(referenceRect, Qt::AlignCenter, referenceText);
 
-            // Create a new page
+            // Créé une nouvelle page
             pdfWriter.newPage();
             yOffset = lineHeight * 2;
             yOffset = drawHeaderAndLines(yOffset);
@@ -1006,22 +1016,12 @@ void pertechargeherse::createPdfReport(const QString &fileName) {
 
     // Ajouter un pied de page sur la dernière page
     QString footerText = QString("Page %1").arg(currentPage);
-    painter.drawText(QRect(0, pdfWriter.height() - 50, pdfWriter.width(), 20), Qt::AlignCenter, footerText);
-    painter.drawText(QRect(0, pdfWriter.height() - 50, pdfWriter.width() - 20, 20), Qt::AlignRight, QString("Référence: %1").arg(reference));
+    painter.drawText(QRect(0, pdfWriter.height() - lineHeight, pdfWriter.width(), lineHeight), Qt::AlignCenter, footerText);
+    painter.drawText(QRect(0, pdfWriter.height() - lineHeight, pdfWriter.width() - 20, lineHeight), Qt::AlignRight, QString("Référence: %1").arg(reference));
 
     painter.end();
 
 }
-
-
-
-
-
-
-
-
-
-
 
 #include <QFile>
 #include <QDataStream>

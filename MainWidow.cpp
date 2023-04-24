@@ -194,17 +194,17 @@ float MainWindow::calcullongueurdeniv() {
 
 float MainWindow::calculdebitvitesse() {
 
-    float debits = debit.text().toFloat(); // Flow rate in m³/h
-    float vitesses = vitesse.text().toFloat(); // Flow velocity in m/s
+    float debits = debit.text().toFloat(); // débit en m³/h
+    float vitesses = vitesse.text().toFloat(); // vitesse en m/s
 
-    float debits_m3s = debits / 3600; // Convert m³/h to m³/s
-    float diametre = std::sqrt((4 * debits_m3s) / (M_PI * vitesses)); // formula for calculating the diameter in meters
+    float debits_m3s = debits / 3600; // Convertit m³/h en m³/s
+    float diametre = std::sqrt((4 * debits_m3s) / (M_PI * vitesses));
 
-    float diametre_mm = diametre * 1000; // Convert diameter from meters to millimeters
+    float diametre_mm = diametre * 1000; // convertit des m en mm
 
     Gettuyau(diametre_mm);
 
-    return roundf(diametre_mm * 100) / 100; // For two decimal places
+    return roundf(diametre_mm * 100) / 100;
 
 }
 
@@ -218,11 +218,12 @@ void MainWindow::Gettuyau(float diametre) {
     QString selected_material = Materiau.currentText();
     QString selected_pressure = Pression.currentText();
 
-    // Retrieve the corresponding material object from the database
+    // On recupére le nom du materiel du tuyau
     matiere selected_matiere = database->findMatiereByName(selected_material.toStdString());
 
     const pression* found_pression_obj = nullptr;
 
+    // trouve le diametre supérieur le plus proche
     for (const auto &pression_obj : selected_matiere.pressions) {
         if (pression_obj.bar == selected_pressure.toInt()) {
             found_pression_obj = &pression_obj;
@@ -230,6 +231,7 @@ void MainWindow::Gettuyau(float diametre) {
         }
     }
 
+    // trouve celui en dessous et au dessus
     if (found_pression_obj != nullptr) {
         float min_diff = std::numeric_limits<float>::max();
         for (int i = 0; i < found_pression_obj->diametre.size(); ++i) {
@@ -268,11 +270,6 @@ void MainWindow::Gettuyau(float diametre) {
     Champligne2.setText(str2);
     Champligne3.setText(str3);
 }
-
-
-
-
-
 
 
 void MainWindow::keyPressEvent(QKeyEvent *event) {
@@ -374,7 +371,7 @@ void MainWindow::setvitesse(int vitesse) {
     // met le champ en visible
     ChampVitesse.setVisible(true);
     std::string str = "";
-    // si la vitesse est > 2 on écris on rouge
+    // si la vitesse est > 2 on écrit en rouge
     if (vitesse > 2) {
         ChampVitesse.setStyleSheet("color: red;  background-color: white ");
         str = "La vitesse est trop élevé ( " + std::to_string(vitesse) + " m/s)";

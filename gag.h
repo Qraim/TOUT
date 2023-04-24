@@ -35,6 +35,8 @@ public:
     explicit gag(std::shared_ptr<bdd> db,QWidget *parent = nullptr);
 
     void refresh(){
+        _Donnees.clear();
+        clear();
         Materiau->clear();
         std::vector<std::string> matiere_names = database->getAllMatiereNames();
         for (const auto& matiere_name : matiere_names) {
@@ -105,18 +107,31 @@ private:
     /// @brief Efface toutes les données saisies.
     void clear();
 
+    /// @brief Filtre les événements pour les objets surveillés.
+    /// @param obj : Objet pour lequel l'événement est envoyé
+    /// @param event : Événement à traiter
+    /// @return Vrai si l'événement doit être filtré (ignoré), sinon faux
     bool eventFilter(QObject *obj, QEvent *event) override;
 
+    /// @brief Charge les données à partir du fichier spécifié.
+    /// @param fileName : Chemin du fichier à partir duquel charger les données
     void loadData(const QString &fileName);
 
+    /// @brief Enregistre les données dans le fichier spécifié.
+    /// @param fileName : Chemin du fichier dans lequel enregistrer les données
     void saveData(const QString &fileName);
 
+    /// @brief Crée un rapport PDF à partir des données.
+    /// @param fileName : Chemin du fichier dans lequel enregistrer le rapport PDF
     void createPdfReport(const QString &fileName);
 
+    /// @brief Enregistre les données sous forme de PDF.
     void saveAsPdf();
 
+    /// @brief Fonction enveloppe pour charger les données.
     void loadDataWrapper();
 
+    /// @brief Fonction enveloppe pour enregistrer les données.
     void saveDataWrapper();
 
 };

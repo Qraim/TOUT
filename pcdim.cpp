@@ -11,7 +11,6 @@ pcdim::pcdim(std::shared_ptr<bdd> db,QWidget *parent)
           mainLayout(new QGridLayout(this))
 {
 
-
     materialComboBox = new QComboBox(this);
     pressureComboBox = new QComboBox(this);
     innerDiameterComboBox = new QComboBox(this);
@@ -21,39 +20,93 @@ pcdim::pcdim(std::shared_ptr<bdd> db,QWidget *parent)
     connect(materialComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onMaterialComboBoxIndexChanged(int)));
     connect(pressureComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onPressureComboBoxIndexChanged(int)));
 
-    // Ajoutez les noms souhaités pour les labels dans ce tableau
-    QString labelNames[] = {"Débit", "Diametre", "Vitesse", "Longueur", "Perte"};
-    QString units[] = {"(m3/h)", "(mm)", "(m/s)", "(m)", "(m)"};
+    // Débit
+    labels[0] = new QLabel("Débit", this);
+    mainLayout->addWidget(labels[0], 0, 0);
 
-    for (int i = 0; i < 5; ++i)
-    {
-        // Utilisez le tableau labelNames pour définir les noms des labels
-        labels[i] = new QLabel(labelNames[i], this);
-        mainLayout->addWidget(labels[i], i, 0);
+    unitsLabels[0] = new QLabel("(m3/h)", this);
+    mainLayout->addWidget(unitsLabels[0], 0, 2);
 
-        unitsLabels[i] = new QLabel(units[i], this);
-        mainLayout->addWidget(unitsLabels[i], i, 2);
+    inputs[0] = new QLineEdit(this);
+    mainLayout->addWidget(inputs[0], 0, 1);
+    inputs[0]->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
-        inputs[i] = new QLineEdit(this);
-        mainLayout->addWidget(inputs[i], i, 1);
-        inputs[i]->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    buttons[0] = new QPushButton(QString("Effacer"));
+    mainLayout->addWidget(buttons[0], 0, 3);
+    connect(buttons[0], &QPushButton::clicked, this, &pcdim::clearInput);
 
-        buttons[i] = new QPushButton(QString("Effacer"));
-        mainLayout->addWidget(buttons[i], i, 3);
-        connect(buttons[i], &QPushButton::clicked, this, &pcdim::clearInput);
-    }
+    // Diamètre
+    labels[1] = new QLabel("Diametre", this);
+    mainLayout->addWidget(labels[1], 1, 0);
 
-    mainLayout->addWidget(materialComboBox, 5, 0);
-    mainLayout->addWidget(pressureComboBox, 5, 1);
-    mainLayout->addWidget(innerDiameterComboBox, 5, 2);
+    unitsLabels[1] = new QLabel("(mm)", this);
+    mainLayout->addWidget(unitsLabels[1], 1, 2);
+
+    inputs[1] = new QLineEdit(this);
+    mainLayout->addWidget(inputs[1], 1, 1);
+    inputs[1]->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
+    buttons[1] = new QPushButton(QString("Effacer"));
+    mainLayout->addWidget(buttons[1], 1, 3);
+    connect(buttons[1], &QPushButton::clicked, this, &pcdim::clearInput);
+
+    // ComboBoxes for diameter
+    mainLayout->addWidget(materialComboBox, 2, 0);
+    mainLayout->addWidget(pressureComboBox, 2, 1);
+    mainLayout->addWidget(innerDiameterComboBox, 2, 3);
+
+    // Vitesse
+    labels[2] = new QLabel("Vitesse", this);
+    mainLayout->addWidget(labels[2], 3, 0);
+
+    unitsLabels[2] = new QLabel("(m/s)", this);
+    mainLayout->addWidget(unitsLabels[2], 3, 2);
+
+    inputs[2] = new QLineEdit(this);
+    mainLayout->addWidget(inputs[2], 3, 1);
+    inputs[2]->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
+    buttons[2] = new QPushButton(QString("Effacer"));
+    mainLayout->addWidget(buttons[2], 3, 3);
+    connect(buttons[2], &QPushButton::clicked, this, &pcdim::clearInput);
+
+    // Longueur
+    labels[3] = new QLabel("Longueur", this);
+    mainLayout->addWidget(labels[3], 4, 0);
+
+    unitsLabels[3] = new QLabel("(m)", this);
+    mainLayout->addWidget(unitsLabels[3], 4, 2);
+
+    inputs[3] = new QLineEdit(this);
+    mainLayout->addWidget(inputs[3], 4, 1);
+    inputs[3]->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
+    buttons[3] = new QPushButton(QString("Effacer"));
+    mainLayout->addWidget(buttons[3], 4, 3);
+    connect(buttons[3], &QPushButton::clicked, this, &pcdim::clearInput);
+
+    // Perte
+    labels[4] = new QLabel("Perte", this);
+    mainLayout->addWidget(labels[4], 5, 0);
+
+    unitsLabels[4] = new QLabel("(m)", this);
+    mainLayout->addWidget(unitsLabels[4], 5, 2);
+
+    inputs[4] = new QLineEdit(this);
+    mainLayout->addWidget(inputs[4], 5, 1);
+    inputs[4]->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
+    buttons[4] = new QPushButton(QString("Effacer"));
+    mainLayout->addWidget(buttons[4], 5, 3);
+    connect(buttons[4], &QPushButton::clicked, this, &pcdim::clearInput);
 
     // Renommer les deux boutons
     bottomButtons[0] = new QPushButton("Calculer", this);
-    mainLayout->addWidget(bottomButtons[0], 6, 0, 1, 4, Qt::AlignCenter);
+    mainLayout->addWidget(bottomButtons[0], 7, 0, 1, 4, Qt::AlignCenter);
     connect(bottomButtons[0], &QPushButton::clicked, this, &pcdim::calculate);
 
     bottomButtons[1] = new QPushButton("Effacer", this);
-    mainLayout->addWidget(bottomButtons[1], 7, 0, 1, 4, Qt::AlignCenter);
+    mainLayout->addWidget(bottomButtons[1], 8, 0, 1, 4, Qt::AlignCenter);
     connect(bottomButtons[1], &QPushButton::clicked, this, &pcdim::clearAll);
 
     for (int i = 0; i < 5; ++i)
@@ -114,7 +167,7 @@ float pcdim::calculvitesse()
     debittext.replace(',', '.');
     float debit = (debittext.toFloat()*1000)/3600;
 
-    QString diametretext = innerDiameterComboBox->currentText();;
+    QString diametretext = innerDiameterComboBox->currentText();
     diametretext.replace(',', '.');
     float diametre = diametretext.toFloat();
 
@@ -238,7 +291,7 @@ bool pcdim::eventFilter(QObject *obj, QEvent *event)
                 }
                 else if (i < 4)
                 {
-                    // Enter: Champ suivant
+                    // Entrer : Champ suivant
                     inputs[i + 1]->setFocus();
                     return true;
                 }
@@ -268,29 +321,28 @@ bool pcdim::eventFilter(QObject *obj, QEvent *event)
 
 
 void pcdim::onMaterialComboBoxIndexChanged(int index) {
-    // Get the selected material and retrieve the list of pressures for the material
+    // Récupération des infos
     QString selectedMaterial = materialComboBox->itemText(index);
     std::vector<int> pressures = database->getAllPressuresForMatiere(selectedMaterial.toStdString());
 
-    // Update the pressure QComboBox with the retrieved data
+    // Mise à jour des infos
     pressureComboBox->clear();
     for (int pressure : pressures) {
         pressureComboBox->addItem(QString::number(pressure));
     }
 
-    // Update the inner diameter QComboBox based on the first pressure in the list
     if (!pressures.empty()) {
         onPressureComboBoxIndexChanged(0);
     }
 }
 
 void pcdim::onPressureComboBoxIndexChanged(int index) {
-    // Get the selected material and pressure, and retrieve the list of inner diameters for the material and pressure
+    // récupération des infos
     QString selectedMaterial = materialComboBox->currentText();
     int selectedPressure = pressureComboBox->itemText(index).toInt();
     std::vector<float> innerDiameters = database->getInnerDiametersForMatiereAndPressure(selectedMaterial.toStdString(), selectedPressure);
 
-    // Update the inner diameter QComboBox with the retrieved data
+    // Mise à jours du diametre extérieur
     innerDiameterComboBox->clear();
     for (float innerDiameter : innerDiameters) {
         innerDiameterComboBox->addItem(QString::number(innerDiameter));
@@ -298,16 +350,15 @@ void pcdim::onPressureComboBoxIndexChanged(int index) {
 }
 
 void pcdim::updateComboBoxes() {
-    // Retrieve the list of materials from the database
+    // Récupération des infos
     std::vector<std::string> materials = database->getAllMatiereNames();
 
-    // Update the material QComboBox with the retrieved data
+    // Mise à jours des infos
     materialComboBox->clear();
     for (const auto &material : materials) {
         materialComboBox->addItem(QString::fromStdString(material));
     }
 
-    // Update the pressure and inner diameter QComboBoxes based on the first material in the list
     if (!materials.empty()) {
         onMaterialComboBoxIndexChanged(0);
     }

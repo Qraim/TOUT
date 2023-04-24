@@ -458,6 +458,10 @@ void gag::focusNextInput() {
 
 
 void gag::calcul() {
+
+    if(Debit->text().isEmpty() || Espacement->text().isEmpty() || Diametre->text().isEmpty() || Longueur->text().isEmpty()){
+        return;
+    }
     // Initialise les paramètres.
     double k = 0;
     float a = 0;
@@ -813,7 +817,7 @@ void gag::loadData(const QString &fileName) {
 
     while (!in.atEnd()) {
         std::vector<float> row;
-        for (int i = 0; i < 10; ++i) { // Change the loop limit to 10 instead of 11
+        for (int i = 0; i < 10; ++i) {
             float value;
             in >> value;
             row.push_back(value);
@@ -821,15 +825,15 @@ void gag::loadData(const QString &fileName) {
         _Donnees.push_back(row);
     }
 
-    // Refresh the display and recalculate the data after loading
-    RafraichirTableau();
+    // Rafraichis le tableau et lance le calcul
     calcul();
+    RafraichirTableau();
 }
 
 
 void gag::createPdfReport(const QString &fileName) {
     calcul();
-    // Create QDialog for user input
+    // Création des QDialog pour les entrées de l'utilisateur
     QDialog inputDialog;
     inputDialog.setWindowTitle("Entrez les informations");
 
@@ -880,19 +884,17 @@ void gag::createPdfReport(const QString &fileName) {
     painter.drawText(0, lineHeight * 3, QString("Référence: %1").arg(reference));
     painter.drawText(pdfWriter.width() - 1000, lineHeight-200, QString("Date: %1").arg(date));
 
-    // Modify headerLabels to include Espacement
+    // Entete
     const QStringList headerLabels = {
             "Index", "Debit", "Espacement", "Diametre", "Longueur", "Hauteur", "Perte", "Piezo", "Cumul Perte", "Cumul Piezo"
     };
 
-    // Modify columnWidths to include Espacement
+    // Espacement des colonnes
     QVector<int> columnWidths = {600, 600, 1000, 1000, 1000, 800, 800, 800, 1200, 1200};
     int tableWidth = 0;
     for (int width : columnWidths) {
         tableWidth += width;
     }
-
-    // The rest of the code for setting up the QPainter and drawing the table remains the same
 
     int yOffset = lineHeight * 5;
     int currentPage = 1;
@@ -908,14 +910,14 @@ void gag::createPdfReport(const QString &fileName) {
 
         yOffset += lineHeight;
 
-        // Draw a horizontal line to separate the header and the numbers
+        // Ligne horizontal de l'entete
         painter.setPen(QPen(Qt::black, 1));
         painter.drawLine(0, yOffset - lineHeight, tableWidth, yOffset - lineHeight);
 
-        // Determine the maximum number of rows per page based on the available space before the footer
+        // determine le nombre de lignes par page
         int maxRowsPerPage = (pdfWriter.height() - yOffset - 150) / lineHeight;
 
-        // Draw vertical lines to separate the columns
+        // Lignes verticales
         xPos = 0;
         for (int i = 0; i < columnWidths.size(); ++i) {
             painter.drawLine(xPos, yOffset - lineHeight, xPos, yOffset + (lineHeight * (maxRowsPerPage - 1)));
@@ -923,7 +925,6 @@ void gag::createPdfReport(const QString &fileName) {
         }
         painter.drawLine(xPos, yOffset - lineHeight, xPos, yOffset + (lineHeight * (maxRowsPerPage - 1)));
 
-        // Reset the font size for the remaining content
         painter.setFont(font);
 
         return yOffset;
@@ -950,7 +951,7 @@ void gag::createPdfReport(const QString &fileName) {
         yOffset += lineHeight;
 
         if (yOffset > pdfWriter.height() - 2 * lineHeight) {
-            // Draw the footer with the current page number
+            // Dessine le bas de page
             QString footerText = QString("Page %1").arg(currentPage);
             QRect footerRect(0, pdfWriter.height() - lineHeight, pdfWriter.width(), lineHeight);
             painter.drawText(footerRect, Qt::AlignCenter, footerText);
@@ -958,7 +959,7 @@ void gag::createPdfReport(const QString &fileName) {
             QRect referenceRect(pdfWriter.width() - 1500, pdfWriter.height() - lineHeight, 1500, lineHeight);
             painter.drawText(referenceRect, Qt::AlignCenter, referenceText);
 
-            // Create a new page
+            // Nouvelle page
             pdfWriter.newPage();
             yOffset = lineHeight * 2;
             yOffset = drawHeaderAndLines(yOffset);
@@ -966,10 +967,10 @@ void gag::createPdfReport(const QString &fileName) {
         }
     }
 
-    // Add a footer on the last page
+    // Ajoute un pied de page à la derniere page
     QString footerText = QString("Page %1").arg(currentPage);
-    painter.drawText(QRect(0, pdfWriter.height() - 80, pdfWriter.width(), 20), Qt::AlignCenter, footerText);
-    painter.drawText(QRect(0, pdfWriter.height() - 80, pdfWriter.width() - 20, 20), Qt::AlignRight, QString("Référence: %1").arg(reference));
+    painter.drawText(QRect(0, pdfWriter.height() - lineHeight, pdfWriter.width(), lineHeight), Qt::AlignCenter, footerText);
+    painter.drawText(QRect(0, pdfWriter.height() - lineHeight, pdfWriter.width() - 20, lineHeight), Qt::AlignRight, QString("Référence: %1").arg(reference));
 
     painter.end();
 }

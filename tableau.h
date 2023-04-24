@@ -34,6 +34,8 @@ Q_OBJECT
 public:
     pertechargeherse(std::shared_ptr<bdd> db,QWidget *parent = nullptr);
     void refresh(){
+        _Donnees.clear();
+        clearchild();
         Materiau->clear();
         std::vector<std::string> matiere_names = database->getAllMatiereNames();
         for (const auto& matiere_name : matiere_names) {
@@ -107,26 +109,32 @@ private:
     /// @brief Supprime une ligne du tableau.
     void enleverLigne();
 
-    void createPdfReport(const QString &fileName);
-
-    void drawTableHeader(QPainter &painter, int yOffset, int lineHeight, const QVector<int> &columnWidths,
-                         const QStringList &headerLabels);
-
+    /// @brief Charge les données à partir du fichier spécifié.
+    /// @param fileName : Chemin du fichier à partir duquel charger les données
     void loadData(const QString &fileName);
 
+    /// @brief Enregistre les données dans le fichier spécifié.
+    /// @param fileName : Chemin du fichier dans lequel enregistrer les données
     void saveData(const QString &fileName);
+
+    /// @brief Crée un rapport PDF à partir des données.
+    /// @param fileName : Chemin du fichier dans lequel enregistrer le rapport PDF
+    void createPdfReport(const QString &fileName);
 
 
 protected :
 
-    bool eventFilter(QObject *obj, QEvent *event);
+    bool eventFilter(QObject *obj, QEvent *event) override;
 
 
+    /// @brief Enregistre les données sous forme de PDF.
     void saveAsPdf();
 
-    void saveDataWrapper();
-
+    /// @brief Fonction enveloppe pour charger les données.
     void loadDataWrapper();
+
+    /// @brief Fonction enveloppe pour enregistrer les données.
+    void saveDataWrapper();
 };
 
 #endif //PERTEDECHARGEHERSE_TABLEAU_H
