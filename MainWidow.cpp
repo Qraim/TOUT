@@ -334,8 +334,6 @@ void MainWindow::onReturnPressed() {
 
 void MainWindow::focusPreviousInput() {
 
-    bool isVisible = longueur.isVisible();
-
     if (denivele.hasFocus()) {
         longueur.setFocus();
         return;

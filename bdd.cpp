@@ -764,6 +764,18 @@ void bdd::montre_coef() {
         }
     });
 
+    std::string matiere_name = matiereComboBox->currentText().toStdString();
+    // Récupérer les coefficients de la matière
+    auto [a, b, k] = get_material_coefficients(matiere_name);
+
+    // Si les coefficients sont trouvés
+    if (a != 0.0f || b != 0.0f || k != 0.0f) {
+        // Afficher les coefficients dans le label de résultat
+        resultLabel->setText("Coefficients pour " + QString::fromStdString(matiere_name) + ":\na: " + QString::number(a, 'f', 2) + "\nb: " + QString::number(b, 'f', 2) + "\nk: " + QString::number(k, 'f', 2));
+    } else {
+        // Afficher un message d'erreur si la matière n'est pas trouvée
+        resultLabel->setText("Matière non trouvée. Veuillez entrer un nom de matière valide.");
+    }
     // Ajout d'une boîte de boutons pour fermer la boîte de dialogue
     QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok, dialog);
     layout->addWidget(buttonBox);

@@ -84,7 +84,7 @@ private:
     /// @param event : Événement qui doit être filtré
     /// @return
     /// Filtre les événements pour l'objet donné et retourne true si l'événement doit être traité normalement, sinon false.
-    bool eventFilter(QObject *obj, QEvent *event);
+    bool eventFilter(QObject *obj, QEvent *event) override;
 
     ///
     /// @param pipe_material : Matériau de la canalisation
