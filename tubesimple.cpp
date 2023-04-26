@@ -9,6 +9,8 @@
 tubesimple::tubesimple(std::shared_ptr<bdd> db, QWidget *parent)
         : QWidget(parent), database(db) {
 
+  setWindowTitle(QString::fromStdString("Tube simple"));
+
     std::vector<std::string> matiere_names = database->getAllMatiereNames();
     for (const auto& matiere_name : matiere_names) {
         materiau.addItem(QString::fromStdString(matiere_name));
@@ -215,7 +217,7 @@ void tubesimple::calculer() {
     b = std::get<1>(coefficients);
     k = std::get<2>(coefficients);
 
-    float pertecharge = k * pow(D * 0.277778, a) * pow(Dia, b) * L; // Calcule la perte de charge en Pa
+    float pertecharge = k * pow(D /3600 * 1000, a) * pow(Dia, b) * L; // Calcule la perte de charge en Pa
     float variation = pertecharge+deniveles; // Calcule la variation de charge en Pa
 
     Perte.setText(QString::number(pertecharge, 'f', 2)); // Met à jour le texte de la QLineEdit "Perte"

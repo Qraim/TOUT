@@ -125,6 +125,9 @@ void write_materials_to_csv(const std::vector<tableau>& materials, const std::st
 bdd::bdd(QWidget *parent)
         : QWidget(parent) {
 
+    setWindowTitle(QString::fromStdString("Base de données"));
+
+
     materials = read_materials_from_csv("BDD.csv");
 
     // Création des boutons

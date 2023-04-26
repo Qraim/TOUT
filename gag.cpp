@@ -12,10 +12,14 @@
 gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db){
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
 
+    setWindowTitle(QString::fromStdString("Goutte à goutte"));
+
     // Top layout
     QGridLayout *topLayout = new QGridLayout;
-    topLayout->setSpacing(10);
+    topLayout->setSpacing(5);
     topLayout->setAlignment(Qt::AlignCenter);
+    topLayout->setColumnStretch(10, 1);
+
 
     // Ajout des champs d'entrée et des étiquettes au QGridLayout fixeInputsLayout
     Materiau = new QComboBox(this);
@@ -66,19 +70,6 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     QLabel *labelLongueur = new QLabel("Longueur: m");
     QLabel *labelHauteur = new QLabel("Hauteur: m");
 
-
-    topLayout->addWidget(labelDebit, 1, 2, Qt::AlignCenter);
-    topLayout->addWidget(Debit, 2, 2, Qt::AlignCenter);
-    topLayout->addWidget(labelEspacement, 1, 3, Qt::AlignCenter);
-    topLayout->addWidget(Espacement, 2, 3, Qt::AlignCenter);
-    topLayout->addWidget(labelDiametre, 1, 4, Qt::AlignCenter);
-    topLayout->addWidget(Diametre, 2, 4, Qt::AlignCenter);
-    topLayout->addWidget(labelLongueur, 1, 5, Qt::AlignCenter);
-    topLayout->addWidget(Longueur, 2, 5, Qt::AlignCenter);
-    topLayout->addWidget(labelHauteur, 1, 6, Qt::AlignCenter);
-    topLayout->addWidget(Hauteur, 2, 6, Qt::AlignCenter);
-
-
     // Ajout des labels en dessous des inputs
     QLabel *labelNumero = new QLabel("Numéro");
     QLabel *labelDebit2 = new QLabel("Debit");
@@ -91,6 +82,28 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     QLabel *labelSigmaPerte = new QLabel("ΣJ");
     QLabel *labelSigmaPiezo = new QLabel("ΣPiezo");
 
+    topLayout->addWidget(labelNumero, 4, 0, Qt::AlignCenter);
+    topLayout->addWidget(labelDebit2, 4, 1, Qt::AlignCenter);
+    topLayout->addWidget(labelEspacement2, 4, 2, Qt::AlignCenter);
+    topLayout->addWidget(labelDiametre2, 4, 3, Qt::AlignCenter);
+    topLayout->addWidget(labelLongueur2, 4, 4, Qt::AlignCenter);
+    topLayout->addWidget(labelHauteur2, 4, 5, Qt::AlignCenter);
+    topLayout->addWidget(labelPerte, 4, 6, Qt::AlignCenter);
+    topLayout->addWidget(labelPiezo, 4, 7, Qt::AlignCenter);
+    topLayout->addWidget(labelSigmaPerte,4, 8, Qt::AlignCenter);
+    topLayout->addWidget(labelSigmaPiezo,4, 9, Qt::AlignCenter);
+
+    topLayout->addWidget(labelDebit, 1, 2, Qt::AlignCenter);
+    topLayout->addWidget(Debit, 2, 2, Qt::AlignCenter);
+    topLayout->addWidget(labelEspacement, 1, 3, Qt::AlignCenter);
+    topLayout->addWidget(Espacement, 2, 3, Qt::AlignCenter);
+    topLayout->addWidget(labelDiametre, 1, 4, Qt::AlignCenter);
+    topLayout->addWidget(Diametre, 2, 4, Qt::AlignCenter);
+    topLayout->addWidget(labelLongueur, 1, 5, Qt::AlignCenter);
+    topLayout->addWidget(Longueur, 2, 5, Qt::AlignCenter);
+    topLayout->addWidget(labelHauteur, 1, 6, Qt::AlignCenter);
+    topLayout->addWidget(Hauteur, 2, 6, Qt::AlignCenter);
+
     labelNumero->setAlignment(Qt::AlignCenter);
     labelDebit2->setAlignment(Qt::AlignCenter);
     labelEspacement2->setAlignment(Qt::AlignCenter);
@@ -102,16 +115,8 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     labelSigmaPerte->setAlignment(Qt::AlignCenter);
     labelSigmaPiezo->setAlignment(Qt::AlignCenter);
 
-    topLayout->addWidget(labelNumero, 4, 0, Qt::AlignCenter);
-    topLayout->addWidget(labelDebit2, 4, 1, Qt::AlignCenter);
-    topLayout->addWidget(labelEspacement2, 4, 2, Qt::AlignCenter);
-    topLayout->addWidget(labelDiametre2, 4, 3, Qt::AlignCenter);
-    topLayout->addWidget(labelLongueur2, 4, 4, Qt::AlignCenter);
-    topLayout->addWidget(labelHauteur2, 4, 5, Qt::AlignCenter);
-    topLayout->addWidget(labelPerte, 4, 6, Qt::AlignCenter);
-    topLayout->addWidget(labelPiezo, 4, 7, Qt::AlignCenter);
-    topLayout->addWidget(labelSigmaPerte,4, 8, Qt::AlignCenter);
-    topLayout->addWidget(labelSigmaPiezo,4, 9, Qt::AlignCenter);
+
+
 
     // Ajout de label pour les unités
 
@@ -163,7 +168,7 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     topLayout->addWidget(Hauteur, 2, 4, Qt::AlignCenter);
 
     // On fixe la taille
-    int fixedWidth = 170;
+    int fixedWidth = 137;
     int fixedHeight = 40;
 
     labelNumero->setFixedSize(fixedWidth, fixedHeight);
@@ -188,10 +193,6 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     unitSigmaPiezo->setFixedSize(fixedWidth, fixedHeight);
 
 
-
-    for (int col = 0; col < 10; ++col) {
-        topLayout->setColumnStretch(col, 1);
-    }
 
     mainLayout->addLayout(topLayout);
 

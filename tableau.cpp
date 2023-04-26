@@ -7,6 +7,7 @@
 #include <QFileDialog>
 
 const int ROW_HEIGHT = 40;
+const int VERTICAL_SPACING = 15;
 
 void espacementColonne(QGridLayout *layout) {
   // Parcourt toutes les colonnes du layout
@@ -19,6 +20,8 @@ void espacementColonne(QGridLayout *layout) {
 pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db, QWidget *parent)
     : QWidget(parent), database(db) {
 
+  setWindowTitle(QString::fromStdString("Herse d'alimentation"));
+
   ligne = 1;
 
   QVBoxLayout *mainLayout = new QVBoxLayout(this);
@@ -27,7 +30,7 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db, QWidget *parent)
   QWidget *inputsWidget = new QWidget(this);
   QVBoxLayout *inputsLayout = new QVBoxLayout(inputsWidget);
 
-  // Scroll Arae et widget
+  // Scroll Area and widget
   scrollArea = new QScrollArea(this);
   scrollWidget = new QWidget(scrollArea);
   scrollArea->setWidgetResizable(true);
@@ -39,13 +42,14 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db, QWidget *parent)
   gridLayout = new QGridLayout(scrollWidget);
   scrollWidget->setLayout(gridLayout);
 
-  // Layout en dessous de la scroll Area
+  // Layout below the scroll Area
   QWidget *bottomWidget = new QWidget(this);
   QVBoxLayout *bottomLayout = new QVBoxLayout(bottomWidget);
 
-  // Widget des Headers
+  // Headers Widget
   QWidget *headersWidget = new QWidget(this);
   QGridLayout *headersGridLayout = new QGridLayout(headersWidget);
+
 
   // Ajout des titres des colonnes
   const QStringList headers = {"Numero",    "Debit",   "ΣDebit",  "Diametre",
@@ -287,21 +291,23 @@ void pertechargeherse::AjoutDonne() {
   debitText.replace(',', '.');
   float debit = debitText.toFloat();
 
-  QString espacementText = inputD->text();
-  espacementText.replace(',', '.');
-  float diametre = espacementText.toFloat();
-
-  QString diametreText = inputL->text();
+  QString diametreText = inputD->text();
   diametreText.replace(',', '.');
-  float longueur = diametreText.toFloat();
+  float diametre = diametreText.toFloat();
+
+  QString longueurtexte = inputL->text();
+  longueurtexte.replace(',', '.');
+  float longueur = longueurtexte.toFloat();
 
   QString hauteurtext = inputH->text();
-  diametreText.replace(',', '.');
-  float hauteur = diametreText.toFloat();
+  hauteurtext.replace(',', '.');
+  float hauteur = hauteurtext.toFloat();
 
   int numero = _Donnees.size() + 1; // numéro
 
   std::vector<float> temp(11, 0.0f); // variable temporaire
+
+  std::cout<<hauteur<<std::endl;
 
   temp[0] = numero;
   temp[1] = debit;
@@ -334,7 +340,7 @@ void pertechargeherse::AjoutLigne() {
     QLineEdit *lineEdit = new QLineEdit(scrollWidget);
     lineEdit->setReadOnly(true);
     lineEdit->setAlignment(Qt::AlignCenter);
-    lineEdit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    lineEdit->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     lineEdit->setFixedWidth(200);
     lineEdit->setFixedHeight(40);
 
@@ -368,16 +374,16 @@ void pertechargeherse::AjoutLigne() {
   // Calculate the scroll widget height based on the number of lines, row
   // height, and vertical spacing.
   int rowHeight = 40;
-  int verticalSpacing = 10;
+  int verticalSpacing = 15;
   int scrollWidgetHeight =
       (ligne * rowHeight) + ((ligne - 1) * verticalSpacing);
 
-  // Set the minimum and maximum height of the scroll widget.
-  scrollWidget->setMinimumHeight(scrollWidgetHeight);
-  scrollWidget->setMaximumHeight(scrollWidgetHeight);
+  // Set the row height for the grid layout.
+  gridLayout->setRowMinimumHeight(ligne - 1, ROW_HEIGHT);
+  gridLayout->setRowStretch(ligne - 1, 0);
 
   // Set the vertical spacing and alignment.
-  gridLayout->setVerticalSpacing(verticalSpacing);
+  gridLayout->setVerticalSpacing(VERTICAL_SPACING);
   gridLayout->setAlignment(Qt::AlignTop);
 }
 
@@ -547,8 +553,7 @@ bool pertechargeherse::Allinputfill() {
 // pertechargeherse.
 void pertechargeherse::calcul() {
 
-  if (inputD->text().isEmpty() || inputQ->text().isEmpty() ||
-      inputL->text().isEmpty() || inputH->text().isEmpty()) {
+  if (!Allinputfill() || _Donnees.size() == 0) {
     return;
   }
 
@@ -590,13 +595,13 @@ void pertechargeherse::calcul() {
     hauteur = _Donnees[i][5];
 
     // Calcule l'aire du tuyau.
-    aireTuyau = (M_PI * pow((diametre) / 2, 2));
+    aireTuyau = (M_PI * pow((diametre/1000) / 2, 2));
 
-    // Calcule le débit en m3/h.
-    debitM3 = sigmaDebit * 1000;
+    // Calcule le débit en m3/s.
+    debitM3 = sigmaDebit / 1000 /3600;
 
     // Calcule la vitesse.
-    vitesse = (debitM3 / 1000) / aireTuyau;
+    vitesse = debitM3 / aireTuyau;
 
     // Convertit le débit en l/s.
     float sigmaDebitLs = sigmaDebit / 3600;
@@ -640,7 +645,6 @@ void pertechargeherse::calcul() {
 // La fonction "RafraichirTableau" permet de mettre à jour un pertechargeherse
 // en affichant les nouvelles données.
 void pertechargeherse::RafraichirTableau() {
-
   // Supprime toutes les cases du pertechargeherse.
   clearchild();
 
@@ -681,10 +685,10 @@ void pertechargeherse::RafraichirTableau() {
       lineEdit->setAlignment(Qt::AlignCenter);
 
       // Définit la politique de redimensionnement de la ligne de texte.
-      lineEdit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+      lineEdit->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
       // Définit la hauteur fixe de la ligne de texte.
-      lineEdit->setFixedHeight(40);
+      lineEdit->setFixedHeight(ROW_HEIGHT);
 
       lineEdit->setFixedWidth(200);
 
@@ -704,12 +708,12 @@ void pertechargeherse::RafraichirTableau() {
       if (ligne - 1 == indexMilieuHydrolique) {
         lineEdit->setStyleSheet("QLineEdit { background-color : orange; }");
       }
-
       // Définit l'espacement vertical du layout.
-      gridLayout->setVerticalSpacing(10);
+      gridLayout->setVerticalSpacing(VERTICAL_SPACING);
 
       // Ajoute la ligne de texte au layout.
       gridLayout->addWidget(lineEdit, ligne, indicesColonnes[i]);
+
     }
 
     // Incrémente le numéro de ligne.
@@ -718,21 +722,24 @@ void pertechargeherse::RafraichirTableau() {
 
   // Calcule la hauteur du widget de défilement et ajuste sa hauteur minimum et
   // maximum en conséquence.
-  int scrollWidgetHeight = ligne * ROW_HEIGHT;
+  int scrollWidgetHeight =
+      (ligne * ROW_HEIGHT) + ((ligne - 1) * VERTICAL_SPACING);
   scrollWidget->setMinimumHeight(scrollWidgetHeight);
   scrollWidget->setMaximumHeight(scrollWidgetHeight);
 
-  gridLayout->setVerticalSpacing(15);
+  // Set the vertical spacing and alignment.
+  gridLayout->setVerticalSpacing(VERTICAL_SPACING);
   gridLayout->setAlignment(Qt::AlignTop);
 }
 
 // La fonction "clearchild" permet de retirer toutes les cases dans un layout.
 
 void pertechargeherse::clearchild() {
+  ligne = 1;
   QLayoutItem *enfant;
 
   // Tant qu'il y a encore des éléments dans le layout, retire-les.
-  while ((enfant = gridLayout->takeAt(0)) != 0) {
+  while ((enfant = gridLayout->takeAt(0)) != nullptr) {
 
     // Supprime le widget contenu dans l'élément layout.
     delete enfant->widget();
@@ -741,9 +748,6 @@ void pertechargeherse::clearchild() {
     delete enfant;
   }
 
-  // Réinitialise les hauteurs minimum et maximum du widget de défilement.
-  scrollWidget->setMinimumHeight(0);
-  scrollWidget->setMaximumHeight(0);
 }
 
 void pertechargeherse::

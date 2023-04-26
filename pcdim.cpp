@@ -11,6 +11,8 @@ pcdim::pcdim(std::shared_ptr<bdd> db,QWidget *parent)
           mainLayout(new QGridLayout(this))
 {
 
+  setWindowTitle(QString::fromStdString("Un peu tout"));
+
     materialComboBox = new QComboBox(this);
     pressureComboBox = new QComboBox(this);
     innerDiameterComboBox = new QComboBox(this);
@@ -217,15 +219,13 @@ float pcdim::calculperte() {
 
     std::string materiel = materialComboBox->currentText().toStdString();
 
-    float diametre_interieur = database->getInnerDiameterForMatierePressureAndOuterDiameter(materiel, pressure, diametre);
-
     std::tuple<float, float, double> material_properties = getMaterialProperties(materiel);
 
     float a = std::get<0>(material_properties);
     float b = std::get<1>(material_properties);
     double k = std::get<2>(material_properties);
 
-    float perte = roundf((k * std::pow(debit_ls, a) * std::pow(diametre_interieur, b) * std::pow(longueur, 1.0)) * 100) / 100;
+    float perte = roundf((k * std::pow(debit_ls, a) * std::pow(diametre, b) * longueur) * 100) / 100;
 
     return perte;
 
