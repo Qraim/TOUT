@@ -128,9 +128,7 @@ public:
 
     std::vector<float> getInnerDiametersForMatiereAndPressure(const std::string &material_name, int pressure);
 
-    float getInnerDiameterForMatierePressureAndOuterDiameter(const std::string &material_name, int pressure, float outer_diameter);
-
-private:
+  private:
 
 
     std::vector<tableau> materials;

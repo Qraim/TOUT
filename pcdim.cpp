@@ -205,10 +205,6 @@ float pcdim::calculperte() {
     diametretext.replace(',', '.');
     float diametre = diametretext.toFloat();
 
-    QString pressiontext = pressureComboBox->currentText();
-    pressiontext.replace(',', '.');
-    float pressure = pressiontext.toFloat();
-
     QString longueurtext = inputs[3]->text();
     longueurtext.replace(',', '.');
     float longueur = longueurtext.toFloat();

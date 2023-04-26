@@ -943,31 +943,3 @@ std::vector<float> bdd::getInnerDiametersForMatiereAndPressure(const std::string
     }
     return innerDiameters;
 }
-
-
-float bdd::getInnerDiameterForMatierePressureAndOuterDiameter(const std::string &material_name, int pressure, float outer_diameter) {
-    // Find the matching material
-    for (const auto &tableau : materials) {
-        for (const auto &material : tableau.matieres) {
-            if (material.nom == material_name) {
-                // Find the matching pressure
-                for (const auto &pressure_tuyaux_pair : material.pressions) {
-                    if (pressure_tuyaux_pair.bar == pressure) {
-                        // Find the matching outer diameter and return the corresponding inner diameter
-                        for (const auto &outer_inner_diameters_pair : pressure_tuyaux_pair.diametre) {
-                            if (outer_inner_diameters_pair.first == outer_diameter) {
-                                return outer_inner_diameters_pair.second;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    // Return -1 if no matching inner diameter is found
-    return -1;
-}
-
-
-
-

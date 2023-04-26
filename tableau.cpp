@@ -76,7 +76,7 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db, QWidget *parent)
     unitLabel->setFixedHeight(40); // Fixe la taille
     headersGridLayout->addWidget(unitLabel, 1,
                                  i); // Ajouter les étiquettes d'unité dans la
-                                     // deuxième ligne du headersGridLayout
+    // deuxième ligne du headersGridLayout
   }
 
   // Ajouter le layout des inputs, la zone de scroll, et le layout du bas au
@@ -325,7 +325,7 @@ void pertechargeherse::AjoutDonne() {
 void pertechargeherse::AjoutLigne() {
 
   if (_Donnees
-          .empty()) { // Si le vecteur "_Donnees" est vide, sort de la fonction.
+      .empty()) { // Si le vecteur "_Donnees" est vide, sort de la fonction.
     return;
   }
 
@@ -345,16 +345,16 @@ void pertechargeherse::AjoutLigne() {
     lineEdit->setFixedHeight(40);
 
     if (indices[i] != -1) { // Si l'indice n'est pas égal à -1, on remplit la
-                            // case correspondante avec la donnée.
+      // case correspondante avec la donnée.
       if (i == 0) {
         lineEdit->setText(QString::number(
             rowData[i], 'f', 0)); // Formatte la donnée en nombre entier s'il
-                                  // s'agit de la première colonne.
+        // s'agit de la première colonne.
       } else {
         lineEdit->setText(
             QString::number(rowData[indices[i]], 'f',
                             2)); // Formatte la donnée en nombre décimal s'il
-                                 // s'agit d'une autre colonne.
+        // s'agit d'une autre colonne.
       }
     } else {
       lineEdit->setText(
@@ -365,7 +365,7 @@ void pertechargeherse::AjoutLigne() {
   }
 
   ligne++; // On incrémente la valeur de "ligne" pour la prochaine ligne à
-           // ajouter.
+  // ajouter.
 
   // Set the row height for the grid layout.
   gridLayout->setRowMinimumHeight(ligne - 1, 40);
@@ -395,12 +395,12 @@ void pertechargeherse::focusPreviousInput() {
     inputL->setFocus();
     return;
   }
-  // Si l'entrée "longueur" a le focus, passe le focus à l'entrée "diametre".
+    // Si l'entrée "longueur" a le focus, passe le focus à l'entrée "diametre".
   else if (inputL->hasFocus()) {
     inputD->setFocus();
     return;
   }
-  // Si l'entrée "diametre" a le focus, passe le focus à l'entrée "debit".
+    // Si l'entrée "diametre" a le focus, passe le focus à l'entrée "debit".
   else if (inputD->hasFocus()) {
     inputQ->setFocus();
   }
@@ -415,12 +415,12 @@ void pertechargeherse::focusNextInput() {
     inputD->setFocus();
     return;
   }
-  // Si l'entrée "diametre" a le focus, passe le focus à l'entrée "longueur".
+    // Si l'entrée "diametre" a le focus, passe le focus à l'entrée "longueur".
   else if (inputD->hasFocus()) {
     inputL->setFocus();
     return;
   }
-  // Si l'entrée "longueur" a le focus, passe le focus à l'entrée "hauteur".
+    // Si l'entrée "longueur" a le focus, passe le focus à l'entrée "hauteur".
   else if (inputL->hasFocus()) {
     inputH->setFocus();
   }
@@ -445,17 +445,17 @@ bool pertechargeherse::eventFilter(QObject *obj, QEvent *event) {
     } else if (keyEvent->key() == Qt::Key_Z) {
       enleverLigne();
     }
-    // Save as PDF (Ctrl + S)
+      // Save as PDF (Ctrl + S)
     else if (controlPressed && keyEvent->key() == Qt::Key_S && !shiftPressed) {
       saveAsPdf();
       return true;
     }
-    // Save data (Ctrl + Shift + S)
+      // Save data (Ctrl + Shift + S)
     else if (controlPressed && keyEvent->key() == Qt::Key_S && shiftPressed) {
       saveDataWrapper();
       return true;
     }
-    // Load data (Ctrl + L)
+      // Load data (Ctrl + L)
     else if (controlPressed && keyEvent->key() == Qt::Key_L && !shiftPressed) {
       loadDataWrapper();
       return true;
@@ -476,7 +476,7 @@ void pertechargeherse::keyPressEvent(QKeyEvent *event) {
     return;
   }
 
-  // If the Tab or Enter key is pressed.
+    // If the Tab or Enter key is pressed.
   else if (event->key() == Qt::Key_Tab || event->key() == Qt::Key_Return) {
 
     // If Shift+Enter is pressed and all data is filled, perform the
@@ -486,12 +486,12 @@ void pertechargeherse::keyPressEvent(QKeyEvent *event) {
       return;
     }
 
-    // If Enter is pressed and all data is filled, add the data.
+      // If Enter is pressed and all data is filled, add the data.
     else if (event->key() == Qt::Key_Return && Allinputfill()) {
       AjoutDonne();
     }
 
-    // Otherwise, focus the next input.
+      // Otherwise, focus the next input.
     else {
       focusNextInput();
     }
@@ -499,42 +499,42 @@ void pertechargeherse::keyPressEvent(QKeyEvent *event) {
     return;
   }
 
-  // If the E key is pressed, delete all data.
+    // If the E key is pressed, delete all data.
   else if (event->key() == Qt::Key_E) {
     _Donnees.clear();
     clearchild();
   }
 
-  // If the R key is pressed and there is data, copy the last line.
+    // If the R key is pressed and there is data, copy the last line.
   else if (event->key() == Qt::Key_R) {
     if (_Donnees.size() > 0) {
       recopiederniereligne();
     }
   }
 
-  // If the M key is pressed, open the dialog box to modify a line.
+    // If the M key is pressed, open the dialog box to modify a line.
   else if (event->key() == Qt::Key_M) {
     showUpdateDialog();
   }
 
-  // If the Z key is pressed, remove a line.
+    // If the Z key is pressed, remove a line.
   else if (event->key() == Qt::Key_Z) {
     enleverLigne();
   }
 
-  // Save as PDF (Ctrl + S)
+    // Save as PDF (Ctrl + S)
   else if (controlPressed && event->key() == Qt::Key_S && !shiftPressed) {
     saveAsPdf();
     return;
   }
 
-  // Save data (Ctrl + Shift + S)
+    // Save data (Ctrl + Shift + S)
   else if (controlPressed && event->key() == Qt::Key_S && shiftPressed) {
     saveDataWrapper();
     return;
   }
 
-  // Load data (Ctrl + L)
+    // Load data (Ctrl + L)
   else if (controlPressed && event->key() == Qt::Key_L && !shiftPressed) {
     loadDataWrapper();
     return;
@@ -748,11 +748,22 @@ void pertechargeherse::clearchild() {
     delete enfant;
   }
 
+  Materiau->clear();
+  inputH->clear();
+  inputQ->clear();
+  inputD->clear();
+  inputL->clear();
+
+  sigmadebitcase->clear();
+  sigmalongueurcase->clear();
+  sigmapertecase->clear();
+  sigmapiezocase->clear();
+
 }
 
 void pertechargeherse::
-    recopiederniereligne() { // Fonction déclenché par la touche 'R' qui permet
-                             // de recopier la derniere ligne entrée
+recopiederniereligne() { // Fonction déclenche par la touche 'R' qui permet
+  // de recopier la derniere ligne entrée
 
   int taille = _Donnees.size();
   std::vector<float> lastline =
@@ -839,8 +850,8 @@ void pertechargeherse::showUpdateDialog() {
   // Fonction qui met à jour les données de la ligne avec les nouvelles données
   // saisies par l'utilisateur et ferme la fenêtre de dialogue
   auto updateDataAndClose = [this, rowNumberLineEdit, debitLineEdit,
-                             diameterLineEdit, lengthLineEdit, heightLineEdit,
-                             updateDialog]() {
+      diameterLineEdit, lengthLineEdit, heightLineEdit,
+      updateDialog]() {
     // Récupère
     // Récupère les nouvelles données saisies par l'utilisateur
     int rowNumber = rowNumberLineEdit->text().toInt();
@@ -913,7 +924,7 @@ void pertechargeherse::enleverLigne() {
   QLineEdit *numeroLigneLineEdit = new QLineEdit(supprimerDialog);
   numeroLigneLineEdit->setValidator(new QIntValidator(
       1, _Donnees.size(), supprimerDialog)); // Permet de limiter la saisie à un
-                                             // nombre entier valide
+  // nombre entier valide
   numeroLigneLineEdit->setFixedWidth(50);
 
   // Ajoute un bouton pour confirmer la suppression de la ligne

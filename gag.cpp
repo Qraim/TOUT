@@ -570,6 +570,18 @@ void gag::clear(){
         delete item->widget();
         delete item;
     }
+
+    Materiau->clear();
+    Debit->clear();
+    Espacement->clear();
+    Diametre->clear();
+    Longueur->clear();
+    Hauteur->clear();
+
+    CumulLongueur->clear();
+    CumulPerte->clear();
+    CumulPiezo->clear();
+    Cumulhauteur->clear();
 }
 
 void gag::RafraichirTableau() {
