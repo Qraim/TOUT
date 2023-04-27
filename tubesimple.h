@@ -40,7 +40,6 @@ public:
         Perte.clear();
         Piezo.clear();
         Vitesse.clear();
-        materiau.clear();
         std::vector<std::string> matiere_names = database->getAllMatiereNames();
         for (const auto& matiere_name : matiere_names) {
             materiau.addItem(QString::fromStdString(matiere_name));

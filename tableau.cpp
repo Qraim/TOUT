@@ -361,26 +361,23 @@ void pertechargeherse::AjoutLigne() {
           ""); // Si l'indice est égal à -1, on laisse la case vide.
     }
 
-    gridLayout->addWidget(lineEdit, ligne, i); // Ajoute la case au layout.
+    // Définit l'espacement vertical du layout.
+    gridLayout->setVerticalSpacing(VERTICAL_SPACING);
+
+    // Ajoute la ligne de texte au layout.
+    gridLayout->addWidget(lineEdit, ligne, i);
   }
 
   ligne++; // On incrémente la valeur de "ligne" pour la prochaine ligne à
   // ajouter.
 
-  // Set the row height for the grid layout.
-  gridLayout->setRowMinimumHeight(ligne - 1, 40);
-  gridLayout->setRowStretch(ligne - 1, 0);
 
-  // Calculate the scroll widget height based on the number of lines, row
-  // height, and vertical spacing.
-  int rowHeight = 40;
-  int verticalSpacing = 15;
+  // Calcule la hauteur du widget de défilement et ajuste sa hauteur minimum et
+  // maximum en conséquence.
   int scrollWidgetHeight =
-      (ligne * rowHeight) + ((ligne - 1) * verticalSpacing);
-
-  // Set the row height for the grid layout.
-  gridLayout->setRowMinimumHeight(ligne - 1, ROW_HEIGHT);
-  gridLayout->setRowStretch(ligne - 1, 0);
+      (ligne * ROW_HEIGHT) + ((ligne - 1) * VERTICAL_SPACING);
+  scrollWidget->setMinimumHeight(scrollWidgetHeight);
+  scrollWidget->setMaximumHeight(scrollWidgetHeight);
 
   // Set the vertical spacing and alignment.
   gridLayout->setVerticalSpacing(VERTICAL_SPACING);
@@ -748,7 +745,6 @@ void pertechargeherse::clearchild() {
     delete enfant;
   }
 
-  Materiau->clear();
   inputH->clear();
   inputQ->clear();
   inputD->clear();
@@ -1185,19 +1181,4 @@ void pertechargeherse::loadData(const QString &fileName) {
   RafraichirTableau();
   calcul();
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

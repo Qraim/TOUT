@@ -571,7 +571,6 @@ void gag::clear(){
         delete item;
     }
 
-    Materiau->clear();
     Debit->clear();
     Espacement->clear();
     Diametre->clear();
