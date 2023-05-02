@@ -36,6 +36,10 @@ public:
     void refresh(){
         _Donnees.clear();
         clearchild();
+        sigmadebitcase->clear();
+        sigmalongueurcase->clear();
+        sigmapertecase->clear();
+        sigmapiezocase->clear();
 
         std::vector<std::string> matiere_names = database->getAllMatiereNames();
         for (const auto& matiere_name : matiere_names) {

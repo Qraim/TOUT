@@ -36,6 +36,10 @@ public:
 
   void refresh(){
     _Donnees.clear();
+    CumulLongueur->clear();
+    CumulPerte->clear();
+    CumulPiezo->clear();
+    Cumulhauteur->clear();
 
     clear();
 

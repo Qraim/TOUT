@@ -577,10 +577,7 @@ void gag::clear(){
     Longueur->clear();
     Hauteur->clear();
 
-    CumulLongueur->clear();
-    CumulPerte->clear();
-    CumulPiezo->clear();
-    Cumulhauteur->clear();
+
 }
 
 void gag::RafraichirTableau() {

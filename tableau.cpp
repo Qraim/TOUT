@@ -750,11 +750,6 @@ void pertechargeherse::clearchild() {
   inputD->clear();
   inputL->clear();
 
-  sigmadebitcase->clear();
-  sigmalongueurcase->clear();
-  sigmapertecase->clear();
-  sigmapiezocase->clear();
-
 }
 
 void pertechargeherse::
