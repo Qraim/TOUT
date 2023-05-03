@@ -1,6 +1,8 @@
 #include "MainWidow.h"
 
 
+float PI2 = 3.14;
+
 MainWindow::MainWindow(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db), Calcul("Calculer", this) {
     setFixedSize(500, 400);
 
@@ -177,7 +179,7 @@ float MainWindow::calcullongueurdeniv() {
     diametreText.replace(',', '.');
     float longueurs = diametreText.toFloat();
 
-    float area = (M_PI * std::pow(deniveles, 2)) / 4; // Calculate the cross-sectional area
+    float area = (PI2 * std::pow(deniveles, 2)) / 4; // Calculate the cross-sectional area
     float vitesses = debits / area; // Calculate the flow speed
 
     float diametre = k * std::pow(debits, a) * std::pow(deniveles, b) * longueurs;
@@ -198,7 +200,7 @@ float MainWindow::calculdebitvitesse() {
     float vitesses = vitesse.text().toFloat(); // vitesse en m/s
 
     float debits_m3s = debits / 3600; // Convertit m³/h en m³/s
-    float diametre = std::sqrt((4 * debits_m3s) / (M_PI * vitesses));
+    float diametre = std::sqrt((4 * debits_m3s) / (PI2 * vitesses));
 
     float diametre_mm = diametre * 1000; // convertit des m en mm
 

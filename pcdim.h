@@ -37,6 +37,8 @@ public:
       for(int i=0;i<5;++i){
         inputs[i]->clear();
       }
+      materialComboBox->setCurrentText("PVC");
+
     }
 
 private:

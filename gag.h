@@ -43,10 +43,14 @@ public:
 
     clear();
 
+    Materiau->clear();
+
     std::vector<std::string> matiere_names = database->getAllMatiereNames();
     for (const auto& matiere_name : matiere_names) {
       Materiau->addItem(QString::fromStdString(matiere_name));
     }
+    Materiau->setCurrentText("PVC");
+
   }
 private:
 

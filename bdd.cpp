@@ -4,6 +4,7 @@
 
 #include <QAbstractButton>
 #include "bdd.h"
+#include <iomanip>
 
 float QStringToFloat(const QString &str) {
     QString modifiedStr = str;
@@ -125,10 +126,18 @@ void write_materials_to_csv(const std::vector<tableau>& materials, const std::st
 bdd::bdd(QWidget *parent)
         : QWidget(parent) {
 
+
+    int width = 150;
+    int height = 250;
+    this->setFixedSize(width, height);
+
+    // Set the minimum and maximum size of the window to the same dimensions
+    this->setMinimumSize(QSize(width, height));
+    this->setMaximumSize(QSize(width, height));
     setWindowTitle(QString::fromStdString("Base de données"));
 
 
-    materials = read_materials_from_csv("BDD.csv");
+    materials = read_materials_from_csv("./BDD.csv");
 
     // Création des boutons
     QPushButton *button1 = new QPushButton("Afficher", this);
@@ -138,6 +147,8 @@ bdd::bdd(QWidget *parent)
     QPushButton *button5 = new QPushButton("Liste tuyaux", this);
     QPushButton *button6 = new QPushButton("Coefficient", this);
     QPushButton *button7 = new QPushButton("Trouver", this);
+    QPushButton *button8 = new QPushButton("Formule", this);
+
 
 
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
@@ -149,6 +160,7 @@ bdd::bdd(QWidget *parent)
     connect(button5, &QPushButton::clicked, this, &::bdd::tuyau_dispo);
     connect(button6, &QPushButton::clicked, this, &::bdd::montre_coef);
     connect(button7, &QPushButton::clicked, this, &::bdd::trouver_tuyau);
+    connect(button8, &QPushButton::clicked, this, &::bdd::on_show_formula_button_clicked);
 
 
 
@@ -160,6 +172,7 @@ bdd::bdd(QWidget *parent)
     mainLayout->addWidget(button5);
     mainLayout->addWidget(button6);
     mainLayout->addWidget(button7);
+    mainLayout->addWidget(button8);
 
     setLayout(mainLayout);
 }
@@ -943,3 +956,52 @@ std::vector<float> bdd::getInnerDiametersForMatiereAndPressure(const std::string
     }
     return innerDiameters;
 }
+
+
+#include <QDialog>
+#include <QVBoxLayout>
+#include <QLabel>
+#include <QDialogButtonBox>
+
+void bdd::on_show_formula_button_clicked() {
+    QDialog formulaDialog(this);
+    formulaDialog.setWindowTitle("Formula");
+    formulaDialog.setMinimumSize(400, 300); // Définir une taille minimale pour le QDialog
+
+    QVBoxLayout *layout = new QVBoxLayout();
+
+    // Créer un QHBoxLayout pour aligner le bouton en haut à droite
+    QHBoxLayout *topLayout = new QHBoxLayout();
+    topLayout->addStretch(1);
+
+    // Créer le bouton pour afficher les coefficients
+    QPushButton *showCoefficientsButton = new QPushButton("Afficher les coefficients", &formulaDialog);
+    topLayout->addWidget(showCoefficientsButton);
+
+    // Ajoutez le QHBoxLayout en haut de la fenêtre
+    layout->addLayout(topLayout);
+
+    QLabel *formulaLabel = new QLabel(&formulaDialog);
+    formulaLabel->setTextFormat(Qt::RichText); // Utiliser le rendu HTML
+    formulaLabel->setText(QString("<p style=\"font-size: 18pt;\"><b>Perte</b> = k * Q<sup>a</sup> * D<sup>b</sup> * L<sup>m</sup></p>"
+                                  "<p style=\"font-size: 14pt;\"><b>Units:</b></p>"
+                                  "<ul style=\"font-size: 14pt;\">"
+                                  "<li>Perte: m</li>"
+                                  "<li>Q: L/s</li>"
+                                  "<li>D: mm</li>"
+                                  "<li>L: m</li>"
+                                  "</ul>"));
+    layout->addWidget(formulaLabel);
+
+    QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok, &formulaDialog);
+    layout->addWidget(buttonBox);
+
+    // Connectez le signal clicked() du bouton pour afficher les coefficients au slot montre_coef()
+    connect(showCoefficientsButton, &QPushButton::clicked, this, &bdd::montre_coef);
+    connect(buttonBox, &QDialogButtonBox::accepted, &formulaDialog, &QDialog::accept);
+
+    formulaDialog.setLayout(layout);
+    formulaDialog.exec();
+}
+
+

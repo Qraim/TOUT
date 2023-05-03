@@ -3,8 +3,12 @@
 //
 
 #include "tout.h"
+#include <QIcon>
 
 tout::tout(QWidget *parent) : QWidget(parent) {
+
+
+    setWindowIcon(QIcon("./logo.png"));
 
     setWindowTitle(QString::fromStdString("PACHA"));
 
@@ -26,9 +30,9 @@ tout::tout(QWidget *parent) : QWidget(parent) {
     goutte = std::make_unique<gag>(database,nullptr);
     goutte->setWindowFlags(Qt::Window);
 
-// Créez le premier QComboBox avec des options principales
+    // Créez le premier QComboBox avec des options principales
     QComboBox *mainOptionsComboBox = new QComboBox(this);
-    mainOptionsComboBox->addItem("Perte");
+    mainOptionsComboBox->addItem("Perte de charge");
     mainOptionsComboBox->addItem("Diametre");
     mainOptionsComboBox->addItem("Débit");
 
@@ -150,7 +154,7 @@ void tout::on_show_database_button_clicked() {
 
 void tout::on_show_pertechargeherse_button_clicked() {
     perteherse->refresh();
-    perteherse->show();
+    perteherse->showMaximized();
 }
 
 void tout::on_show_pcdimm_button_clicked() {
@@ -165,7 +169,7 @@ void tout::on_show_MW_button_clicked() {
 
 void tout::on_show_gag_button_clicked() {
     goutte->refresh();
-    goutte->show();
+    goutte->showMaximized();
 }
 
 

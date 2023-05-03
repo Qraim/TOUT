@@ -41,9 +41,12 @@ public:
         Piezo.clear();
         Vitesse.clear();
         std::vector<std::string> matiere_names = database->getAllMatiereNames();
+        materiau.clear();
         for (const auto& matiere_name : matiere_names) {
             materiau.addItem(QString::fromStdString(matiere_name));
         }
+        materiau.setCurrentText("PVC");
+
     }
 
 private:

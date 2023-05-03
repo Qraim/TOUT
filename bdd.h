@@ -165,6 +165,8 @@ public:
     ///
     void montre_coef();
 
+    void on_show_formula_button_clicked();
+
 };
 
 

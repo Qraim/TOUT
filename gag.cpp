@@ -168,7 +168,7 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     topLayout->addWidget(Hauteur, 2, 4, Qt::AlignCenter);
 
     // On fixe la taille
-    int fixedWidth = 137;
+    int fixedWidth = 181;
     int fixedHeight = 40;
 
     labelNumero->setFixedSize(fixedWidth, fixedHeight);
@@ -326,6 +326,9 @@ bool gag::eventFilter(QObject *watched, QEvent *event) {
         } else if (keyEvent->key() == Qt::Key_Control) {
             focusPreviousInput();
             return true;
+        } else if (keyEvent->key() == Qt::Key_C) {
+            calcul();
+            return true;
         }
             // Ajoute le raccourci Ctrl + S pour enregistrer en PDF
         else if (keyEvent->modifiers() & Qt::ControlModifier && keyEvent->key() == Qt::Key_S && !(keyEvent->modifiers() & Qt::ShiftModifier)) {
@@ -391,6 +394,13 @@ void gag::AjoutDonnee() {
         // Ajouter le vecteur temporaire aux données
         _Donnees.push_back(temp);
 
+        Debit->clear();
+        Debit->setFocus();
+        Espacement->clear();
+        Diametre->clear();
+        Longueur->clear();
+        Hauteur->clear();
+
         // Ajouter une nouvelle ligne avec les données saisies
         AjoutLigne();
 
@@ -418,7 +428,7 @@ void gag::AjoutLigne() {
         valueLabel->setAlignment(alignment);
         valueLabel->setSizePolicy(sizePolicy);
         valueLabel->setFixedHeight(fixedHeight);
-        valueLabel->setFixedWidth(131);
+        valueLabel->setFixedWidth(181);
 
         // Ajoutez l'objet QLineEdit dans la zone de défilement en utilisant le numéro de ligne et de colonne approprié.
         scrollAreaLayout->addWidget(valueLabel, row, col, Qt::AlignTop);
@@ -485,9 +495,8 @@ void gag::focusNextInput() {
 
 void gag::calcul() {
 
-    if(Debit->text().isEmpty() || Espacement->text().isEmpty() || Diametre->text().isEmpty() || Longueur->text().isEmpty()){
-        return;
-    }
+    if(_Donnees.size()==0) return;
+
     // Initialise les paramètres.
     double k = 0;
     float a = 0;
@@ -600,7 +609,7 @@ void gag::RafraichirTableau() {
             value->setReadOnly(true);
             value->setAlignment(alignment);
             value->setFixedHeight(fixedHeight); // Définir la taille de la ligne.
-            value->setFixedWidth(131);
+            value->setFixedWidth(181);
             value->setSizePolicy(sizePolicy);
             scrollAreaLayout->addWidget(value, i + 1, j, Qt::AlignTop);
         }
@@ -619,6 +628,9 @@ void gag::keyPressEvent(QKeyEvent *event) {
     } else if (event->key() == Qt::Key_R) {
         // Appelle la fonction recopie
         recopiederniereligne();
+    } else if (event->key() == Qt::Key_C) {
+        // Appelle la fonction recopie
+        calcul();
     } else if (event->key() == Qt::Key_M) {
         // Appelle la fonction modifier
         showUpdateDialog();

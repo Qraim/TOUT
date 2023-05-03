@@ -30,9 +30,12 @@ public:
     MainWindow(std::shared_ptr<bdd> db,QWidget *parent = nullptr);
     void refresh(){
         std::vector<std::string> matiere_names = database->getAllMatiereNames();
+        Materiau.clear();
         for (const auto& matiere_name : matiere_names) {
             Materiau.addItem(QString::fromStdString(matiere_name));
         }
+        Materiau.setCurrentText("PVC");
+
         debit.clear();
         vitesse.clear();
         longueur.clear();

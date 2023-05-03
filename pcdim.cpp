@@ -4,7 +4,10 @@
 
 #include "pcdim.h"
 #include <cmath>
+
+#include <math.h>
 #include <QTableWidget>
+float PI3 = 3.14;
 
 pcdim::pcdim(std::shared_ptr<bdd> db,QWidget *parent)
         : QWidget(parent), database(db),
@@ -159,7 +162,7 @@ float pcdim::calculdebit()
     diametretext.replace(',', '.');
     float diametre = diametretext.toFloat();
 
-    float debit = (vitesse * M_PI * std::pow((diametre / 2), 2)) / 1000; // Debit m³/h
+    float debit = (vitesse * PI3 * std::pow((diametre / 2), 2)) / 1000; // Debit m³/h
     return debit;
 }
 
@@ -173,7 +176,7 @@ float pcdim::calculvitesse()
     diametretext.replace(',', '.');
     float diametre = diametretext.toFloat();
 
-    float vitesse = (1000 * debit) / (M_PI * std::pow((diametre / 2), 2)); // Vitesse m/s
+    float vitesse = (1000 * debit) / (PI3 * std::pow((diametre / 2), 2)); // Vitesse m/s
     return vitesse;
 }
 
@@ -188,7 +191,7 @@ float pcdim::calculdiametre()
     vitessetext.replace(',', '.');
     float vitesse = vitessetext.toFloat();
 
-    float diametre = std::sqrt((4 * debit_m3s) / (M_PI * vitesse)) * 1000; // Calculate the diameter in millimeters
+    float diametre = std::sqrt((4 * debit_m3s) / (PI3 * vitesse)) * 1000; // Calculate the diameter in millimeters
 
     return diametre;
 }

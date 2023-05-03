@@ -9,6 +9,8 @@
 const int ROW_HEIGHT = 40;
 const int VERTICAL_SPACING = 15;
 
+float PI = 3.14;
+
 void espacementColonne(QGridLayout *layout) {
   // Parcourt toutes les colonnes du layout
   for (int i = 0; i < layout->columnCount(); i++) {
@@ -217,23 +219,33 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db, QWidget *parent)
 
   QHBoxLayout *topLayout = new QHBoxLayout();
   topLayout->addStretch();
-  topLayout->addWidget(saveAsPdfButton);
   mainLayout->insertLayout(0, topLayout);
 
   QPushButton *saveDataButton = new QPushButton("Save Data", this);
   QPushButton *loadDataButton = new QPushButton("Load Data", this);
 
+  // Set maximum width for the buttons
+  saveAsPdfButton->setMaximumWidth(120);
+  saveDataButton->setMaximumWidth(120);
+  loadDataButton->setMaximumWidth(120);
+
+  // Create QHBoxLayout for the buttons
   QHBoxLayout *buttonsLayout = new QHBoxLayout();
+
+  // Add stretch, buttons, and another stretch to center the buttons
+  buttonsLayout->addStretch(1);
   buttonsLayout->addWidget(saveAsPdfButton);
   buttonsLayout->addWidget(saveDataButton);
   buttonsLayout->addWidget(loadDataButton);
+  buttonsLayout->addStretch(1);
 
-  connect(saveAsPdfButton, &QPushButton::clicked, this,
-          &pertechargeherse::saveAsPdf);
-  connect(saveDataButton, &QPushButton::clicked, this,
-          &pertechargeherse::saveDataWrapper);
-  connect(loadDataButton, &QPushButton::clicked, this,
-          &pertechargeherse::loadDataWrapper);
+  // Connect buttons to their respective slots (functions)
+  connect(saveAsPdfButton, &QPushButton::clicked, this, &pertechargeherse::saveAsPdf);
+  connect(saveDataButton, &QPushButton::clicked, this, &pertechargeherse::saveDataWrapper);
+  connect(loadDataButton, &QPushButton::clicked, this, &pertechargeherse::loadDataWrapper);
+
+  // Add buttonsLayout to the main layout (assuming mainLayout is the main layout)
+  mainLayout->addLayout(buttonsLayout);
 
   inputQ->setFocus();
 
@@ -316,6 +328,12 @@ void pertechargeherse::AjoutDonne() {
   temp[5] = hauteur;
 
   _Donnees.push_back(temp); // mise dans le set des données
+
+  inputD->clear();
+  inputH->clear();
+  inputL->clear();
+  inputQ->clear();
+  inputQ->setFocus();
 
   AjoutLigne();
 }
@@ -441,6 +459,8 @@ bool pertechargeherse::eventFilter(QObject *obj, QEvent *event) {
       showUpdateDialog();
     } else if (keyEvent->key() == Qt::Key_Z) {
       enleverLigne();
+    }else if (keyEvent->key() == Qt::Key_C) {
+      calcul();
     }
       // Save as PDF (Ctrl + S)
     else if (controlPressed && keyEvent->key() == Qt::Key_S && !shiftPressed) {
@@ -502,6 +522,10 @@ void pertechargeherse::keyPressEvent(QKeyEvent *event) {
     clearchild();
   }
 
+  else if (event->key() == Qt::Key_C) {
+    calcul();
+  }
+
     // If the R key is pressed and there is data, copy the last line.
   else if (event->key() == Qt::Key_R) {
     if (_Donnees.size() > 0) {
@@ -550,7 +574,7 @@ bool pertechargeherse::Allinputfill() {
 // pertechargeherse.
 void pertechargeherse::calcul() {
 
-  if (!Allinputfill() || _Donnees.size() == 0) {
+  if (_Donnees.size() == 0) {
     return;
   }
 
@@ -592,7 +616,7 @@ void pertechargeherse::calcul() {
     hauteur = _Donnees[i][5];
 
     // Calcule l'aire du tuyau.
-    aireTuyau = (M_PI * pow((diametre/1000) / 2, 2));
+    aireTuyau = (PI * pow((diametre/1000) / 2, 2));
 
     // Calcule le débit en m3/s.
     debitM3 = sigmaDebit / 1000 /3600;
@@ -1021,8 +1045,8 @@ void pertechargeherse::createPdfReport(const QString &fileName) {
       "Index",   "Debit", "Cumul", "Diametre",    "Longueur",   "Hauteur",
       "Vitesse", "Perte", "Piezo", "Cumul Perte", "Cumul Piezo"};
 
-  QVector<int> columnWidths = {600, 600, 600, 1000, 1000, 800,
-                               800, 800, 800, 1200, 1200};
+  QVector<int> columnWidths = {600, 800, 800, 1000, 1000, 800,
+                               800, 800, 800, 1000, 1000};
   int tableWidth = 0;
   for (int width : columnWidths) {
     tableWidth += width;
