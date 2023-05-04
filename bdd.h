@@ -41,7 +41,7 @@
 #include <QCheckBox>
 #include <QMainWindow>
 #include <QStackedWidget>
-
+#include <QCloseEvent>
 #ifndef BDD_BDD_H
 #define BDD_BDD_H
 
@@ -127,6 +127,7 @@ public:
     std::vector<int> getAllPressuresForMatiere(const std::string &material_name);
 
     std::vector<float> getInnerDiametersForMatiereAndPressure(const std::string &material_name, int pressure);
+
 
   private:
 

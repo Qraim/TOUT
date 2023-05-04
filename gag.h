@@ -65,6 +65,8 @@ private:
   QLineEdit *Hauteur;
 
   QGridLayout *scrollAreaLayout;
+  QScrollArea *scrollArea;
+
 
   QLineEdit *CumulLongueur;
   QLineEdit *Cumulhauteur;

@@ -173,7 +173,9 @@ void tout::on_show_gag_button_clicked() {
 }
 
 
-
+void tout::closeEvent(QCloseEvent *event) {
+    QApplication::quit();
+}
 
 
 

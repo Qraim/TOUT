@@ -272,18 +272,18 @@ bool pcdim::eventFilter(QObject *obj, QEvent *event)
         if (obj == inputs[i] && event->type() == QEvent::KeyPress)
         {
             QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-            if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter)
+            if (keyEvent->key() == Qt::Key_Control)
+            {
+                // Control : Champ précédent
+                if (i != 0) inputs[i - 1]->setFocus();
+                return true;
+            }
+            else if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter)
             {
                 if (keyEvent->modifiers() == Qt::ShiftModifier)
                 {
                     // Shift + Entrer: Calculer
                     calculate();
-                    return true;
-                }
-                else if (keyEvent->modifiers() == Qt::ControlModifier && i > 0)
-                {
-                    // Control : Champ précédent
-                    inputs[i - 1]->setFocus();
                     return true;
                 }
                 else if (i < 4)
@@ -294,7 +294,7 @@ bool pcdim::eventFilter(QObject *obj, QEvent *event)
                 }
                 else if (i == 4)
                 {
-                    // Si tout est remplis sauf perte calculer
+                    // Si tout est rempli sauf perte, calculer
                     bool allFilled = true;
                     for (int j = 0; j < 4; ++j)
                     {
@@ -315,6 +315,7 @@ bool pcdim::eventFilter(QObject *obj, QEvent *event)
     }
     return QWidget::eventFilter(obj, event);
 }
+
 
 
 void pcdim::onMaterialComboBoxIndexChanged(int index) {

@@ -197,7 +197,7 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     mainLayout->addLayout(topLayout);
 
     // Section du milieu
-    QScrollArea *scrollArea = new QScrollArea;
+    scrollArea = new QScrollArea;
     mainLayout->addWidget(scrollArea);
 
     QWidget *scrollAreaContents = new QWidget;
@@ -416,8 +416,6 @@ void gag::AjoutLigne() {
     const std::vector<float>& temp = _Donnees[row - 1]; // Copiez les valeurs de la dernière ligne pour les utiliser comme valeurs par défaut pour la nouvelle ligne.
 
     // Définir les propriétés pour les objets QLineEdit
-    QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    sizePolicy.setHeightForWidth(true);
     int fixedHeight = 40;
     Qt::Alignment alignment = Qt::AlignCenter;
 
@@ -426,21 +424,32 @@ void gag::AjoutLigne() {
         QLineEdit *valueLabel = new QLineEdit(QString::number(temp[col]));
         valueLabel->setReadOnly(true);
         valueLabel->setAlignment(alignment);
-        valueLabel->setSizePolicy(sizePolicy);
         valueLabel->setFixedHeight(fixedHeight);
-        valueLabel->setFixedWidth(181);
+        valueLabel->setFixedWidth(180);
 
         // Ajoutez l'objet QLineEdit dans la zone de défilement en utilisant le numéro de ligne et de colonne approprié.
-        scrollAreaLayout->addWidget(valueLabel, row, col, Qt::AlignTop);
+        scrollAreaLayout->addWidget(valueLabel, row, col);
+        scrollArea->ensureWidgetVisible(valueLabel);
     }
 
-    // Définir l'espacement vertical et l'alignement pour la disposition de la zone de défilement.
+    // Set the vertical spacing and alignment.
     scrollAreaLayout->setVerticalSpacing(15);
     scrollAreaLayout->setAlignment(Qt::AlignTop);
 
-    Debit->setFocus(); // Définir le focus sur l'objet "Debit" après avoir ajouté la nouvelle ligne.
+    // Utilisez la variable fixedHeight pour déterminer la hauteur de la ligne.
+    int ROW_HEIGHT = fixedHeight;
 
+    int VERTICAL_SPACING = 15; // Utilisez la même valeur que celle définie pour l'espacement vertical dans scrollAreaLayout.
+    int scrollWidgetHeight = (row * ROW_HEIGHT) + ((row - 1) * VERTICAL_SPACING);
+    scrollArea->widget()->setMinimumHeight(scrollWidgetHeight);
+    scrollArea->widget()->setMaximumHeight(scrollWidgetHeight);
+
+
+    // Vérifier les propriétés des widgets de défilement (scrollArea et scrollAreaLayout) dans les deux classes pour s'assurer qu'elles sont identiques.
+
+    Debit->setFocus(); // Définir le focus sur l'objet "Debit" après avoir ajouté la nouvelle ligne.
 }
+
 
 
 
@@ -552,7 +561,6 @@ void gag::calcul() {
         sigmaLongueur += longueur;
         sigmaHauteur += hauteur;
 
-
         // Stocke les cumuls dans le vecteur.
         _Donnees[i][8] = sigmaPerte;
         _Donnees[i][9] = sigmaPiezo;
@@ -570,8 +578,88 @@ void gag::calcul() {
 
     RafraichirTableau();
 }
+/*void gag::calcul() {
 
+    if(_Donnees.size()==0) return;
 
+    // Initialise les paramètres.
+    double k = 0;
+    float a = 0;
+    float b = 0;
+
+    // Initialise les variables.
+    float espacement = 0;
+    float diametre = 0;
+    float longueur = 0;
+    float hauteur = 0;
+    float perteCharge = 0;
+    float piezo = 0;
+    float sigmaDebit = 0; // Cumul débit
+    float debitLS = 0;
+
+    std::string material_name = Materiau->currentText().toStdString();
+    auto coefficients = database->get_material_coefficients(material_name);
+
+    a = std::get<0>(coefficients);
+    b = std::get<1>(coefficients);
+    k = std::get<2>(coefficients);
+
+    float sigmaPiezo = 0; // Cumul piezo
+    float sigmaPerte = 0; // Cumul perte
+    float sigmaLongueur = 0;
+    float sigmaHauteur = 0;
+
+    // Effectue les calculs pour chaque ligne de données.
+    for (int i = 0; i < _Donnees.size(); ++i) {
+
+        // Récupère les données de la ligne courante.
+        sigmaDebit += _Donnees[i][1];
+        espacement = _Donnees[i][2];
+        diametre = _Donnees[i][3];
+        longueur = _Donnees[i][4];
+        hauteur = _Donnees[i][5];
+
+        debitLS = sigmaDebit / 3600;
+
+        // Calcule le nombre de trous.
+        int nombreDeTrous = longueur / espacement;
+
+        // Calcule le débit par trou.
+        float debitParTrou = debitLS / nombreDeTrous;
+
+        // Calcule la perte de charge.
+        perteCharge = k * std::pow(debitParTrou, a) * std::pow(diametre, b) * longueur;
+
+        // Calcule la hauteur piezométrique.
+        piezo = perteCharge + hauteur;
+
+        // Ajoute les données calculées au vecteur.
+        _Donnees[i][6] = perteCharge;
+        _Donnees[i][7] = piezo;
+
+        // Calcule les cumuls pour chaque ligne de données.
+        sigmaPiezo += piezo;
+        sigmaPerte += perteCharge;
+        sigmaLongueur += longueur;
+        sigmaHauteur += hauteur;
+
+        // Stocke les cumuls dans le vecteur.
+        _Donnees[i][8] = sigmaPerte;
+        _Donnees[i][9] = sigmaPiezo;
+    }
+
+    // Affiche les résultats dans les cases correspondantes en arrondissant à deux chiffres après la virgule.
+    CumulLongueur->setText(QString::number(sigmaLongueur, 'f', 2));
+    CumulLongueur->setAlignment(Qt::AlignCenter);
+    Cumulhauteur->setText(QString::number(sigmaHauteur, 'f', 2));
+    Cumulhauteur->setAlignment(Qt::AlignCenter);
+    CumulPerte->setText(QString::number(sigmaPerte, 'f', 2));
+    CumulPerte->setAlignment(Qt::AlignCenter);
+    CumulPiezo->setText(QString::number(sigmaPiezo, 'f', 2));
+    CumulPiezo->setAlignment(Qt::AlignCenter);
+    RafraichirTableau();
+}
+*/
 void gag::clear(){
     // Supprime les widgets existants dans le layout de la scrollArea.
     QLayoutItem *item;
@@ -593,7 +681,7 @@ void gag::RafraichirTableau() {
     clear(); // Efface le contenu actuel de la zone de défilement.
 
     // Définit les propriétés des objets QLineEdit
-    QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     int fixedHeight = 40;
     Qt::Alignment alignment = Qt::AlignCenter;
 
@@ -609,15 +697,18 @@ void gag::RafraichirTableau() {
             value->setReadOnly(true);
             value->setAlignment(alignment);
             value->setFixedHeight(fixedHeight); // Définir la taille de la ligne.
-            value->setFixedWidth(181);
+            value->setFixedWidth(180);
             value->setSizePolicy(sizePolicy);
             scrollAreaLayout->addWidget(value, i + 1, j, Qt::AlignTop);
         }
+        // Définit l'espacement vertical et l'alignement pour la disposition de la zone de défilement.
+        scrollAreaLayout->setVerticalSpacing(15);
+        scrollAreaLayout->setAlignment(Qt::AlignTop);
     }
-
-    // Définit l'espacement vertical et l'alignement pour la disposition de la zone de défilement.
+    // Set the vertical spacing and alignment.
     scrollAreaLayout->setVerticalSpacing(15);
     scrollAreaLayout->setAlignment(Qt::AlignTop);
+
 }
 
 void gag::keyPressEvent(QKeyEvent *event) {
@@ -717,8 +808,8 @@ void gag::showUpdateDialog() {
     formLayout->addWidget(updateButton);
 
     // Fonction qui permet de définir le comportement à adopter lorsque l'utilisateur appuie sur la touche "Entrée" dans un champ de saisie
-    auto handleEnterKeyPress = [](QLineEdit *current, QLineEdit *next, std::function<void()> lastAction = nullptr) {
-        QObject::connect(current, &QLineEdit::returnPressed, [current, next, lastAction]() {
+    auto handleEnterKeyPress = [this](QLineEdit *current, QLineEdit *next, std::function<void()> lastAction = nullptr) {
+        QObject::connect(current, &QLineEdit::returnPressed, [this, current, next, lastAction]() {
             // Si le champ en cours de saisie est rempli et que le champ suivant (s'il y en a un) est vide, déplace le curseur vers le champ suivant
             if (!current->text().isEmpty() && (next == nullptr || next->text().isEmpty())) {
                 if (next) {
@@ -729,6 +820,7 @@ void gag::showUpdateDialog() {
             }
         });
     };
+
 
     // Fonction qui met à jour les données de la ligne avec les nouvelles données saisies par l'utilisateur et ferme la fenêtre de dialogue
     auto updateDataAndClose = [this, rowNumberLineEdit, debitLineEdit,espacementLineEdit, diameterLineEdit, lengthLineEdit, heightLineEdit, updateDialog]() {

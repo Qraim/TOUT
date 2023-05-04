@@ -984,7 +984,7 @@ void bdd::on_show_formula_button_clicked() {
     QLabel *formulaLabel = new QLabel(&formulaDialog);
     formulaLabel->setTextFormat(Qt::RichText); // Utiliser le rendu HTML
     formulaLabel->setText(QString("<p style=\"font-size: 18pt;\"><b>Perte</b> = k * Q<sup>a</sup> * D<sup>b</sup> * L<sup>m</sup></p>"
-                                  "<p style=\"font-size: 14pt;\"><b>Units:</b></p>"
+                                  "<p style=\"font-size: 14pt;\"><b>Unités:</b></p>"
                                   "<ul style=\"font-size: 14pt;\">"
                                   "<li>Perte: m</li>"
                                   "<li>Q: L/s</li>"

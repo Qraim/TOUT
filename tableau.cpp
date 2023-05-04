@@ -254,7 +254,6 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db, QWidget *parent)
   bottomLayout->setSpacing(5);
 
   // Add buttonsLayout to the inputsLayout
-  bottomLayout->addLayout(buttonsLayout);
 
   inputD->installEventFilter(this);
   inputQ->installEventFilter(this);

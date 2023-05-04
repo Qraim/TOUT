@@ -32,7 +32,7 @@
 #include <QScrollBar>
 #include <QDialog>
 
-
+#include <QCloseEvent>
 
 class tout : public QWidget {
 Q_OBJECT
@@ -65,7 +65,8 @@ private:
 
     /// @brief Affiche la fenêtre de l'outil de calcul de perte de charge pour un goutte à goutte.
     void on_show_gag_button_clicked();
-
+protected:
+    void closeEvent(QCloseEvent *event) override;
 
 };
 
