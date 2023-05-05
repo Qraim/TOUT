@@ -7,6 +7,7 @@
 
 tout::tout(QWidget *parent) : QWidget(parent) {
 
+    setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
 
     setWindowIcon(QIcon("./logo.png"));
 
@@ -61,7 +62,7 @@ tout::tout(QWidget *parent) : QWidget(parent) {
     QPushButton *openDatabaseButton = new QPushButton("Base de données", this);
 
     // Définir le style pour openDatabaseButton
-    QString openDatabaseButtonStyle = "QPushButton { font-weight: bold; font-size: 12px; padding: 6px 12px; }";
+    QString openDatabaseButtonStyle = "QPushButton { font-weight: bold; font-size: 24px; padding: 6px 12px; }";
     openDatabaseButton->setStyleSheet(openDatabaseButtonStyle);
 
     // Positionner l'openDatabaseButton dans le coin supérieur droit de la fenêtre
@@ -134,12 +135,13 @@ tout::tout(QWidget *parent) : QWidget(parent) {
     layout()->setSizeConstraint(QLayout::SetFixedSize);
 
     // Définir des styles pour les widgets QComboBox et le bouton de démarrage
-    QString comboBoxStyle = "QComboBox { font-weight: bold; font-size: 14px; padding: 6px 12px; min-width: 150px; }";
-    QString buttonStyle = "QPushButton { font-weight: bold; font-size: 14px; padding: 6px 12px; min-width: 100px; }";
+    QString comboBoxStyle = "QComboBox { font-weight: bold; font-size: 24px; padding: 6px 12px; min-width: 150px; }";
+    QString buttonStyle = "QPushButton { font-weight: bold; font-size: 24px; padding: 6px 12px; min-width: 100px; }";
 
     mainOptionsComboBox->setStyleSheet(comboBoxStyle);
     subOptionsComboBox->setStyleSheet(comboBoxStyle);
     startButton->setStyleSheet(buttonStyle);
+    openDatabaseButton->setStyleSheet(openDatabaseButtonStyle);
 
 }
 

@@ -7,7 +7,7 @@
 
 #include <math.h>
 #include <QTableWidget>
-float PI3 = 3.14;
+float PI3 = 3.14159265359;
 
 pcdim::pcdim(std::shared_ptr<bdd> db,QWidget *parent)
         : QWidget(parent), database(db),
@@ -15,6 +15,7 @@ pcdim::pcdim(std::shared_ptr<bdd> db,QWidget *parent)
 {
 
   setWindowTitle(QString::fromStdString("Un peu tout"));
+  setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
 
     materialComboBox = new QComboBox(this);
     pressureComboBox = new QComboBox(this);

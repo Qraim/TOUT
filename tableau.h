@@ -46,6 +46,7 @@ public:
             Materiau->addItem(QString::fromStdString(matiere_name));
         }
         Materiau->setCurrentText("PVC");
+        inputQ->setFocus();
 
     }
 private:

@@ -127,9 +127,10 @@ bdd::bdd(QWidget *parent)
         : QWidget(parent) {
 
 
-    int width = 150;
-    int height = 250;
+    int width = 200;
+    int height = 350;
     this->setFixedSize(width, height);
+    setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
 
     // Set the minimum and maximum size of the window to the same dimensions
     this->setMinimumSize(QSize(width, height));
@@ -195,6 +196,8 @@ std::tuple<float, float, double> bdd::get_material_coefficients( const std::stri
 
 void bdd::afficher_tableaux() {
     QWidget *window = new QWidget;
+    window->setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
+
     QVBoxLayout *layout = new QVBoxLayout(window);
     window->setLayout(layout);
     window->setWindowTitle("Matiere Tables");
@@ -255,6 +258,54 @@ void bdd::afficher_tableaux() {
                 }
                 row++;
             }
+            matiereTable->setStyleSheet("QTableWidget {"
+                                        "    background-color: #404c4d;"
+                                        "    color: white;"
+                                        "    font-size: 24px;"
+                                        "    gridline-color: #808080;"
+                                        "}"
+                                        "QHeaderView::section {"
+                                        "    background-color: #303030;"
+                                        "    color: white;"
+                                        "    font-size: 24px;"
+                                        "    border: 1px solid #808080;"
+                                        "}"
+                                        "QHeaderView {"
+                                        "    background-color: #303030;"
+                                        "}"
+                                        "QTableCornerButton::section {"
+                                        "    background-color: #303030;"
+                                        "    border: 1px solid #808080;"
+                                        "}");
+            // Customize the appearance of the QTabWidget and its tab bar
+            tabWidget->setStyleSheet("QTabWidget {"
+                                     "    background-color: #404c4d;"
+                                     "    color: white;"
+                                     "}"
+                                     "QTabBar::tab {"
+                                     "    background-color: #303030;"
+                                     "    color: white;"
+                                     "    font-size: 20px;"
+                                     "    padding: 10px;"
+                                     "}"
+                                     "QTabBar::tab:selected {"
+                                     "    background-color: #404c4d;"
+                                     "}"
+                                     "QTabWidget::pane {"
+                                     "    border: 1px solid #808080;"
+                                     "}"
+                                     "QTabBar::close-button {"
+                                     "    image: url('path/to/close-button-icon.png');"
+                                     "    background-color: #303030;"
+                                     "}"
+                                     "QTabBar::close-button:hover {"
+                                     "    background-color: #505050;"
+                                     "}"
+                                     "QTabBar::close-button:pressed {"
+                                     "    background-color: #707070;"
+                                     "}");
+
+
 
             matiereTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
             tabWidget->addTab(tab, QString::fromStdString(mat.nom));
@@ -282,6 +333,7 @@ std::vector<std::pair<int, float>> bdd::get_possible_tuyaux(const matiere& m, in
 
 void bdd::modifier_tableaux() {
     QDialog *dialog = new QDialog;
+    dialog->setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
     dialog->setWindowTitle("Modifier diametre intérieur");
 
     QFormLayout *formLayout = new QFormLayout(dialog);
@@ -430,6 +482,8 @@ bdd::~bdd() {
 
 void bdd::ajouter_tableaux() {
     QDialog *dialog = new QDialog;
+    dialog->setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
+
     dialog->setWindowTitle("Ajouter");
 
     QFormLayout *formLayout = new QFormLayout(dialog);
@@ -541,6 +595,7 @@ void bdd::ajouter_tableaux() {
 void bdd::suprimmer_tableaux() {
     // Création d'une boîte de dialogue
     QDialog *dialog = new QDialog;
+    dialog->setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
     dialog->setWindowTitle("Supprimer un tuyau");
 
     // Création d'un layout de formulaire
@@ -655,7 +710,10 @@ void bdd::suprimmer_tableaux() {
 
 void bdd::tuyau_dispo() {
     QDialog *dialog = new QDialog;
+    dialog->setFixedSize(700,600);
     dialog->setWindowTitle("Tuyaux disponibles");
+    dialog->setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
+
 
     QFormLayout *formLayout = new QFormLayout(dialog);
     dialog->setLayout(formLayout);
@@ -721,6 +779,51 @@ void bdd::tuyau_dispo() {
         }
       }
     };
+    // Set the stylesheet for the QTableWidget
+    tableWidget->setStyleSheet("QHeaderView::section {"
+                               "    background-color: #404c4d;"
+                               "    color: white;"
+                               "    font-size: 24px;"
+                               "    border: 1px solid #808080;"
+                               "}"
+                               "QTableWidget {"
+                               "    gridline-color: #808080;"
+                               "}");
+    // Set the stylesheet for the QTableWidget
+    tableWidget->setStyleSheet("QTableWidget {"
+                               "    gridline-color: #808080;"
+                               "}");
+
+    // Set the stylesheet for the QHeaderView
+    tableWidget->horizontalHeader()->setStyleSheet("QHeaderView::section {"
+                                                   "    background-color: #404c4d;"
+                                                   "    color: white;"
+                                                   "    font-size: 24px;"
+                                                   "    border: 1px solid #808080;"
+                                                   "}");
+
+
+    // Set the stylesheet for the QComboBox
+    QString comboBoxStyle = "QComboBox {"
+                            "    background-color: #303030;"
+                            "    color: white;"
+                            "    font-size: 24px;"
+                            "    padding: 5px;"
+                            "}"
+                            "QComboBox::drop-down {"
+                            "    border: 1px solid #808080;"
+                            "}"
+                            "QComboBox QAbstractItemView {"
+                            "    background-color: #303030;"
+                            "    color: white;"
+                            "    font-size: 24px;"
+                            "    selection-background-color: #404c4d;"
+                            "    selection-color: white;"
+                            "}";
+
+    matiereComboBox->setStyleSheet(comboBoxStyle);
+    pressureComboBox->setStyleSheet(comboBoxStyle);
+
 
     QObject::connect(matiereComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), updateTableWidget);
     QObject::connect(pressureComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), updateTableWidget);
@@ -740,6 +843,7 @@ void bdd::montre_coef() {
     // Création d'une boîte de dialogue
     QDialog *dialog = new QDialog;
     dialog->setWindowTitle("Coefficients pour une matière");
+    dialog->setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
 
     // Création d'un layout vertical
     QVBoxLayout *layout = new QVBoxLayout(dialog);
@@ -813,6 +917,8 @@ void bdd::trouver_tuyau() {
     // Créer un layout vertical
     QVBoxLayout *layout = new QVBoxLayout(dialog);
     dialog->setLayout(layout);
+
+    dialog->setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
 
     // Créer et ajouter un label pour le diamètre intérieur
     QLabel *inputLabel = new QLabel("Entrez le diamètre intérieur:", dialog);
@@ -965,6 +1071,8 @@ std::vector<float> bdd::getInnerDiametersForMatiereAndPressure(const std::string
 
 void bdd::on_show_formula_button_clicked() {
     QDialog formulaDialog(this);
+    formulaDialog.setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
+
     formulaDialog.setWindowTitle("Formula");
     formulaDialog.setMinimumSize(400, 300); // Définir une taille minimale pour le QDialog
 

@@ -38,6 +38,7 @@ public:
         inputs[i]->clear();
       }
       materialComboBox->setCurrentText("PVC");
+      pressureComboBox->setCurrentText("10");
 
     }
 

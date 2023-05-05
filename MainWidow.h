@@ -35,6 +35,7 @@ public:
             Materiau.addItem(QString::fromStdString(matiere_name));
         }
         Materiau.setCurrentText("PVC");
+        Pression.setCurrentText("10");
 
         debit.clear();
         vitesse.clear();

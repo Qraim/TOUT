@@ -13,6 +13,7 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
 
     setWindowTitle(QString::fromStdString("Goutte à goutte"));
+    setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
 
     // Top layout
     QGridLayout *topLayout = new QGridLayout;
@@ -30,7 +31,6 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
         Materiau->addItem(QString::fromStdString(matiere_name));
     }
 
-    topLayout->addWidget(Materiau);
 
     // QlineEdit et labels pour la section du haut
     Debit = new QLineEdit;
@@ -39,7 +39,7 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     Longueur = new QLineEdit;
     Hauteur = new QLineEdit;
 
-    // séparateur décimal
+
     QLocale customLocale = QLocale::French;
 
     // On ajoute des validator pour restreindre l'input à un nombre
@@ -64,11 +64,6 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     Hauteur->setValidator(hauteurValidator);
 
 
-    QLabel *labelDebit = new QLabel("Debit: l/h");
-    QLabel *labelEspacement = new QLabel("Espacement: m ");
-    QLabel *labelDiametre = new QLabel("Diametre: mm");
-    QLabel *labelLongueur = new QLabel("Longueur: m");
-    QLabel *labelHauteur = new QLabel("Hauteur: m");
 
     // Ajout des labels en dessous des inputs
     QLabel *labelNumero = new QLabel("Numéro");
@@ -92,17 +87,9 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     topLayout->addWidget(labelPiezo, 4, 7, Qt::AlignCenter);
     topLayout->addWidget(labelSigmaPerte,4, 8, Qt::AlignCenter);
     topLayout->addWidget(labelSigmaPiezo,4, 9, Qt::AlignCenter);
+    topLayout->addWidget(Materiau, 6, 0, Qt::AlignCenter);
 
-    topLayout->addWidget(labelDebit, 1, 2, Qt::AlignCenter);
-    topLayout->addWidget(Debit, 2, 2, Qt::AlignCenter);
-    topLayout->addWidget(labelEspacement, 1, 3, Qt::AlignCenter);
-    topLayout->addWidget(Espacement, 2, 3, Qt::AlignCenter);
-    topLayout->addWidget(labelDiametre, 1, 4, Qt::AlignCenter);
-    topLayout->addWidget(Diametre, 2, 4, Qt::AlignCenter);
-    topLayout->addWidget(labelLongueur, 1, 5, Qt::AlignCenter);
-    topLayout->addWidget(Longueur, 2, 5, Qt::AlignCenter);
-    topLayout->addWidget(labelHauteur, 1, 6, Qt::AlignCenter);
-    topLayout->addWidget(Hauteur, 2, 6, Qt::AlignCenter);
+
 
     labelNumero->setAlignment(Qt::AlignCenter);
     labelDebit2->setAlignment(Qt::AlignCenter);
@@ -116,11 +103,14 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     labelSigmaPiezo->setAlignment(Qt::AlignCenter);
 
 
-
+    Diametre->setAlignment(Qt::AlignCenter);
+    Debit->setAlignment(Qt::AlignCenter);
+    Espacement->setAlignment(Qt::AlignCenter);
+    Longueur->setAlignment(Qt::AlignCenter);
+    Hauteur->setAlignment(Qt::AlignCenter);
 
     // Ajout de label pour les unités
 
-    QLabel *numero = new QLabel("");
     QLabel *unitDebit2 = new QLabel("l/h");
     QLabel *unitEspacement2 = new QLabel("m");
     QLabel *unitDiametre2 = new QLabel("mm");
@@ -131,7 +121,6 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     QLabel *unitSigmaPerte = new QLabel("m");
     QLabel *unitSigmaPiezo = new QLabel("m");
 
-    numero->setAlignment(Qt::AlignCenter);
     unitDebit2->setAlignment(Qt::AlignCenter);
     unitEspacement2->setAlignment(Qt::AlignCenter);
     unitDiametre2->setAlignment(Qt::AlignCenter);
@@ -142,8 +131,8 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     unitSigmaPerte->setAlignment(Qt::AlignCenter);
     unitSigmaPiezo->setAlignment(Qt::AlignCenter);
 
+
     // Ajout des unités au layout
-    topLayout->addWidget(numero, 5, 0, Qt::AlignCenter);
     topLayout->addWidget(unitDebit2, 5, 1, Qt::AlignCenter);
     topLayout->addWidget(unitEspacement2, 5, 2, Qt::AlignCenter);
     topLayout->addWidget(unitDiametre2, 5, 3, Qt::AlignCenter);
@@ -156,20 +145,23 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
 
 
     // Ajout des label et des QlineEdit au layout
-    topLayout->addWidget(labelDebit, 1, 0, Qt::AlignCenter);
-    topLayout->addWidget(Debit, 2, 0, Qt::AlignCenter);
-    topLayout->addWidget(labelEspacement, 1, 1, Qt::AlignCenter);
-    topLayout->addWidget(Espacement, 2, 1, Qt::AlignCenter);
-    topLayout->addWidget(labelDiametre, 1, 2, Qt::AlignCenter);
-    topLayout->addWidget(Diametre, 2, 2, Qt::AlignCenter);
-    topLayout->addWidget(labelLongueur, 1, 3, Qt::AlignCenter);
-    topLayout->addWidget(Longueur, 2, 3, Qt::AlignCenter);
-    topLayout->addWidget(labelHauteur, 1, 4, Qt::AlignCenter);
-    topLayout->addWidget(Hauteur, 2, 4, Qt::AlignCenter);
+    topLayout->addWidget(Debit, 6, 1, Qt::AlignCenter);
+    topLayout->addWidget(Espacement, 6, 2, Qt::AlignCenter);
+    topLayout->addWidget(Diametre, 6, 3, Qt::AlignCenter);
+    topLayout->addWidget(Longueur, 6, 4, Qt::AlignCenter);
+    topLayout->addWidget(Hauteur, 6, 5, Qt::AlignCenter);
 
     // On fixe la taille
     int fixedWidth = 181;
     int fixedHeight = 40;
+
+    Debit->setFixedSize(fixedWidth,fixedHeight);
+
+    Espacement->setFixedSize(fixedWidth,fixedHeight);
+    Diametre->setFixedSize(fixedWidth,fixedHeight);
+
+    Longueur->setFixedSize(fixedWidth,fixedHeight);
+    Hauteur->setFixedSize(fixedWidth,fixedHeight);
 
     labelNumero->setFixedSize(fixedWidth, fixedHeight);
     labelDebit2->setFixedSize(fixedWidth, fixedHeight);
@@ -181,7 +173,6 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     labelPiezo->setFixedSize(fixedWidth, fixedHeight);
     labelSigmaPerte->setFixedSize(fixedWidth, fixedHeight);
     labelSigmaPiezo->setFixedSize(fixedWidth, fixedHeight);
-    numero->setFixedSize(fixedWidth, fixedHeight);
     unitDebit2->setFixedSize(fixedWidth, fixedHeight);
     unitEspacement2->setFixedSize(fixedWidth, fixedHeight);
     unitDiametre2->setFixedSize(fixedWidth, fixedHeight);
@@ -191,6 +182,8 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     unitPiezo->setFixedSize(fixedWidth, fixedHeight);
     unitSigmaPerte->setFixedSize(fixedWidth, fixedHeight);
     unitSigmaPiezo->setFixedSize(fixedWidth, fixedHeight);
+    Materiau->setFixedSize(fixedWidth, fixedHeight);
+
 
 
 
@@ -216,20 +209,23 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     CumulPerte = new QLineEdit;
     CumulPiezo = new QLineEdit;
 
-    QLabel *labelCumulLongueur = new QLabel("Cumul Longueur:");
-    QLabel *labelCumulhauteur = new QLabel("Cumul Hauteur:");
-    QLabel *labelCumulPerte = new QLabel("Cumul Perte:");
-    QLabel *labelCumulPiezo = new QLabel("Cumul Piezo:");
 
-    // Add labels and QLineEdit widgets to the bottomLayout
-    bottomLayout->addWidget(labelCumulLongueur, 0, 0, Qt::AlignCenter);
-    bottomLayout->addWidget(CumulLongueur, 0, 1, Qt::AlignCenter);
-    bottomLayout->addWidget(labelCumulhauteur, 1, 0, Qt::AlignCenter);
-    bottomLayout->addWidget(Cumulhauteur, 1, 1, Qt::AlignCenter);
-    bottomLayout->addWidget(labelCumulPerte, 2, 0, Qt::AlignCenter);
-    bottomLayout->addWidget(CumulPerte, 2, 1, Qt::AlignCenter);
-    bottomLayout->addWidget(labelCumulPiezo, 3, 0, Qt::AlignCenter);
-    bottomLayout->addWidget(CumulPiezo, 3, 1, Qt::AlignCenter);
+    CumulLongueur->setFixedSize(fixedWidth, fixedHeight);
+    Cumulhauteur->setFixedSize(fixedWidth, fixedHeight);
+    CumulPerte->setFixedSize(fixedWidth, fixedHeight);
+    CumulPiezo->setFixedSize(fixedWidth, fixedHeight);
+
+    // Add spacer before the first QLineEdit
+
+    bottomLayout->addWidget(CumulLongueur, 0, 3, Qt::AlignCenter); // Column 4 for Longueur
+    bottomLayout->addWidget(Cumulhauteur, 0, 4, Qt::AlignCenter); // Column 6 for Hauteur
+
+    // Add spacer between Hauteur and Perte
+
+    bottomLayout->addWidget(CumulPerte, 0, 5, Qt::AlignCenter); // Column 9 for Perte
+
+    // Add spacer between Perte and Piezo
+    bottomLayout->addWidget(CumulPiezo, 0, 6, Qt::AlignCenter); // Column 11 for Piezo
 
     connect(Debit, &QLineEdit::returnPressed, this, &gag::AjoutDonnee);
     connect(Espacement, &QLineEdit::returnPressed, this, &gag::AjoutDonnee);
@@ -249,14 +245,45 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
 
 
     // Create buttons
-    QPushButton *button1 = new QPushButton("Save ad pdf");
-    QPushButton *button2 = new QPushButton("Save data");
-    QPushButton *button3 = new QPushButton("Load data");
+    QPushButton *button1 = new QPushButton("Export PDF");
+    QPushButton *button2 = new QPushButton("Sauvergarder");
+    QPushButton *button3 = new QPushButton("Charger");
 
-// Add buttons to the bottomLayout
-    bottomLayout->addWidget(button1, 4, 0, Qt::AlignCenter);
-    bottomLayout->addWidget(button2, 4, 1, Qt::AlignCenter);
-    bottomLayout->addWidget(button3, 4, 2, Qt::AlignCenter);
+    // Create the buttons for the bottom layout
+    QPushButton *calculButton = new QPushButton("Calcul");
+    QPushButton *effacerButton = new QPushButton("Effacer");
+    QPushButton *modifierButton = new QPushButton("Modifier");
+    QPushButton *recopier = new QPushButton("Recopier");
+    QPushButton *reinitialiserButton = new QPushButton("Réinitialiser");
+
+    connect(calculButton, &QPushButton::clicked, this, &gag::calcul);
+    connect(effacerButton, &QPushButton::clicked, this, &gag::enleverLigne);
+    connect(modifierButton, &QPushButton::clicked, this, &gag::showUpdateDialog);
+    connect(reinitialiserButton, &QPushButton::clicked, this, &gag::refresh);
+    connect(recopier, &QPushButton::clicked, this, &gag::recopiederniereligne);
+
+
+    button1->setFixedSize(fixedWidth, fixedHeight);
+    button2->setFixedSize(fixedWidth, fixedHeight);
+    button3->setFixedSize(fixedWidth, fixedHeight);
+    calculButton->setFixedSize(fixedWidth, fixedHeight);
+    effacerButton->setFixedSize(fixedWidth, fixedHeight);
+    modifierButton->setFixedSize(fixedWidth, fixedHeight);
+    reinitialiserButton->setFixedSize(fixedWidth, fixedHeight);
+    recopier->setFixedSize(fixedWidth, fixedHeight);
+
+    // Add buttons to the bottomLayout
+
+    // Add buttons to the bottomLayout
+    bottomLayout->addWidget(calculButton, 1, 0, Qt::AlignCenter);
+    bottomLayout->addWidget(effacerButton, 1, 1, Qt::AlignCenter);
+    bottomLayout->addWidget(modifierButton, 1, 2, Qt::AlignCenter);
+    bottomLayout->addWidget(recopier, 1, 3, Qt::AlignCenter);
+    bottomLayout->addWidget(reinitialiserButton, 1, 4, Qt::AlignCenter);
+    bottomLayout->addWidget(button1, 1, 5, Qt::AlignCenter);
+    bottomLayout->addWidget(button2, 1, 6, Qt::AlignCenter);
+    bottomLayout->addWidget(button3, 1, 7, Qt::AlignCenter);
+
 
     bottomLayout->setAlignment(Qt::AlignHCenter);
 
@@ -306,6 +333,8 @@ void gag::loadDataWrapper() {
 
 
 
+
+
 bool gag::eventFilter(QObject *watched, QEvent *event) {
     if (event->type() == QEvent::KeyPress) {
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
@@ -329,18 +358,29 @@ bool gag::eventFilter(QObject *watched, QEvent *event) {
         } else if (keyEvent->key() == Qt::Key_C) {
             calcul();
             return true;
+        } else if (keyEvent->key() == Qt::Key_Tab) {
+            if  (!Debit->text().isEmpty() && !Espacement->text().isEmpty() &&
+                    !Diametre->text().isEmpty() && !Longueur->text().isEmpty() &&
+                    !Hauteur->text().isEmpty()) {
+                AjoutDonnee();
+                return true;
+
+            } else {
+                keyEvent->ignore(); // Ignore tab key event to prevent natural action
+                return true;
+            }
         }
-            // Ajoute le raccourci Ctrl + S pour enregistrer en PDF
+        // Ajoute le raccourci Ctrl + S pour enregistrer en PDF
         else if (keyEvent->modifiers() & Qt::ControlModifier && keyEvent->key() == Qt::Key_S && !(keyEvent->modifiers() & Qt::ShiftModifier)) {
             saveAsPdf();
             return true;
         }
-            // Ajoute le raccourci Ctrl + Shift + S pour enregistrer les données
+        // Ajoute le raccourci Ctrl + Shift + S pour enregistrer les données
         else if (keyEvent->modifiers() & Qt::ControlModifier && keyEvent->key() == Qt::Key_S && keyEvent->modifiers() & Qt::ShiftModifier) {
             saveDataWrapper();
             return true;
         }
-            // Ajoute le raccourci Ctrl + L pour charger les données
+        // Ajoute le raccourci Ctrl + L pour charger les données
         else if (keyEvent->modifiers() & Qt::ControlModifier && keyEvent->key() == Qt::Key_L) {
             loadDataWrapper();
             return true;
@@ -426,6 +466,7 @@ void gag::AjoutLigne() {
         valueLabel->setAlignment(alignment);
         valueLabel->setFixedHeight(fixedHeight);
         valueLabel->setFixedWidth(180);
+        valueLabel->setStyleSheet("color: yellow;"); // Changer la couleur du texte en bleu
 
         // Ajoutez l'objet QLineEdit dans la zone de défilement en utilisant le numéro de ligne et de colonne approprié.
         scrollAreaLayout->addWidget(valueLabel, row, col);
@@ -433,7 +474,7 @@ void gag::AjoutLigne() {
     }
 
     // Set the vertical spacing and alignment.
-    scrollAreaLayout->setVerticalSpacing(15);
+    scrollAreaLayout->setVerticalSpacing(1);
     scrollAreaLayout->setAlignment(Qt::AlignTop);
 
     // Utilisez la variable fixedHeight pour déterminer la hauteur de la ligne.
@@ -502,8 +543,8 @@ void gag::focusNextInput() {
 }
 
 
-void gag::calcul() {
 
+void gag::calcul() {
     if(_Donnees.size()==0) return;
 
     // Initialise les paramètres.
@@ -546,7 +587,7 @@ void gag::calcul() {
         debitLS = sigmaDebit / 3600;
 
         // Calcule la perte de charge.
-        perteCharge = k * std::pow(debitLS, a) * std::pow(diametre, b) * longueur ;
+        perteCharge = k * std::pow(debitLS, a) * std::pow(diametre, b) * longueur * espacement;
 
         // Calcule la hauteur piezométrique.
         piezo = perteCharge + hauteur;
@@ -578,6 +619,7 @@ void gag::calcul() {
 
     RafraichirTableau();
 }
+
 /*void gag::calcul() {
 
     if(_Donnees.size()==0) return;
@@ -695,10 +737,17 @@ void gag::RafraichirTableau() {
                 value = new QLineEdit(QString::number(_Donnees[i][j], 'f', 2));
             }
             value->setReadOnly(true);
-            value->setAlignment(alignment);
             value->setFixedHeight(fixedHeight); // Définir la taille de la ligne.
-            value->setFixedWidth(180);
             value->setSizePolicy(sizePolicy);
+            value->setFixedWidth(180);
+            value->setAlignment(alignment);
+            if (j >= 1 && j <= 5) {
+                QPalette palette;
+                value->setStyleSheet("color : #eaff00");
+            } else {
+                value->setStyleSheet("color :  #64f5a3");
+
+            }
             scrollAreaLayout->addWidget(value, i + 1, j, Qt::AlignTop);
         }
         // Définit l'espacement vertical et l'alignement pour la disposition de la zone de défilement.
@@ -706,22 +755,29 @@ void gag::RafraichirTableau() {
         scrollAreaLayout->setAlignment(Qt::AlignTop);
     }
     // Set the vertical spacing and alignment.
-    scrollAreaLayout->setVerticalSpacing(15);
+    scrollAreaLayout->setVerticalSpacing(1);
     scrollAreaLayout->setAlignment(Qt::AlignTop);
-
 }
 
 void gag::keyPressEvent(QKeyEvent *event) {
     // Vérifie si la touche Shift est enfoncée et si la touche Entrée est également enfoncée.
     if (event->modifiers() & Qt::ShiftModifier && event->key() == Qt::Key_Return) {
+        if (!Debit->text().isEmpty() && !Espacement->text().isEmpty() &&
+            !Diametre->text().isEmpty() && !Longueur->text().isEmpty() &&
+            !Hauteur->text().isEmpty()) {
         // Appelle la fonction calcul().
-        calcul();
+             calcul();
+        }
     } else if (event->key() == Qt::Key_R) {
         // Appelle la fonction recopie
         recopiederniereligne();
     } else if (event->key() == Qt::Key_C) {
-        // Appelle la fonction recopie
-        calcul();
+        if (!Debit->text().isEmpty() && !Espacement->text().isEmpty() &&
+            !Diametre->text().isEmpty() && !Longueur->text().isEmpty() &&
+            !Hauteur->text().isEmpty()) {
+             // Appelle la fonction calcul().
+             calcul();
+        }
     } else if (event->key() == Qt::Key_M) {
         // Appelle la fonction modifier
         showUpdateDialog();
@@ -753,6 +809,9 @@ void gag::keyPressEvent(QKeyEvent *event) {
 
 void gag::recopiederniereligne() { // Fonction déclenché par la touche 'R' qui permet de recopier la derniere ligne entrée
 
+    if (_Donnees.size()==0) {
+        return;
+    }
     int taille =_Donnees.size();
     std::vector<float> lastline = _Donnees[taille-1]; // Pour avoir la derniere ligne du vecteur
     std::vector<float> recopie(10, 0.0f);

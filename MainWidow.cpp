@@ -1,12 +1,13 @@
 #include "MainWidow.h"
 
 
-float PI2 = 3.14;
+float PI2 =3.14159265359;
 
 MainWindow::MainWindow(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db), Calcul("Calculer", this) {
-    setFixedSize(500, 400);
+    setFixedSize(800, 600);
 
     setWindowTitle(QString::fromStdString("Calcul du diametre intérieur d'un tube simple"));
+    setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
 
     Materiau.setFixedWidth(80);
     Pression.setFixedWidth(80);
@@ -50,11 +51,11 @@ MainWindow::MainWindow(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent
 
     // Bouton Changer en haut à droite
     Changer.setText("Changer");
-    Changer.setFixedWidth(80);
+    Changer.setFixedWidth(100);
     gridLayout->addWidget(&Changer, 0, 3);
 
     // Bouton Calculer au milieu en bas
-    Calcul.setFixedWidth(80);
+    Calcul.setFixedWidth(100);
     Calcul.setEnabled(false);
     gridLayout->addWidget(&Calcul, 6, 1);
 
@@ -64,20 +65,26 @@ MainWindow::MainWindow(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent
 
 
     Champligne.setReadOnly(true);
-    Champligne.setFixedWidth(480);
+    Champligne.setFixedWidth(800);
+    Champligne.setAlignment(Qt::AlignCenter);
     gridLayout->addWidget(&ChampVitesse, 8, 0, 1, 4);
 
     ChampVitesse.setReadOnly(true);
-    ChampVitesse.setFixedWidth(480);
+    ChampVitesse.setFixedWidth(800);
+    ChampVitesse.setAlignment(Qt::AlignCenter);
     gridLayout->addWidget(&Champligne, 9, 0, 1, 4);
 
     Champligne2.setReadOnly(true);
-    Champligne2.setFixedWidth(600);
+    Champligne2.setFixedWidth(800);
+    Champligne2.setAlignment(Qt::AlignCenter);
+
     gridLayout->addWidget(&Champligne2, 10, 0, 1, 4);
 
     // Configuration of the third QLineEdit widget (Champligne3)
     Champligne3.setReadOnly(true);
-    Champligne3.setFixedWidth(600);
+    Champligne3.setFixedWidth(800);
+    Champligne3.setAlignment(Qt::AlignCenter);
+
     gridLayout->addWidget(&Champligne3, 11, 0, 1, 4);
 
     setLayout(gridLayout);

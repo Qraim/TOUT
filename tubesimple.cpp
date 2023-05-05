@@ -6,12 +6,14 @@
 #include <cmath>
 #include <memory>
 
-float M_PI = 3.14;
+float M_PI =3.14159265359;
 
 tubesimple::tubesimple(std::shared_ptr<bdd> db, QWidget *parent)
         : QWidget(parent), database(db) {
 
   setWindowTitle(QString::fromStdString("Tube simple"));
+  setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
+
 
     std::vector<std::string> matiere_names = database->getAllMatiereNames();
     for (const auto& matiere_name : matiere_names) {
