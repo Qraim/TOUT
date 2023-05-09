@@ -344,7 +344,10 @@ void pertechargeherse::AjoutLigne() {
   for (int i = 0; i < indices.size(); ++i) {
 
     QLineEdit *lineEdit = new QLineEdit(scrollWidget);
+    // Make QLineEdit editable
     lineEdit->setReadOnly(true);
+
+
     lineEdit->setAlignment(Qt::AlignCenter);
     lineEdit->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     lineEdit->setFixedWidth(200);
@@ -391,6 +394,26 @@ void pertechargeherse::AjoutLigne() {
   gridLayout->setVerticalSpacing(VERTICAL_SPACING);
   gridLayout->setAlignment(Qt::AlignTop);
 }
+
+void pertechargeherse::on_lineEdit_editingFinished(const QString &text, int row, int col) {
+  qDebug() << "Row:" << row << "Col:" << col << "Text:" << text;
+
+  bool ok;
+  float value = text.toFloat(&ok);
+
+  if (ok) {
+    if (row >= 0 && row < _Donnees.size() && col >= 0 && col < _Donnees[row].size()) {
+      _Donnees[row][col] = value;
+    } else {
+      qDebug() << "Error: Invalid row or col value.";
+    }
+  } else {
+    // Handle invalid input if necessary
+  }
+}
+
+
+
 
 // La fonction "focusPreviousInput" est appelée lorsqu'un raccourci clavier est
 // utilisé pour passer au champ d'entrée précédent.
@@ -709,9 +732,20 @@ void pertechargeherse::RafraichirTableau() {
       // Crée une nouvelle ligne de texte.
       QLineEdit *lineEdit = new QLineEdit(scrollWidget);
 
-      // Rend la ligne de texte en lecture seule.
-      lineEdit->setReadOnly(true);
+      // Only make the QLineEdit fields for columns 1, 3, 4, and 5 editable
+      if (i == 1 || i == 3 || i == 4 || i == 5) {
+        lineEdit->setReadOnly(false);
 
+        int currentRow = ligne;
+        QObject::connect(lineEdit, &QLineEdit::editingFinished, [this, lineEdit, i, indicesColonnes, currentRow]() {
+            qDebug() << "lineEdit editingFinished, row:" << (currentRow - 1) << "col:" << indicesColonnes[i];
+            on_lineEdit_editingFinished(lineEdit->text(), currentRow - 1, indicesColonnes[i]);
+        });
+
+
+      } else {
+        lineEdit->setReadOnly(true);
+      }
       // Centre le texte dans la ligne de texte.
       lineEdit->setAlignment(Qt::AlignCenter);
 

@@ -145,6 +145,7 @@ private:
   /// @brief Fonction enveloppe pour enregistrer les données.
   void saveDataWrapper();
 
+  void on_lineEdit_editingFinished(const QString &text, int row, int col);
 };
 
 

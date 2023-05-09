@@ -549,18 +549,18 @@ void gag::calcul() {
 
     // Initialise les paramètres.
     double k = 0;
-    float a = 0;
-    float b = 0;
+    double a = 0;
+    double b = 0;
 
     // Initialise les variables.
-    float espacement = 0;
-    float diametre = 0;
-    float longueur = 0;
-    float hauteur = 0;
-    float perteCharge = 0;
-    float piezo = 0;
-    float sigmaDebit = 0; // Cumul débit
-    float debitLS = 0;
+    double espacement = 0;
+    double diametre = 0;
+    double longueur = 0;
+    double hauteur = 0;
+    double perteCharge = 0;
+    double piezo = 0;
+    double sigmaDebit = 0; // Cumul débit
+    double debitLS = 0;
 
     std::string material_name = Materiau->currentText().toStdString();
     auto coefficients = database->get_material_coefficients(material_name);
@@ -569,10 +569,10 @@ void gag::calcul() {
     b = std::get<1>(coefficients);
     k = std::get<2>(coefficients);
 
-    float sigmaPiezo = 0; // Cumul piezo
-    float sigmaPerte = 0; // Cumul perte
-    float sigmaLongueur = 0;
-    float sigmaHauteur = 0;
+    double sigmaPiezo = 0; // Cumul piezo
+    double sigmaPerte = 0; // Cumul perte
+    double sigmaLongueur = 0;
+    double sigmaHauteur = 0;
 
     // Effectue les calculs pour chaque ligne de données.
     for (int i = 0; i < _Donnees.size(); ++i) {
@@ -584,10 +584,14 @@ void gag::calcul() {
         longueur = _Donnees[i][4];
         hauteur = _Donnees[i][5];
 
+        std::cout<< sigmaDebit << " "<< espacement << " " <<diametre << " "<< longueur << " " << hauteur<<std::endl;
+
         debitLS = sigmaDebit / 3600;
 
+        std::cout<<debitLS<<" "<<k<<std::endl;
+
         // Calcule la perte de charge.
-        perteCharge = k * std::pow(debitLS, a) * std::pow(diametre, b) * longueur * espacement;
+        perteCharge = k * std::pow(debitLS, a) * std::pow(diametre, b) * longueur ;
 
         // Calcule la hauteur piezométrique.
         piezo = perteCharge + hauteur;
@@ -736,7 +740,17 @@ void gag::RafraichirTableau() {
             } else { // Sinon, affichez la valeur avec deux décimales.
                 value = new QLineEdit(QString::number(_Donnees[i][j], 'f', 2));
             }
-            value->setReadOnly(true);
+            // Connect the editingFinished signal for the QLineEdit fields in columns 1, 3, 4, and 5
+            if (j == 1 || j == 2 || j == 3 || j == 4 || j == 5) {
+                value->setReadOnly(false);
+
+                QObject::connect(value, &QLineEdit::editingFinished, [this, value, i, j]() {
+                    on_lineEdit_editingFinished(value->text(), i, j);
+                });
+            } else {
+                value->setReadOnly(true);
+            }
+
             value->setFixedHeight(fixedHeight); // Définir la taille de la ligne.
             value->setSizePolicy(sizePolicy);
             value->setFixedWidth(180);
@@ -759,12 +773,21 @@ void gag::RafraichirTableau() {
     scrollAreaLayout->setAlignment(Qt::AlignTop);
 }
 
+void gag::on_lineEdit_editingFinished(const QString &text, int row, int col) {
+    bool ok;
+    float value = text.toFloat(&ok);
+
+    if (ok) {
+        _Donnees[row][col] = value;
+    } else {
+        // Handle invalid input if necessary
+    }
+}
+
 void gag::keyPressEvent(QKeyEvent *event) {
     // Vérifie si la touche Shift est enfoncée et si la touche Entrée est également enfoncée.
     if (event->modifiers() & Qt::ShiftModifier && event->key() == Qt::Key_Return) {
-        if (!Debit->text().isEmpty() && !Espacement->text().isEmpty() &&
-            !Diametre->text().isEmpty() && !Longueur->text().isEmpty() &&
-            !Hauteur->text().isEmpty()) {
+        if (_Donnees.size()!=0) {
         // Appelle la fonction calcul().
              calcul();
         }
@@ -772,9 +795,7 @@ void gag::keyPressEvent(QKeyEvent *event) {
         // Appelle la fonction recopie
         recopiederniereligne();
     } else if (event->key() == Qt::Key_C) {
-        if (!Debit->text().isEmpty() && !Espacement->text().isEmpty() &&
-            !Diametre->text().isEmpty() && !Longueur->text().isEmpty() &&
-            !Hauteur->text().isEmpty()) {
+        if (_Donnees.size()!=0) {
              // Appelle la fonction calcul().
              calcul();
         }

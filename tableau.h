@@ -22,6 +22,7 @@
 #include <QScrollArea>
 #include <QScrollBar>
 #include <QDialog>
+#include <QDebug>
 
 
 #include <vector>
@@ -128,6 +129,7 @@ private:
     /// @param fileName : Chemin du fichier dans lequel enregistrer le rapport PDF
     void createPdfReport(const QString &fileName);
 
+    void on_lineEdit_editingFinished(const QString &text, int row, int column);
 
 protected :
 
