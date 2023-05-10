@@ -109,6 +109,8 @@ tout::tout(QWidget *parent) : QWidget(parent) {
 
     subOptionsComboBox->addItem("Herse d'alimentation");
     subOptionsComboBox->addItem("Goutte à goutte");
+    subOptionsComboBox->addItem("Goutte à goutte 2");
+
     subOptionsComboBox->addItem("Tube simple");
 
     // Configurez le layout principal
@@ -183,7 +185,7 @@ void tout::on_show_gag_button_clicked() {
 
 void tout::on_show_gag2_button_clicked() {
     goutte2->refresh();
-    goutte2->showMaximized();
+    goutte2->show();
 }
 
 void tout::closeEvent(QCloseEvent *event) {

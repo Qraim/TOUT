@@ -38,6 +38,8 @@ public:
         _Piezo->clear();
         _Perte->clear();
 
+        Q->setFocus();
+
         Materiau->clear();
 
         std::vector<std::string> matiere_names = database->getAllMatiereNames();
