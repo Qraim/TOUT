@@ -5,12 +5,15 @@ gag2::gag2(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent),database(d
   QGridLayout *gridLayout = new QGridLayout(this);
   setWindowTitle(QString::fromStdString("GAGV2"));
 
+  setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
+
+
   QStringList headers = {" " ,"Débit", "Espacement", "Diamètre", "Longueur", "Hauteur", "Perte", "Piezo"};
   QStringList units = {" ", "m", "m", "mm", "m", "m", "m"};
 
   for (int i = 0; i < headers.size(); ++i) {
     QLabel *headerLabel = new QLabel(headers[i], this);
-    headerLabel->setFixedSize(80,20);
+    headerLabel->setFixedSize(200,20);
     headerLabel->setAlignment(Qt::AlignCenter);
     gridLayout->addWidget(headerLabel, 0, i);
   }
@@ -26,7 +29,7 @@ gag2::gag2(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent),database(d
 
   for (int i = 2; i < units.size(); ++i) {
     QLabel *unitLabel = new QLabel(units[i], this);
-    unitLabel->setFixedSize(80,20);
+    unitLabel->setFixedSize(200,40);
     unitLabel->setAlignment(Qt::AlignCenter);
     gridLayout->addWidget(unitLabel, 1, i);
   }
@@ -43,12 +46,11 @@ gag2::gag2(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent),database(d
   L->setAlignment(Qt::AlignCenter);
   H->setAlignment(Qt::AlignCenter);
 
-
-  Q->setFixedSize(80,20);
-  E->setFixedSize(80,20);
-  D->setFixedSize(80,20);
-  L->setFixedSize(80,20);
-  H->setFixedSize(80,20);
+  Q->setFixedSize(200,40);
+  E->setFixedSize(200,40);
+  D->setFixedSize(200,40);
+  L->setFixedSize(200,40);
+  H->setFixedSize(200,40);
 
   Q->installEventFilter(this);
   E->installEventFilter(this);
@@ -63,19 +65,19 @@ gag2::gag2(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent),database(d
   gridLayout->addWidget(H, 2, 5);
 
   QPushButton *calculateButton = new QPushButton("Calculer", this);
-  calculateButton->setFixedSize(100,30);
+  calculateButton->setFixedSize(200,40);
   connect(calculateButton, &QPushButton::clicked, this, &gag2::calcul);
-  gridLayout->addWidget(calculateButton, 3, 0, 1, -1, Qt::AlignCenter);
+  gridLayout->addWidget(calculateButton, 3, 3, Qt::AlignCenter);
 
   _Longueur = new QLineEdit(this);
   _Hauteur = new QLineEdit(this);
   _Perte = new QLineEdit(this);
   _Piezo = new QLineEdit(this);
 
-  _Longueur->setFixedSize(80,20);
-  _Hauteur->setFixedSize(80,20);
-  _Perte->setFixedSize(80,20);
-  _Piezo->setFixedSize(80,20);
+  _Longueur->setFixedSize(200,40);
+  _Hauteur->setFixedSize(200,40);
+  _Perte->setFixedSize(200,40);
+  _Piezo->setFixedSize(200,40);
 
   _Longueur->setAlignment(Qt::AlignCenter);
   _Hauteur->setAlignment(Qt::AlignCenter);

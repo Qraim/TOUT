@@ -6,6 +6,7 @@
 #include <cmath>
 #include <memory>
 
+float M_PI = 3.1415926535;
 
 tubesimple::tubesimple(std::shared_ptr<bdd> db, QWidget *parent)
         : QWidget(parent), database(db) {
