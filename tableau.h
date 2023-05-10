@@ -23,6 +23,7 @@
 #include <QScrollBar>
 #include <QDialog>
 #include <QDebug>
+#include <QTimer>
 
 
 #include <vector>
@@ -61,6 +62,7 @@ private:
     QLineEdit *inputH;
     QLineEdit *inputL;
     QComboBox *Materiau;
+    QComboBox *unite;
     QGridLayout *gridLayout;
     QScrollArea *scrollArea;
     QWidget* scrollWidget;
@@ -130,6 +132,10 @@ private:
     void createPdfReport(const QString &fileName);
 
     void on_lineEdit_editingFinished(const QString &text, int row, int column);
+
+    bool focusNextPrevChild(bool next) override;
+
+    void findWidgetIndex(QLineEdit *widget, int &row, int &col);
 
 protected :
 

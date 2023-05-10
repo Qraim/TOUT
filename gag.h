@@ -23,9 +23,9 @@
 #include <QDoubleValidator>
 #include <QLocale>
 #include <QSpacerItem>
-
-
+#include <QTimer>
 #include <vector>
+
 #include "bdd.h"
 
 class gag : public QWidget {
@@ -57,6 +57,7 @@ private:
   std::shared_ptr<bdd> database;
 
   QComboBox *Materiau;
+  QComboBox *unite;
 
   QLineEdit *Debit;
   QLineEdit *Espacement;
@@ -146,6 +147,9 @@ private:
   void saveDataWrapper();
 
   void on_lineEdit_editingFinished(const QString &text, int row, int col);
+
+  bool focusNextPrevChild(bool next) override;
+
 };
 
 

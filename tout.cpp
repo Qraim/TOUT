@@ -31,6 +31,9 @@ tout::tout(QWidget *parent) : QWidget(parent) {
     goutte = std::make_unique<gag>(database,nullptr);
     goutte->setWindowFlags(Qt::Window);
 
+    goutte2 = std::make_unique<gag2>(database,nullptr);
+    goutte2->setWindowFlags(Qt::Window);
+
     // Créez le premier QComboBox avec des options principales
     QComboBox *mainOptionsComboBox = new QComboBox(this);
     mainOptionsComboBox->addItem("Perte de charge");
@@ -47,6 +50,8 @@ tout::tout(QWidget *parent) : QWidget(parent) {
             case 0: // Perte
                 subOptionsComboBox->addItem("Herse d'alimentation");
                 subOptionsComboBox->addItem("Goutte à goutte");
+                subOptionsComboBox->addItem("Goutte à goutte 2");
+
                 subOptionsComboBox->addItem("Tube simple");
                 break;
             case 1: // Diametre
@@ -81,6 +86,8 @@ tout::tout(QWidget *parent) : QWidget(parent) {
                     on_show_pertechargeherse_button_clicked();
                 } else if (subOptionsComboBox->currentIndex() == 1) {
                     on_show_gag_button_clicked();
+                } else if (subOptionsComboBox->currentIndex() == 2) {
+                    on_show_gag2_button_clicked();
                 } else if (subOptionsComboBox->currentIndex() == 2) {
                     on_show_tubesimple_button_clicked();
                 }
@@ -174,6 +181,10 @@ void tout::on_show_gag_button_clicked() {
     goutte->showMaximized();
 }
 
+void tout::on_show_gag2_button_clicked() {
+    goutte2->refresh();
+    goutte2->showMaximized();
+}
 
 void tout::closeEvent(QCloseEvent *event) {
     QApplication::quit();

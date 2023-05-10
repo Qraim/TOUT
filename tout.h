@@ -12,6 +12,7 @@
 #include "pcdim.h"
 #include "MainWidow.h"
 #include "gag.h"
+#include "gag2.h"
 
 #include <QApplication>
 #include <QPushButton>
@@ -47,6 +48,7 @@ private:
     std::unique_ptr<pcdim> pcdimm;
     std::unique_ptr<MainWindow> MW;
     std::unique_ptr<gag> goutte;
+    std::unique_ptr<gag2> goutte2;
 
     /// @brief Affiche la fenêtre de l'outil de calcul de perte de charge pour une herse d'alimentation.
     void on_show_pertechargeherse_button_clicked();
@@ -65,6 +67,9 @@ private:
 
     /// @brief Affiche la fenêtre de l'outil de calcul de perte de charge pour un goutte à goutte.
     void on_show_gag_button_clicked();
+
+    void on_show_gag2_button_clicked();
+
 protected:
     void closeEvent(QCloseEvent *event) override;
 

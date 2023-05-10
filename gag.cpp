@@ -71,7 +71,7 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     QLabel *labelEspacement2 = new QLabel("Espacement");
     QLabel *labelDiametre2 = new QLabel("Diametre");
     QLabel *labelLongueur2 = new QLabel("Longueur");
-    QLabel *labelHauteur2 = new QLabel("Hauteur");
+    QLabel *labelHauteur2 = new QLabel("Dénivelé");
     QLabel *labelPerte = new QLabel("J");
     QLabel *labelPiezo = new QLabel("Piezo");
     QLabel *labelSigmaPerte = new QLabel("ΣJ");
@@ -89,8 +89,6 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     topLayout->addWidget(labelSigmaPiezo,4, 9, Qt::AlignCenter);
     topLayout->addWidget(Materiau, 6, 0, Qt::AlignCenter);
 
-
-
     labelNumero->setAlignment(Qt::AlignCenter);
     labelDebit2->setAlignment(Qt::AlignCenter);
     labelEspacement2->setAlignment(Qt::AlignCenter);
@@ -102,7 +100,6 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     labelSigmaPerte->setAlignment(Qt::AlignCenter);
     labelSigmaPiezo->setAlignment(Qt::AlignCenter);
 
-
     Diametre->setAlignment(Qt::AlignCenter);
     Debit->setAlignment(Qt::AlignCenter);
     Espacement->setAlignment(Qt::AlignCenter);
@@ -111,7 +108,11 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
 
     // Ajout de label pour les unités
 
-    QLabel *unitDebit2 = new QLabel("l/h");
+    unite = new QComboBox();
+    unite->addItem("         l/h");
+    unite->addItem("         l/s");
+    unite->addItem("       m3/h");
+
     QLabel *unitEspacement2 = new QLabel("m");
     QLabel *unitDiametre2 = new QLabel("mm");
     QLabel *unitLongueur2 = new QLabel("m");
@@ -121,7 +122,6 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     QLabel *unitSigmaPerte = new QLabel("m");
     QLabel *unitSigmaPiezo = new QLabel("m");
 
-    unitDebit2->setAlignment(Qt::AlignCenter);
     unitEspacement2->setAlignment(Qt::AlignCenter);
     unitDiametre2->setAlignment(Qt::AlignCenter);
     unitLongueur2->setAlignment(Qt::AlignCenter);
@@ -133,7 +133,7 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
 
 
     // Ajout des unités au layout
-    topLayout->addWidget(unitDebit2, 5, 1, Qt::AlignCenter);
+    topLayout->addWidget(unite, 5, 1, Qt::AlignCenter);
     topLayout->addWidget(unitEspacement2, 5, 2, Qt::AlignCenter);
     topLayout->addWidget(unitDiametre2, 5, 3, Qt::AlignCenter);
     topLayout->addWidget(unitLongueur2, 5, 4, Qt::AlignCenter);
@@ -142,7 +142,6 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     topLayout->addWidget(unitPiezo, 5, 7, Qt::AlignCenter);
     topLayout->addWidget(unitSigmaPerte, 5, 8, Qt::AlignCenter);
     topLayout->addWidget(unitSigmaPiezo, 5, 9, Qt::AlignCenter);
-
 
     // Ajout des label et des QlineEdit au layout
     topLayout->addWidget(Debit, 6, 1, Qt::AlignCenter);
@@ -173,7 +172,7 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     labelPiezo->setFixedSize(fixedWidth, fixedHeight);
     labelSigmaPerte->setFixedSize(fixedWidth, fixedHeight);
     labelSigmaPiezo->setFixedSize(fixedWidth, fixedHeight);
-    unitDebit2->setFixedSize(fixedWidth, fixedHeight);
+    unite->setFixedSize(fixedWidth, fixedHeight);
     unitEspacement2->setFixedSize(fixedWidth, fixedHeight);
     unitDiametre2->setFixedSize(fixedWidth, fixedHeight);
     unitLongueur2->setFixedSize(fixedWidth, fixedHeight);
@@ -332,28 +331,78 @@ void gag::loadDataWrapper() {
 
 
 
-
+bool gag::focusNextPrevChild(bool next) {
+    return false;
+}
 
 
 bool gag::eventFilter(QObject *watched, QEvent *event) {
+
+    QLineEdit *lineEdit = qobject_cast<QLineEdit *>(watched);
+    if (lineEdit) {
+        if (event->type() == QEvent::MouseButtonPress) {
+            // QTimer::singleShot will allow the QLineEdit to handle the event first.
+            QTimer::singleShot(0, lineEdit, &QLineEdit::selectAll);
+            return false;
+        } else if (event->type() == QEvent::KeyPress) {
+            QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+            if (keyEvent->key() == Qt::Key_Tab) {
+                int i, j;
+                bool found = false;
+                for (i = 0; i < _Donnees.size() && !found; ++i) {
+                    for (j = 0; j < _Donnees[i].size() && !found; ++j) {
+                        QLineEdit *currentLineEdit = qobject_cast<QLineEdit *>(scrollAreaLayout->itemAtPosition(i + 1, j)->widget());
+                        if (currentLineEdit == lineEdit) {
+                            found = true;
+                        }
+                    }
+                }
+
+                if (found) {
+                    --i; // Adjust the index to match the actual row in _Donnees.
+                    on_lineEdit_editingFinished(lineEdit->text(), i, j-1);
+
+                    // Move to the next row in the same column.
+                    if (i + 1 < _Donnees.size()) {
+                        QLineEdit *nextLineEdit = qobject_cast<QLineEdit *>(scrollAreaLayout->itemAtPosition(i + 2, j-1)->widget());
+                        if (nextLineEdit) {
+                            std::cout<<i<<" "<<j<<std::endl;
+                            nextLineEdit->setFocus();
+                            nextLineEdit->selectAll();
+                        }
+                    } else {
+                        // If the next row does not exist, stay in the same cell.
+                        lineEdit->setFocus();
+                        lineEdit->selectAll();
+                    }
+                    return true;
+                }
+            }
+        }
+    }
     if (event->type() == QEvent::KeyPress) {
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
 
         if (keyEvent->key() == Qt::Key_R) {
             recopiederniereligne();
+
             return true;
         } else if (keyEvent->key() == Qt::Key_M) {
             showUpdateDialog();
+
             return true;
         } else if (keyEvent->key() == Qt::Key_Z) {
             enleverLigne();
+
             return true;
         } else if (keyEvent->key() == Qt::Key_E) {
             _Donnees.clear();
             clear();
+
             return true;
         } else if (keyEvent->key() == Qt::Key_Control) {
             focusPreviousInput();
+
             return true;
         } else if (keyEvent->key() == Qt::Key_C) {
             calcul();
@@ -480,7 +529,7 @@ void gag::AjoutLigne() {
     // Utilisez la variable fixedHeight pour déterminer la hauteur de la ligne.
     int ROW_HEIGHT = fixedHeight;
 
-    int VERTICAL_SPACING = 15; // Utilisez la même valeur que celle définie pour l'espacement vertical dans scrollAreaLayout.
+    int VERTICAL_SPACING = 1; // Utilisez la même valeur que celle définie pour l'espacement vertical dans scrollAreaLayout.
     int scrollWidgetHeight = (row * ROW_HEIGHT) + ((row - 1) * VERTICAL_SPACING);
     scrollArea->widget()->setMinimumHeight(scrollWidgetHeight);
     scrollArea->widget()->setMaximumHeight(scrollWidgetHeight);
@@ -489,6 +538,9 @@ void gag::AjoutLigne() {
     // Vérifier les propriétés des widgets de défilement (scrollArea et scrollAreaLayout) dans les deux classes pour s'assurer qu'elles sont identiques.
 
     Debit->setFocus(); // Définir le focus sur l'objet "Debit" après avoir ajouté la nouvelle ligne.
+
+    // Scroll to the last line of the scroll area.
+    scrollArea->ensureVisible(0, scrollWidgetHeight);
 }
 
 
@@ -574,21 +626,27 @@ void gag::calcul() {
     double sigmaLongueur = 0;
     double sigmaHauteur = 0;
 
+    int index = 0;
+    index = unite->currentIndex();
     // Effectue les calculs pour chaque ligne de données.
     for (int i = 0; i < _Donnees.size(); ++i) {
 
         // Récupère les données de la ligne courante.
-        sigmaDebit += _Donnees[i][1];
+        sigmaDebit = _Donnees[i][1];
         espacement = _Donnees[i][2];
         diametre = _Donnees[i][3];
         longueur = _Donnees[i][4];
         hauteur = _Donnees[i][5];
 
-        std::cout<< sigmaDebit << " "<< espacement << " " <<diametre << " "<< longueur << " " << hauteur<<std::endl;
+        if(index==0){ // l/h
+            debitLS = sigmaDebit / 3600;
 
-        debitLS = sigmaDebit / 3600;
+        } else if(index==1){ // l/s
+            debitLS = sigmaDebit;
 
-        std::cout<<debitLS<<" "<<k<<std::endl;
+        } else if(index==2){ // m3/h
+            debitLS = sigmaDebit / 3.6;
+        }
 
         // Calcule la perte de charge.
         perteCharge = k * std::pow(debitLS, a) * std::pow(diametre, b) * longueur ;
@@ -623,6 +681,84 @@ void gag::calcul() {
 
     RafraichirTableau();
 }
+/*
+ * void gag::calcul() {
+    if(_Donnees.size()==0) return;
+
+    // Initialise les paramètres.
+    double k = 0;
+    double a = 0;
+    double b = 0;
+
+    // Initialise les variables.
+    double espacement = 0;
+    double diametre = 0;
+    double longueur = 0;
+    double hauteur = 0;
+    double perteCharge = 0;
+    double piezo = 0;
+    double sigmaDebit = 0; // Cumul débit
+    double debitLS = 0;
+
+    std::string material_name = Materiau->currentText().toStdString();
+    auto coefficients = database->get_material_coefficients(material_name);
+
+    a = std::get<0>(coefficients);
+    b = std::get<1>(coefficients);
+    k = std::get<2>(coefficients);
+
+    double sigmaPiezo = 0; // Cumul piezo
+    double sigmaPerte = 0; // Cumul perte
+    double sigmaLongueur = 0;
+    double sigmaHauteur = 0;
+
+    int index = 0;
+    index = unite->currentIndex();
+
+    // Récupère les données de la ligne courante.
+    sigmaDebit = _Donnees[0][1];
+    espacement = _Donnees[0][2];
+    diametre = _Donnees[0][3];
+    longueur = _Donnees[0][4];
+    hauteur = _Donnees[0][5];
+
+    if(index==0){ // l/h
+        debitLS = sigmaDebit / 3600;
+
+    } else if(index==1){ // l/s
+        debitLS = sigmaDebit;
+
+    } else if(index==2){ // m3/h
+        debitLS = sigmaDebit / 3.6;
+    }
+
+    float arosseurs =(longueur + espacement -1 ) /espacement;
+
+    // Calcule la perte de charge.
+    perteCharge = k * std::pow(debitLS, a) * std::pow(diametre, b) * espacement ;
+
+
+    _Donnees[0][6] = perteCharge;
+    _Donnees[0][7] = perteCharge + hauteur;
+    _Donnees[0][8] = perteCharge * arosseurs;
+    _Donnees[0][9] = perteCharge * arosseurs + hauteur * arosseurs;
+
+    // Affiche les résultats dans les cases correspondantes en arrondissant à deux chiffres après la virgule.
+    CumulLongueur->setText(QString::number(sigmaLongueur, 'f', 2));
+    CumulLongueur->setAlignment(Qt::AlignCenter);
+    Cumulhauteur->setText(QString::number(sigmaHauteur, 'f', 2));
+    Cumulhauteur->setAlignment(Qt::AlignCenter);
+    CumulPerte->setText(QString::number(sigmaPerte, 'f', 2));
+    CumulPerte->setAlignment(Qt::AlignCenter);
+    CumulPiezo->setText(QString::number(sigmaPiezo, 'f', 2));
+    CumulPiezo->setAlignment(Qt::AlignCenter);
+
+    RafraichirTableau();
+}
+*/
+
+
+
 
 /*void gag::calcul() {
 
@@ -723,6 +859,9 @@ void gag::clear(){
 
 }
 
+
+
+
 void gag::RafraichirTableau() {
     clear(); // Efface le contenu actuel de la zone de défilement.
 
@@ -740,37 +879,39 @@ void gag::RafraichirTableau() {
             } else { // Sinon, affichez la valeur avec deux décimales.
                 value = new QLineEdit(QString::number(_Donnees[i][j], 'f', 2));
             }
-            // Connect the editingFinished signal for the QLineEdit fields in columns 1, 3, 4, and 5
             if (j == 1 || j == 2 || j == 3 || j == 4 || j == 5) {
                 value->setReadOnly(false);
-
-                QObject::connect(value, &QLineEdit::editingFinished, [this, value, i, j]() {
-                    on_lineEdit_editingFinished(value->text(), i, j);
-                });
+                value->installEventFilter(this); // Install the event filter.
             } else {
                 value->setReadOnly(true);
+            }
+            if (j >= 1 && j <= 5) {
+                value->setStyleSheet("color : #eaff00");
+            } else {
+                value->setStyleSheet("color :  #64f5a3");
+
             }
 
             value->setFixedHeight(fixedHeight); // Définir la taille de la ligne.
             value->setSizePolicy(sizePolicy);
             value->setFixedWidth(180);
             value->setAlignment(alignment);
-            if (j >= 1 && j <= 5) {
-                QPalette palette;
-                value->setStyleSheet("color : #eaff00");
-            } else {
-                value->setStyleSheet("color :  #64f5a3");
 
-            }
             scrollAreaLayout->addWidget(value, i + 1, j, Qt::AlignTop);
         }
         // Définit l'espacement vertical et l'alignement pour la disposition de la zone de défilement.
-        scrollAreaLayout->setVerticalSpacing(15);
         scrollAreaLayout->setAlignment(Qt::AlignTop);
     }
     // Set the vertical spacing and alignment.
     scrollAreaLayout->setVerticalSpacing(1);
     scrollAreaLayout->setAlignment(Qt::AlignTop);
+
+    // Calculate the scroll widget height.
+    int scrollWidgetHeight = (_Donnees.size() * fixedHeight) + ((_Donnees.size() - 1) * 1);
+
+    // Scroll to the last line of the scroll area.
+    scrollArea->ensureVisible(0, scrollWidgetHeight);
+
 }
 
 void gag::on_lineEdit_editingFinished(const QString &text, int row, int col) {
@@ -785,8 +926,14 @@ void gag::on_lineEdit_editingFinished(const QString &text, int row, int col) {
 }
 
 void gag::keyPressEvent(QKeyEvent *event) {
+
+    // Ignore l'effet de la touche Tab.
+    if (event->key() == Qt::Key_Tab) {
+        event->ignore();
+        return;
+    }
     // Vérifie si la touche Shift est enfoncée et si la touche Entrée est également enfoncée.
-    if (event->modifiers() & Qt::ShiftModifier && event->key() == Qt::Key_Return) {
+    else if (event->modifiers() & Qt::ShiftModifier && event->key() == Qt::Key_Return) {
         if (_Donnees.size()!=0) {
         // Appelle la fonction calcul().
              calcul();
@@ -981,6 +1128,7 @@ void gag::enleverLigne() {
     // Crée un slot pour gérer la suppression de la ligne
     auto supprimerLigneSlot = [this, numeroLigneLineEdit, supprimerDialog]() {
         int numeroLigne = numeroLigneLineEdit->text().toInt() - 1;
+        if(numeroLigne > _Donnees.size()) return;
         if (numeroLigne >= 0 && numeroLigne < _Donnees.size()) {
             _Donnees.erase(_Donnees.begin() + numeroLigne); // Supprime la ligne du tableau
             // Réaffecte les numéros de ligne à partir de la ligne supprimée

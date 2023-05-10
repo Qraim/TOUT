@@ -36,91 +36,106 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db, QWidget *parent)
 
   // Ajout des titres des colonnes
   const QStringList headers = {"Numero",    "Debit",   "ΣDebit",  "Diametre",
-                                                             "Longueur ", "Hauteur", "Vitesse", "Perte",
+                                                             "Intervale ", "Hauteur", "Vitesse", "Perte",
                                 "Piezo",     "ΣPerte",  "ΣPiezo"};
 
-                                for (int i = 0; i < headers.size(); ++i) {
-                                                                         QLabel *label = new QLabel(headers[i], headersWidget);
-  label->setAlignment(Qt::AlignCenter);
-  label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-  label->setFixedHeight(40); // Fixe la taille
-  headersGridLayout->addWidget(label, 0, i);
-  headersGridLayout->setHorizontalSpacing(0); // On enlève les espaces
-}
+    for (int i = 0; i < headers.size(); ++i) {
+      QLabel *label = new QLabel(headers[i], headersWidget);
+      label->setAlignment(Qt::AlignCenter);
+      label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+      label->setFixedHeight(40); // Fixe la taille
+      headersGridLayout->addWidget(label, 0, i);
+      headersGridLayout->setHorizontalSpacing(0); // On enlève les espaces
+    }
 
-// Ajoute les unités dans le header
-const QStringList units = {" ",   "l/h", "l/h", "mm", "m", "m",
-                           "m/s", "m",   "m",   "m",  "m"};
+    // Ajoute les unités dans le header
+    const QStringList units = {" ",   " ", " ", "mm", "m", "m",
+                               "m/s", "m",   "m",   "m",  "m"};
 
-// Initialize the 4 input fields
-inputQ = new QLineEdit(this);
-inputD = new QLineEdit(this);
-inputL = new QLineEdit(this);
-inputH = new QLineEdit(this);
 
-inputQ->setMaximumWidth(75);
-inputD->setMaximumWidth(75);
-inputL->setMaximumWidth(75);
-inputH->setMaximumWidth(75);
 
-inputQ->setAlignment(Qt::AlignCenter);
-inputD->setAlignment(Qt::AlignCenter);
-inputL->setAlignment(Qt::AlignCenter);
-inputH->setAlignment(Qt::AlignCenter);
 
-for (int i = 0; i < units.size(); ++i) {
-  QLabel *unitLabel = new QLabel(units[i], headersWidget);
-  unitLabel->setAlignment(Qt::AlignCenter);
-  unitLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-  unitLabel->setFixedHeight(40); // Fixe la taille
-  headersGridLayout->addWidget(unitLabel, 1, i);
-}
+    // Initialize the 4 input fields
+    inputQ = new QLineEdit(this);
+    inputD = new QLineEdit(this);
+    inputL = new QLineEdit(this);
+    inputH = new QLineEdit(this);
 
-// Add input fields to the headersGridLayout
-headersGridLayout->addWidget(inputQ, 2, 1, Qt::AlignCenter);
-headersGridLayout->addWidget(inputD, 2, 3, Qt::AlignCenter);
-headersGridLayout->addWidget(inputL, 2, 4, Qt::AlignCenter);
-headersGridLayout->addWidget(inputH, 2, 5, Qt::AlignCenter);
+    inputQ->setMaximumWidth(75);
+    inputD->setMaximumWidth(75);
+    inputL->setMaximumWidth(75);
+    inputH->setMaximumWidth(75);
 
-// Set horizontal spacing for headersGridLayout to 0
-headersGridLayout->setHorizontalSpacing(0);
+    inputQ->setAlignment(Qt::AlignCenter);
+    inputD->setAlignment(Qt::AlignCenter);
+    inputL->setAlignment(Qt::AlignCenter);
+    inputH->setAlignment(Qt::AlignCenter);
 
-// Add the headersWidget to the main layout
-mainLayout->addWidget(headersWidget);
+    for (int i = 0; i < units.size(); ++i) {
+          if(i!=1){
+              QLabel *unitLabel = new QLabel(units[i], headersWidget);
+              unitLabel->setAlignment(Qt::AlignCenter);
+              unitLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+              unitLabel->setFixedHeight(40); // Fixe la taille
+              headersGridLayout->addWidget(unitLabel, 1, i);
+          } else {
+              unite = new QComboBox(this);
+              unite->addItem("  l/h");
+              unite->addItem("  l/s");
+              unite->addItem(" m3/h");
+              unite->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+              unite->setFixedHeight(40); // Fixe la taille
+              unite->setFixedWidth(80); // Fixe la taille
+              headersGridLayout->addWidget(unite, 1, i);
+              headersGridLayout->setAlignment(unite, Qt::AlignCenter); // Center the QComboBox
+          }
+    }
 
-// Scroll Area and widget
-scrollArea = new QScrollArea(this);
-scrollWidget = new QWidget(scrollArea);
-scrollArea->setWidgetResizable(true);
-scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-scrollArea->setWidget(scrollWidget);
-scrollWidget->setMinimumSize(sizeHint());
+    // Add input fields to the headersGridLayout
+    headersGridLayout->addWidget(inputQ, 2, 1, Qt::AlignCenter);
+    headersGridLayout->addWidget(inputD, 2, 3, Qt::AlignCenter);
+    headersGridLayout->addWidget(inputL, 2, 4, Qt::AlignCenter);
+    headersGridLayout->addWidget(inputH, 2, 5, Qt::AlignCenter);
 
-gridLayout = new QGridLayout(scrollWidget);
-scrollWidget->setLayout(gridLayout);
+    // Set horizontal spacing for headersGridLayout to 0
+    headersGridLayout->setHorizontalSpacing(0);
 
-// Add the scrollArea to the main layout
-mainLayout->addWidget(scrollArea);
+    // Add the headersWidget to the main layout
+    mainLayout->addWidget(headersWidget);
 
-// Bottom Widget and Layout
-QWidget *bottomWidget = new QWidget(this);
-QVBoxLayout *bottomLayout = new QVBoxLayout(bottomWidget);
+    // Scroll Area and widget
+    scrollArea = new QScrollArea(this);
+    scrollWidget = new QWidget(scrollArea);
+    scrollArea->setWidgetResizable(true);
+    scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    scrollArea->setWidget(scrollWidget);
+    scrollWidget->setMinimumSize(sizeHint());
 
-// Add bottomWidget to the main layout
-mainLayout->addWidget(bottomWidget);
+    gridLayout = new QGridLayout(scrollWidget);
+    scrollWidget->setLayout(gridLayout);
 
-// Material ComboBox
-Materiau = new QComboBox(this);
-Materiau->setFixedSize(75, 25);
+    // Add the scrollArea to the main layout
+    mainLayout->addWidget(scrollArea);
 
-std::vector<std::string> matiere_names = database->getAllMatiereNames();
-for (const auto &matiere_name : matiere_names) {
-  Materiau->addItem(QString::fromStdString(matiere_name));
-}
+    // Bottom Widget and Layout
+    QWidget *bottomWidget = new QWidget(this);
+    QVBoxLayout *bottomLayout = new QVBoxLayout(bottomWidget);
 
-// Add the ComboBox to the headersGridLayout
-headersGridLayout->addWidget(Materiau, 2, 0, Qt::AlignCenter);
+    // Add bottomWidget to the main layout
+    mainLayout->addWidget(bottomWidget);
+
+    // Material ComboBox
+    Materiau = new QComboBox(this);
+    Materiau->setFixedSize(75, 25);
+
+    std::vector<std::string> matiere_names = database->getAllMatiereNames();
+    for (const auto &matiere_name : matiere_names) {
+      Materiau->addItem(QString::fromStdString(matiere_name));
+    }
+
+    // Add the ComboBox to the headersGridLayout
+    headersGridLayout->addWidget(Materiau, 2, 0, Qt::AlignCenter);
 
   // AJoute les 4 QLineEdits a BottomWidget
   sigmadebitcase = new QLineEdit(bottomWidget);
@@ -172,10 +187,6 @@ headersGridLayout->addWidget(Materiau, 2, 0, Qt::AlignCenter);
   bottomGrid->addWidget(sigmalongueurcase, 0, 4, Qt::AlignCenter);
   bottomGrid->addWidget(sigmapertecase, 0, 10, Qt::AlignCenter);
   bottomGrid->addWidget(sigmapiezocase, 0, 11, Qt::AlignCenter);
-
-
-
-
 
   QPushButton *saveAsPdfButton = new QPushButton("Export PDF", this);
 
@@ -326,6 +337,11 @@ void pertechargeherse::AjoutDonne() {
   AjoutLigne();
 }
 
+bool pertechargeherse::focusNextPrevChild(bool next) {
+  return false;
+}
+
+
 // La fonction "AjoutLigne" est appelée pour ajouter une nouvelle ligne au
 // pertechargeherse.
 void pertechargeherse::AjoutLigne() {
@@ -382,7 +398,6 @@ void pertechargeherse::AjoutLigne() {
   ligne++; // On incrémente la valeur de "ligne" pour la prochaine ligne à
   // ajouter.
 
-
   // Calcule la hauteur du widget de défilement et ajuste sa hauteur minimum et
   // maximum en conséquence.
   int scrollWidgetHeight =
@@ -390,13 +405,14 @@ void pertechargeherse::AjoutLigne() {
   scrollWidget->setMinimumHeight(scrollWidgetHeight);
   scrollWidget->setMaximumHeight(scrollWidgetHeight);
 
+  scrollArea->ensureVisible(0, scrollWidgetHeight);
+
   // Set the vertical spacing and alignment.
   gridLayout->setVerticalSpacing(VERTICAL_SPACING);
   gridLayout->setAlignment(Qt::AlignTop);
 }
 
 void pertechargeherse::on_lineEdit_editingFinished(const QString &text, int row, int col) {
-  qDebug() << "Row:" << row << "Col:" << col << "Text:" << text;
 
   bool ok;
   float value = text.toFloat(&ok);
@@ -407,8 +423,6 @@ void pertechargeherse::on_lineEdit_editingFinished(const QString &text, int row,
     } else {
       qDebug() << "Error: Invalid row or col value.";
     }
-  } else {
-    // Handle invalid input if necessary
   }
 }
 
@@ -454,7 +468,34 @@ void pertechargeherse::focusNextInput() {
   }
 }
 
+void pertechargeherse::findWidgetIndex(QLineEdit *widget, int &row, int &col) {
+  row = -1;
+  col = -1;
+
+  for (int i = 0; i < _Donnees.size(); ++i) {
+    for (int j = 0; j < _Donnees[i].size(); ++j) {
+      QLineEdit *currentLineEdit = qobject_cast<QLineEdit *>(gridLayout->itemAtPosition(i + 1, j)->widget());
+      if (currentLineEdit == widget) {
+        row = i;
+        col = j;
+        return;
+      }
+    }
+  }
+}
+
+
 bool pertechargeherse::eventFilter(QObject *obj, QEvent *event) {
+
+
+  QLineEdit *lineEdit = qobject_cast<QLineEdit *>(obj);
+
+  // Add static variables to keep track of the initial QLineEdit and the mouse button state.
+  static QLineEdit *initialLineEdit = nullptr;
+  static bool leftMouseButtonPressed = false;
+  static QPoint lastMousePos;
+
+
   if (event->type() == QEvent::KeyPress) {
     QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
 
@@ -468,14 +509,54 @@ bool pertechargeherse::eventFilter(QObject *obj, QEvent *event) {
     } else if (keyEvent->key() == Qt::Key_E) {
       _Donnees.clear();
       clearchild();
+      return true;
     } else if (keyEvent->key() == Qt::Key_M) {
       showUpdateDialog();
+      return true;
+
     } else if (keyEvent->key() == Qt::Key_Z) {
       enleverLigne();
+      return true;
+
     } else if (keyEvent->key() == Qt::Key_C) {
       calcul();
+      return true;
+
     } else if (keyEvent->key() == Qt::Key_Tab) {
-      if (Allinputfill()) {
+      if(lineEdit){
+        if (keyEvent->key() == Qt::Key_Tab) {
+            int i, j;
+            bool found = false;
+            for (i = 0; i < _Donnees.size() && !found; ++i) {
+                for (j = 0; j < _Donnees[i].size() && !found; ++j) {
+                    QLineEdit *currentLineEdit = qobject_cast<QLineEdit *>(gridLayout->itemAtPosition(i + 1, j)->widget());
+                    if (currentLineEdit == lineEdit) {
+                        found = true;
+                    }
+                }
+            }
+
+            if (found) {
+                --i; // Adjust the index to match the actual row in _Donnees.
+                on_lineEdit_editingFinished(lineEdit->text(), i, j-1);
+
+                // Move to the next row in the same column.
+                if (i + 1 < _Donnees.size()) {
+                    QLineEdit *nextLineEdit = qobject_cast<QLineEdit *>(gridLayout->itemAtPosition(i + 2, j-1)->widget());
+                    if (nextLineEdit) {
+                        nextLineEdit->setFocus();
+                        nextLineEdit->selectAll();
+                    }
+                } else {
+                    // If the next row does not exist, stay in the same cell.
+                    lineEdit->setFocus();
+                    lineEdit->selectAll();
+                }
+                return true;
+            }
+        }
+      }
+      else if (Allinputfill()) {
         AjoutDonne();
         return true;
       } else {
@@ -498,6 +579,42 @@ bool pertechargeherse::eventFilter(QObject *obj, QEvent *event) {
       return true;
     }
   }
+  else // Handle mouse events for QLineEdit instances.
+    if (lineEdit) {
+      if (event->type() == QEvent::MouseButtonPress) {
+        QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+        if (mouseEvent->button() == Qt::LeftButton) {
+            leftMouseButtonPressed = true;
+            initialLineEdit = lineEdit;
+            lastMousePos = mouseEvent->pos();
+            QTimer::singleShot(0, lineEdit, &QLineEdit::selectAll);
+            return false;
+        }
+      } else if (event->type() == QEvent::MouseMove && leftMouseButtonPressed) {
+        QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+        if (initialLineEdit && (mouseEvent->pos().y() - lastMousePos.y() > 10)) {
+            lastMousePos = mouseEvent->pos();
+
+            int iInitial, jInitial, iCurrent, jCurrent;
+            findWidgetIndex(initialLineEdit, iInitial, jInitial);
+            findWidgetIndex(lineEdit, iCurrent, jCurrent);
+
+            if (jInitial == jCurrent && iCurrent > iInitial) {
+                for (int i = iInitial + 1; i <= iCurrent; ++i) {
+                    QLineEdit *currentLineEdit = qobject_cast<QLineEdit *>(gridLayout->itemAtPosition(i + 1, jInitial)->widget());
+                    if (currentLineEdit) {
+                        currentLineEdit->setText(initialLineEdit->text());
+                    }
+                }
+            }
+        }
+        return false;
+      } else if (event->type() == QEvent::MouseButtonRelease) {
+        leftMouseButtonPressed = false;
+        initialLineEdit = nullptr;
+        return false;
+      }
+    }
   return QWidget::eventFilter(obj, event);
 }
 
@@ -507,6 +624,12 @@ void pertechargeherse::keyPressEvent(QKeyEvent *event) {
   // Modifier keys status
   bool controlPressed = event->modifiers() & Qt::ControlModifier;
   bool shiftPressed = event->modifiers() & Qt::ShiftModifier;
+
+  // Ignore l'effet de la touche Tab.
+  if (event->key() == Qt::Key_Tab) {
+    event->ignore();
+    return;
+  }
 
   // If the Control key is pressed, focus the previous input.
   if (event->key() == Qt::Key_Control) {
@@ -607,6 +730,8 @@ void pertechargeherse::calcul() {
     return;
   }
 
+  int unit = unite->currentIndex();
+
   // Initialise les paramètres.
   double k = 0;
   float a = 0;
@@ -625,7 +750,7 @@ void pertechargeherse::calcul() {
   float sigmaPiezo = 0; // Cumul piezo
   float sigmaPerte = 0; // Cumul perte
   float sigmaLongueur = 0;
-
+  float sigmaDebitLs = 0;
   std::tuple<float, float, double> coefficients =
       database->get_material_coefficients(
           Materiau->currentText().toStdString());
@@ -635,6 +760,8 @@ void pertechargeherse::calcul() {
 
   // Effectue les calculs pour chaque ligne de données.
   for (int i = 0; i < _Donnees.size(); ++i) {
+
+
     // Calcule le cumul de débit.
     sigmaDebit += _Donnees[i][1];
     _Donnees[i][2] = sigmaDebit;
@@ -644,17 +771,30 @@ void pertechargeherse::calcul() {
     longueur = _Donnees[i][4];
     hauteur = _Donnees[i][5];
 
+    if(unit==0){ // l/h
+      // Calcule le débit en m3/s.
+      debitM3 = sigmaDebit / 1000 /3600;
+
+      // Convertit le débit en l/s.
+      sigmaDebitLs = sigmaDebit / 3600;
+    } else if(unit==1){ // l/s
+      sigmaDebitLs = sigmaDebit;
+
+      // Calcule le débit en m3/s.
+      debitM3 = sigmaDebit / 1000;
+    } else if(unit==2){ // m3/h
+
+      sigmaDebitLs = sigmaDebit / 3.6;
+
+      // Calcule le débit en m3/s.
+      debitM3 = sigmaDebit * 3600;
+    }
+
     // Calcule l'aire du tuyau.
     aireTuyau = (PI * pow((diametre/1000) / 2, 2));
 
-    // Calcule le débit en m3/s.
-    debitM3 = sigmaDebit / 1000 /3600;
-
     // Calcule la vitesse.
     vitesse = debitM3 / aireTuyau;
-
-    // Convertit le débit en l/s.
-    float sigmaDebitLs = sigmaDebit / 3600;
 
     // Calcule la perte de charge.
     perteCharge = k * pow(sigmaDebitLs, a) * pow(diametre, b) * longueur;
@@ -722,6 +862,7 @@ void pertechargeherse::RafraichirTableau() {
     // Détermine la couleur du texte.
     QString textColor;
     for (int i = 0; i < indicesColonnes.size(); ++i) {
+
       if(i == 1 || i == 3 || i == 4 || i == 5){
         textColor = "QLineEdit { color: #eaff00; }";
       }
@@ -731,17 +872,13 @@ void pertechargeherse::RafraichirTableau() {
 
       // Crée une nouvelle ligne de texte.
       QLineEdit *lineEdit = new QLineEdit(scrollWidget);
+      lineEdit->setStyleSheet(textColor);
 
       // Only make the QLineEdit fields for columns 1, 3, 4, and 5 editable
       if (i == 1 || i == 3 || i == 4 || i == 5) {
         lineEdit->setReadOnly(false);
 
-        int currentRow = ligne;
-        QObject::connect(lineEdit, &QLineEdit::editingFinished, [this, lineEdit, i, indicesColonnes, currentRow]() {
-            qDebug() << "lineEdit editingFinished, row:" << (currentRow - 1) << "col:" << indicesColonnes[i];
-            on_lineEdit_editingFinished(lineEdit->text(), currentRow - 1, indicesColonnes[i]);
-        });
-
+        lineEdit->installEventFilter(this); // Install event filter
 
       } else {
         lineEdit->setReadOnly(true);
@@ -759,15 +896,12 @@ void pertechargeherse::RafraichirTableau() {
 
       if (i == 0) {
         lineEdit->setText(QString::number(donneesLigne[i], 'f', 0));
-      } else if (i == 6 && donneesLigne[6] > 2) {
-        lineEdit->setStyleSheet(
-            "QLineEdit { background-color : red; color : white; }");
-        lineEdit->setText(
-            QString::number(donneesLigne[indicesColonnes[i]], 'f', 2));
-      } else {
-        lineEdit->setText(
-            QString::number(donneesLigne[indicesColonnes[i]], 'f', 2));
+      } QString formattedText = QString::number(donneesLigne[indicesColonnes[i]], 'f', 2);
+      if (i == 6 && donneesLigne[6] > 2) {
+        lineEdit->setStyleSheet("QLineEdit { background-color : red; color : white; }");
       }
+      lineEdit->setText(formattedText);
+
 
       // Colorie la ligne en orange pour le milieu hydrolique.
       if (ligne - 1 == indexMilieuHydrolique) {
@@ -775,10 +909,9 @@ void pertechargeherse::RafraichirTableau() {
       }
       // Définit l'espacement vertical du layout.
       gridLayout->setVerticalSpacing(VERTICAL_SPACING);
-
-      // Ajoute la ligne de texte au layout.
-      lineEdit->setStyleSheet(textColor);
       gridLayout->addWidget(lineEdit, ligne, indicesColonnes[i]);
+
+
 
     }
 
@@ -792,6 +925,9 @@ void pertechargeherse::RafraichirTableau() {
       (ligne * ROW_HEIGHT) + ((ligne - 1) * VERTICAL_SPACING);
   scrollWidget->setMinimumHeight(scrollWidgetHeight);
   scrollWidget->setMaximumHeight(scrollWidgetHeight);
+
+  scrollArea->ensureVisible(0, scrollWidgetHeight);
+
 
   // Set the vertical spacing and alignment.
   gridLayout->setVerticalSpacing(VERTICAL_SPACING);
