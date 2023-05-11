@@ -30,7 +30,7 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db, QWidget *parent)
 
   QVBoxLayout *mainLayout = new QVBoxLayout(this);
 
-  // Headers Widget
+  // entete
   QWidget *headersWidget = new QWidget(this);
   QGridLayout *headersGridLayout = new QGridLayout(headersWidget);
 
@@ -55,7 +55,7 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db, QWidget *parent)
 
 
 
-    // Initialize the 4 input fields
+    // 4 champ d'entré
     inputQ = new QLineEdit(this);
     inputD = new QLineEdit(this);
     inputL = new QLineEdit(this);
@@ -91,19 +91,17 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db, QWidget *parent)
           }
     }
 
-    // Add input fields to the headersGridLayout
+    // ajout des entrés
     headersGridLayout->addWidget(inputQ, 2, 1, Qt::AlignCenter);
     headersGridLayout->addWidget(inputD, 2, 3, Qt::AlignCenter);
     headersGridLayout->addWidget(inputL, 2, 4, Qt::AlignCenter);
     headersGridLayout->addWidget(inputH, 2, 5, Qt::AlignCenter);
 
-    // Set horizontal spacing for headersGridLayout to 0
     headersGridLayout->setHorizontalSpacing(0);
 
-    // Add the headersWidget to the main layout
     mainLayout->addWidget(headersWidget);
 
-    // Scroll Area and widget
+    // Scroll Area
     scrollArea = new QScrollArea(this);
     scrollWidget = new QWidget(scrollArea);
     scrollArea->setWidgetResizable(true);
@@ -115,14 +113,12 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db, QWidget *parent)
     gridLayout = new QGridLayout(scrollWidget);
     scrollWidget->setLayout(gridLayout);
 
-    // Add the scrollArea to the main layout
     mainLayout->addWidget(scrollArea);
 
-    // Bottom Widget and Layout
+    // layout du bas
     QWidget *bottomWidget = new QWidget(this);
     QVBoxLayout *bottomLayout = new QVBoxLayout(bottomWidget);
 
-    // Add bottomWidget to the main layout
     mainLayout->addWidget(bottomWidget);
 
     // Material ComboBox
@@ -134,7 +130,6 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db, QWidget *parent)
       Materiau->addItem(QString::fromStdString(matiere_name));
     }
 
-    // Add the ComboBox to the headersGridLayout
     headersGridLayout->addWidget(Materiau, 2, 0, Qt::AlignCenter);
 
   // AJoute les 4 QLineEdits a BottomWidget
@@ -153,11 +148,9 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db, QWidget *parent)
   sigmapertecase->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
   sigmapiezocase->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
-  // Create a QGridLayout for the cases and their corresponding labels
   QGridLayout *bottomGrid = new QGridLayout();
   bottomLayout->addLayout(bottomGrid);
 
-  // Add horizontal spacers to align the cases with their columns
   QSpacerItem *spacer1 = new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Minimum);
   QSpacerItem *spacer2 = new QSpacerItem(5, 1, QSizePolicy::Expanding, QSizePolicy::Minimum);
   QSpacerItem *spacer3 = new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Minimum);
@@ -176,13 +169,12 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db, QWidget *parent)
   bottomGrid->addItem(spacer7, 0, 7);
   bottomGrid->addItem(spacer8, 0, 8);
 
-  // Set the size of the result cases
+  // fixe la taille
   sigmadebitcase->setFixedSize(170, 40);
   sigmalongueurcase->setFixedSize(170, 40);
   sigmapertecase->setFixedSize(170, 40);
   sigmapiezocase->setFixedSize(170, 40);
 
-  // Add the result cases to the QGridLayout
   bottomGrid->addWidget(sigmadebitcase, 0, 2, Qt::AlignCenter);
   bottomGrid->addWidget(sigmalongueurcase, 0, 4, Qt::AlignCenter);
   bottomGrid->addWidget(sigmapertecase, 0, 10, Qt::AlignCenter);
@@ -197,25 +189,21 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db, QWidget *parent)
   QPushButton *saveDataButton = new QPushButton("Sauvergarder", this);
   QPushButton *loadDataButton = new QPushButton("Charger", this);
 
-  // Set maximum width for the buttons
   saveAsPdfButton->setMaximumWidth(140);
   saveDataButton->setMaximumWidth(140);
   loadDataButton->setMaximumWidth(140);
 
-  // Create the buttons for the bottom layout
   QPushButton *calculButton = new QPushButton("Calculer");
   QPushButton *effacerButton = new QPushButton("Effacer");
   QPushButton *modifierButton = new QPushButton("Modifier");
   QPushButton *recopier = new QPushButton("Recopier");
   QPushButton *reinitialiserButton = new QPushButton("Réinitialiser");
 
-  // Set the maximum width for the buttons
   calculButton->setMaximumWidth(140);
   effacerButton->setMaximumWidth(140);
   modifierButton->setMaximumWidth(140);
   reinitialiserButton->setMaximumWidth(140);
   recopier->setMaximumWidth(140);
-
 
   connect(calculButton, &QPushButton::clicked, this, &pertechargeherse::calcul);
   connect(effacerButton, &QPushButton::clicked, this, &pertechargeherse::enleverLigne);
@@ -223,10 +211,8 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db, QWidget *parent)
   connect(reinitialiserButton, &QPushButton::clicked, this, &pertechargeherse::refresh);
   connect(recopier, &QPushButton::clicked, this, &pertechargeherse::recopiederniereligne);
 
-  // Create QHBoxLayout for the buttons
   QHBoxLayout *buttonsLayout = new QHBoxLayout();
 
-  // Add stretch, buttons, and another stretch to center the buttons
   buttonsLayout->addStretch(1);
   buttonsLayout->addWidget(calculButton);
   buttonsLayout->addWidget(effacerButton);
@@ -238,34 +224,24 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db, QWidget *parent)
   buttonsLayout->addWidget(loadDataButton);
   buttonsLayout->addStretch(1);
 
-  // Connect buttons to their respective slots (functions)
   connect(saveAsPdfButton, &QPushButton::clicked, this, &pertechargeherse::saveAsPdf);
   connect(saveDataButton, &QPushButton::clicked, this, &pertechargeherse::saveDataWrapper);
   connect(loadDataButton, &QPushButton::clicked, this, &pertechargeherse::loadDataWrapper);
 
-  // Add buttonsLayout to the main layout (assuming mainLayout is the main layout)
   mainLayout->addLayout(buttonsLayout);
 
   inputQ->setFocus();
 
-  // Définir l'espacement des inputsLayout et bottomLayout
   bottomLayout->setSpacing(5);
-
-  // Add buttonsLayout to the inputsLayout
 
   inputD->installEventFilter(this);
   inputQ->installEventFilter(this);
   inputH->installEventFilter(this);
   inputL->installEventFilter(this);
 
-
-
-
-  // Get the available geometry of the screen
   QDesktopWidget desktop;
   QRect screenSize = desktop.availableGeometry(this);
 
-  // Set the window size to the screen size
   this->setGeometry(screenSize);
 }
 
@@ -317,8 +293,6 @@ void pertechargeherse::AjoutDonne() {
   int numero = _Donnees.size() + 1; // numéro
 
   std::vector<float> temp(11, 0.0f); // variable temporaire
-
-  std::cout<<hauteur<<std::endl;
 
   temp[0] = numero;
   temp[1] = debit;
@@ -499,13 +473,13 @@ bool pertechargeherse::eventFilter(QObject *obj, QEvent *event) {
   if (event->type() == QEvent::KeyPress) {
     QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
 
-    // Modifier keys status
+    // Modifiers
     bool controlPressed = keyEvent->modifiers() & Qt::ControlModifier;
     bool shiftPressed = keyEvent->modifiers() & Qt::ShiftModifier;
 
     if (keyEvent->key() == Qt::Key_R) {
       recopiederniereligne();
-      return true; // Mark the event as handled
+      return true; // marqué l'event comme fait
     } else if (keyEvent->key() == Qt::Key_E) {
       _Donnees.clear();
       clearchild();
@@ -537,10 +511,10 @@ bool pertechargeherse::eventFilter(QObject *obj, QEvent *event) {
             }
 
             if (found) {
-                --i; // Adjust the index to match the actual row in _Donnees.
+                --i; // ajustement de l'index
                 on_lineEdit_editingFinished(lineEdit->text(), i, j-1);
 
-                // Move to the next row in the same column.
+                // On bouge à la ligne du dessous
                 if (i + 1 < _Donnees.size()) {
                     QLineEdit *nextLineEdit = qobject_cast<QLineEdit *>(gridLayout->itemAtPosition(i + 2, j-1)->widget());
                     if (nextLineEdit) {
@@ -560,7 +534,7 @@ bool pertechargeherse::eventFilter(QObject *obj, QEvent *event) {
         AjoutDonne();
         return true;
       } else {
-        return true; // prevent the natural action of tab
+        return true; // retire l'action naturel de tab
       }
     }
     // Save as PDF (Ctrl + S)
@@ -579,7 +553,7 @@ bool pertechargeherse::eventFilter(QObject *obj, QEvent *event) {
       return true;
     }
   }
-  else // Handle mouse events for QLineEdit instances.
+  else  // clique de souris dans la grille
     if (lineEdit) {
       if (event->type() == QEvent::MouseButtonPress) {
         QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
@@ -621,54 +595,46 @@ bool pertechargeherse::eventFilter(QObject *obj, QEvent *event) {
 
 void pertechargeherse::keyPressEvent(QKeyEvent *event) {
 
-  // Modifier keys status
   bool controlPressed = event->modifiers() & Qt::ControlModifier;
   bool shiftPressed = event->modifiers() & Qt::ShiftModifier;
 
-  // Ignore l'effet de la touche Tab.
   if (event->key() == Qt::Key_Tab) {
     event->ignore();
     return;
   }
 
-  // If the Control key is pressed, focus the previous input.
   if (event->key() == Qt::Key_Control) {
     focusPreviousInput();
     return;
   }
 
-  // If the Tab or Enter key is pressed.
+  // si tab ou entrée est appuyé
   else if (event->key() == Qt::Key_Tab || event->key() == Qt::Key_Return) {
 
-    // If Shift+Enter is pressed and all data is filled, perform the calculation.
     if (shiftPressed && event->key() == Qt::Key_Return && Allinputfill()) {
       calcul();
       return;
     }
-
-    // If Enter is pressed and all data is filled, add the data.
     else if (event->key() == Qt::Key_Return && Allinputfill()) {
       AjoutDonne();
     }
 
-    //if all input are filled and we press tab it start calcul().
     else if (event->key() == Qt::Key_Tab && Allinputfill()){
 
-      //prevent normal tab action
       event->accept();
 
       AjoutDonne();
       return;
     }
 
-    // Otherwise, focus the next input.
+    // changer le champ d'entré
     else {
       focusNextInput();
     }
 
   }
 
-  // If the E key is pressed, delete all data.
+  // E pour effacer toutes les données
   else if (event->key() == Qt::Key_E) {
     _Donnees.clear();
     clearchild();
@@ -678,19 +644,19 @@ void pertechargeherse::keyPressEvent(QKeyEvent *event) {
     calcul();
   }
 
-  // If the R key is pressed and there is data, copy the last line.
+  // R copie la derniere ligne
   else if (event->key() == Qt::Key_R) {
     if (_Donnees.size() > 0) {
       recopiederniereligne();
     }
   }
 
-  // If the M key is pressed, open the dialog box to modify a line.
+  // si M est appuyé ouvre la fenetre de modification
   else if (event->key() == Qt::Key_M) {
     showUpdateDialog();
   }
 
-  // If the Z key is pressed, remove a line.
+  // si Z est appuyé ouvre la fenetre pour retirer une ligne
   else if (event->key() == Qt::Key_Z) {
     enleverLigne();
   }
@@ -874,7 +840,6 @@ void pertechargeherse::RafraichirTableau() {
       QLineEdit *lineEdit = new QLineEdit(scrollWidget);
       lineEdit->setStyleSheet(textColor);
 
-      // Only make the QLineEdit fields for columns 1, 3, 4, and 5 editable
       if (i == 1 || i == 3 || i == 4 || i == 5) {
         lineEdit->setReadOnly(false);
 

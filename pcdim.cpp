@@ -56,7 +56,7 @@ pcdim::pcdim(std::shared_ptr<bdd> db,QWidget *parent)
     mainLayout->addWidget(buttons[1], 1, 3);
     connect(buttons[1], &QPushButton::clicked, this, &pcdim::clearInput);
 
-    // ComboBoxes for diameter
+    // ComboBoxes pour le diametre
     mainLayout->addWidget(materialComboBox, 2, 0);
     mainLayout->addWidget(pressureComboBox, 2, 1);
     mainLayout->addWidget(innerDiameterComboBox, 2, 3);

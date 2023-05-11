@@ -366,7 +366,6 @@ bool gag::eventFilter(QObject *watched, QEvent *event) {
                     if (i + 1 < _Donnees.size()) {
                         QLineEdit *nextLineEdit = qobject_cast<QLineEdit *>(scrollAreaLayout->itemAtPosition(i + 2, j-1)->widget());
                         if (nextLineEdit) {
-                            std::cout<<i<<" "<<j<<std::endl;
                             nextLineEdit->setFocus();
                             nextLineEdit->selectAll();
                         }

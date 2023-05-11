@@ -134,13 +134,13 @@ void MainWindow::onSwitchButtonClicked() {
 void MainWindow::updateSecondComboBox(int index) {
     Pression.clear(); // Clear the contents to replace them
 
-    // Get the selected material
+    // materiau selectionné
     QString selected_material = Materiau.itemText(index);
 
-    // Get all the different pressure values for the selected material
+    // valeur de pressions
     std::vector<int> pressures = database->getAllPressuresForMatiere(selected_material.toStdString());
 
-    // Fill the Pression ComboBox with available pressure values
+    // On remplis la comboox avec les pressions
     for (const auto& pressure : pressures) {
         Pression.addItem(QString::number(pressure));
     }

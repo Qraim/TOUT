@@ -8,12 +8,12 @@ gag2::gag2(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent),database(d
   setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
 
 
-  QStringList headers = {" " ,"Débit", "Espacement", "Diamètre", "Longueur", "Hauteur", "Perte", "Piezo"};
+  QStringList headers = {"Matiere" ,"Débit", "Espacement", "Diamètre", "Longueur", "Hauteur", "Perte", "Piezo"};
   QStringList units = {" ", "m", "m", "mm", "m", "m", "m"};
 
   for (int i = 0; i < headers.size(); ++i) {
     QLabel *headerLabel = new QLabel(headers[i], this);
-    headerLabel->setFixedSize(200,20);
+    headerLabel->setFixedSize(200,30);
     headerLabel->setAlignment(Qt::AlignCenter);
     gridLayout->addWidget(headerLabel, 0, i);
   }
@@ -68,6 +68,14 @@ gag2::gag2(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent),database(d
   calculateButton->setFixedSize(200,40);
   connect(calculateButton, &QPushButton::clicked, this, &gag2::calcul);
   gridLayout->addWidget(calculateButton, 3, 3, Qt::AlignCenter);
+
+  QPushButton *diametre = new QPushButton("Diametres", this);
+  diametre->setFixedSize(200,40);
+  connect(diametre, &QPushButton::clicked, [=]() {
+      database->afficher_tableaux();
+  });
+
+  gridLayout->addWidget(diametre, 4, 0, Qt::AlignCenter);
 
   _Longueur = new QLineEdit(this);
   _Hauteur = new QLineEdit(this);
@@ -154,9 +162,9 @@ void gag2::calcul() {
     debitLS = (debit ) / 3.6;
   }
 
-  for (int i = 1; i <= arosseurs; i++) {  // Change the loop condition to i <= arosseur
+  for (int i = 1; i <= arosseurs; i++) {
 
-    double pressureLossPerSegment = k * std::pow(debitLS*i, a) * std::pow(diametre, b) * espacement;  // Use espacement instead of longueur
+    double pressureLossPerSegment = k * std::pow(debitLS*i, a) * std::pow(diametre, b) * espacement;  // formule de perte de charge
     perte += pressureLossPerSegment;
   }
 

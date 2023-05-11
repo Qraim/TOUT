@@ -32,21 +32,16 @@ tout::tout(QWidget *parent) : QWidget(parent) {
     goutte2 = std::make_unique<gag2>(database, nullptr);
     goutte2->setWindowFlags(Qt::Window);
 
-    // Create the main options buttons
     QPushButton *mainOptionButton = new QPushButton("Perte de charge", this);
     QPushButton *subOptionButton = new QPushButton("Herse d'alimentation", this);
 
-    // Set button styles
     QString buttonStyle = "QPushButton { font-weight: bold; font-size: 24px; padding: 6px 12px; min-width: 100px; }";
     mainOptionButton->setStyleSheet(buttonStyle);
     subOptionButton->setStyleSheet(buttonStyle);
 
-    // Create the start button
     QPushButton *startButton = new QPushButton("Lancer", this);
     startButton->setStyleSheet(buttonStyle);
 
-
-    // Connect mainOptionButton's clicked signal to a lambda function to update the options
     connect(mainOptionButton, &QPushButton::clicked, [=]() {
         static int mainOptionIndex = 0;
         mainOptionIndex = (mainOptionIndex + 1) % 3;
@@ -67,7 +62,6 @@ tout::tout(QWidget *parent) : QWidget(parent) {
         }
     });
 
-    // Connect subOptionButton's clicked signal to a lambda function to update the sub-options
     connect(subOptionButton, &QPushButton::clicked, [=]() {
         QString currentText = subOptionButton->text();
         QString mainOptionText = mainOptionButton->text();
@@ -105,13 +99,12 @@ tout::tout(QWidget *parent) : QWidget(parent) {
         } else if (mainOptionText == "Diamètre") {
             on_show_pcdimm_button_clicked();
         } else if (mainOptionText == "Débit") {
-            // Add appropriate cases for Débit if necessary
+            // Option à ajouter dans le futur
             on_show_MW_button_clicked();
         }
     });
 
 
-    // Create the QPushButton for the database
     QPushButton *openDatabaseButton = new QPushButton("Base de données", this);
     QString openDatabaseButtonStyle = "QPushButton { font-weight: bold; font-size: 24px; padding: 6px 12px; }";
     openDatabaseButton->setStyleSheet(openDatabaseButtonStyle);
@@ -122,34 +115,29 @@ tout::tout(QWidget *parent) : QWidget(parent) {
     mainLayout->setAlignment(Qt::AlignTop);
     mainLayout->setSpacing(20);
 
-    // Create QHBoxLayouts for each button
     QHBoxLayout *mainOptionLayout = new QHBoxLayout();
     QHBoxLayout *subOptionLayout = new QHBoxLayout();
     QHBoxLayout *startButtonLayout = new QHBoxLayout();
     QHBoxLayout *openDatabaseLayout = new QHBoxLayout();
 
-    // Add buttons to their respective layouts with stretch factors
     mainOptionLayout->addWidget(mainOptionButton, 1);
     subOptionLayout->addWidget(subOptionButton, 1);
     startButtonLayout->addWidget(startButton, 1);
     openDatabaseLayout->addWidget(openDatabaseButton, 1);
 
-    // Set button size policies to expanding
     mainOptionButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     subOptionButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     startButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     openDatabaseButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
-
-    // Add QHBoxLayouts to the main layout
     mainLayout->addLayout(mainOptionLayout);
     mainLayout->addLayout(subOptionLayout);
     mainLayout->addLayout(startButtonLayout);
     mainLayout->addLayout(openDatabaseLayout);
 
-    // Set the layout for the widget
     setLayout(mainLayout);
 
+    this->setFixedSize(this->width()-250, this->height()-200);
 }
 
 void tout::on_show_tubesimple_button_clicked() {
