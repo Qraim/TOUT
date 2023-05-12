@@ -753,7 +753,7 @@ void pertechargeherse::calcul() {
       sigmaDebitLs = sigmaDebit / 3.6;
 
       // Calcule le débit en m3/s.
-      debitM3 = sigmaDebit * 3600;
+      debitM3 = sigmaDebit / 3600;
     }
 
     // Calcule l'aire du tuyau.

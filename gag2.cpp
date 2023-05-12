@@ -172,8 +172,9 @@ void gag2::calcul() {
 
   _Longueur->setText(QString::number(longueur));
   _Hauteur->setText(QString::number(hauteur));
-  _Perte->setText(QString::number(perte));
-  _Piezo->setText(QString::number(piezo));
+  _Perte->setText(QString::number(perte, 'f', 2));
+  _Piezo->setText(QString::number(piezo, 'f', 2));
+
 }
 
 bool gag2::eventFilter(QObject *obj, QEvent *event) {

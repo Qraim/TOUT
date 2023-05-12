@@ -6,9 +6,11 @@
 #include <QIcon>
 
 tout::tout(QWidget *parent) : QWidget(parent) {
+
     setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
 
     setWindowIcon(QIcon("./logo.png"));
+
     setWindowTitle(QString::fromStdString("PACHA"));
 
     database = std::make_shared<bdd>(nullptr);
@@ -20,124 +22,140 @@ tout::tout(QWidget *parent) : QWidget(parent) {
     pcdimm = std::make_unique<pcdim>(database, nullptr);
     pcdimm->setWindowFlags(Qt::Window);
 
-    MW = std::make_unique<MainWindow>(database, nullptr);
+    MW = std::make_unique<MainWindow>(database,nullptr);
     MW->setWindowFlags(Qt::Window);
 
-    perteherse = std::make_unique<pertechargeherse>(database, nullptr);
+    perteherse = std::make_unique<pertechargeherse>(database,nullptr);
     perteherse->setWindowFlags(Qt::Window);
 
-    goutte = std::make_unique<gag>(database, nullptr);
+    goutte = std::make_unique<gag>(database,nullptr);
     goutte->setWindowFlags(Qt::Window);
 
-    goutte2 = std::make_unique<gag2>(database, nullptr);
+    goutte2 = std::make_unique<gag2>(database,nullptr);
     goutte2->setWindowFlags(Qt::Window);
 
-    QPushButton *mainOptionButton = new QPushButton("Perte de charge", this);
-    QPushButton *subOptionButton = new QPushButton("Herse d'alimentation", this);
+    // Créez le premier QComboBox avec des options principales
+    QComboBox *mainOptionsComboBox = new QComboBox(this);
+    mainOptionsComboBox->addItem("Perte de charge");
+    mainOptionsComboBox->addItem("Diametre");
+    mainOptionsComboBox->addItem("Débit");
 
-    QString buttonStyle = "QPushButton { font-weight: bold; font-size: 24px; padding: 6px 12px; min-width: 100px; }";
-    mainOptionButton->setStyleSheet(buttonStyle);
-    subOptionButton->setStyleSheet(buttonStyle);
+        // Créez le deuxième QComboBox pour les sous-options
+        QComboBox *subOptionsComboBox = new QComboBox(this);
 
-    QPushButton *startButton = new QPushButton("Lancer", this);
-    startButton->setStyleSheet(buttonStyle);
+    // Connectez le signal currentIndexChanged du premier QComboBox pour mettre à jour le deuxième QComboBox
+    connect(mainOptionsComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), [=](int index) {
+        subOptionsComboBox->clear();
+        switch (index) {
+        case 0: // Perte
+            subOptionsComboBox->addItem("Herse d'alimentation");
+            subOptionsComboBox->addItem("Goutte à goutte");
+                subOptionsComboBox->addItem("Goutte à goutte 2");
 
-    connect(mainOptionButton, &QPushButton::clicked, [=]() {
-        static int mainOptionIndex = 0;
-        mainOptionIndex = (mainOptionIndex + 1) % 3;
-
-        switch (mainOptionIndex) {
-            case 0: // Perte
-                mainOptionButton->setText("Perte de charge");
-                subOptionButton->setText("Herse d'alimentation");
-                break;
-            case 1: // Diametre
-                mainOptionButton->setText("Diamètre");
-                subOptionButton->setText("Un peu tout");
-                break;
-            case 2: // Débit
-                mainOptionButton->setText("Débit");
-                subOptionButton->setText("Tube simple");
-                break;
+                subOptionsComboBox->addItem("Tube simple");
+            break;
+        case 1: // Diametre
+            subOptionsComboBox->addItem("Un peu tout");
+            break;
+        case 2 :
+            subOptionsComboBox->addItem("Tube simple");
+            break;
         }
     });
 
-    connect(subOptionButton, &QPushButton::clicked, [=]() {
-        QString currentText = subOptionButton->text();
-        QString mainOptionText = mainOptionButton->text();
-
-        if (mainOptionText == "Perte de charge") {
-            if (currentText == "Herse d'alimentation") {
-                subOptionButton->setText("Goutte à goutte");
-            } else if (currentText == "Goutte à goutte") {
-                subOptionButton->setText("Tube simple");
-
-            } else if (currentText == "Tube simple") {
-                subOptionButton->setText("Herse d'alimentation");
-            }
-        } else if (mainOptionText == "Diamètre") {
-            // Add additional cases for Diamètre if necessary
-        } else if (mainOptionText == "Débit") {
-            // Add additional cases for Débit if necessary
-        }
-    });
-
-    connect(startButton, &QPushButton::clicked, [=]() {
-        QString mainOptionText = mainOptionButton->text();
-        QString subOptionText = subOptionButton->text();
-
-        if (mainOptionText == "Perte de charge") {
-            if (subOptionText == "Herse d'alimentation") {
-                on_show_pertechargeherse_button_clicked();
-            } else if (subOptionText == "Goutte à goutte") {
-                on_show_gag2_button_clicked();
-            } else if (subOptionText == "Goutte à goutte 2") {
-                on_show_gag_button_clicked();
-            } else if (subOptionText == "Tube simple") {
-                on_show_tubesimple_button_clicked();
-            }
-        } else if (mainOptionText == "Diamètre") {
-            on_show_pcdimm_button_clicked();
-        } else if (mainOptionText == "Débit") {
-            // Option à ajouter dans le futur
-            on_show_MW_button_clicked();
-        }
-    });
-
-
+    // Créez le QPushButton pour ouvrir la base de données
     QPushButton *openDatabaseButton = new QPushButton("Base de données", this);
-    QString openDatabaseButtonStyle = "QPushButton { font-weight: bold; font-size: 24px; padding: 6px 12px; }";
+
+        // Définir le style pour openDatabaseButton
+        QString openDatabaseButtonStyle = "QPushButton { font-weight: bold; font-size: 24px; padding: 6px 12px; }";
     openDatabaseButton->setStyleSheet(openDatabaseButtonStyle);
-    // Connect the clicked signal of openDatabaseButton to the slot on_show_database_button_clicked()
+
+    // Positionner l'openDatabaseButton dans le coin supérieur droit de la fenêtre
+    openDatabaseButton->setGeometry(width() - openDatabaseButton->width() - 20, 20, openDatabaseButton->width(), openDatabaseButton->height());
+    openDatabaseButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+
+    // Connectez le signal cliqué de openDatabaseButton au slot on_show_database_button_clicked()
     connect(openDatabaseButton, &QPushButton::clicked, this, &tout::on_show_database_button_clicked);
 
-    QVBoxLayout *mainLayout = new QVBoxLayout(this);
-    mainLayout->setAlignment(Qt::AlignTop);
-    mainLayout->setSpacing(20);
+    QPushButton *startButton = new QPushButton("Lancer", this);
 
-    QHBoxLayout *mainOptionLayout = new QHBoxLayout();
-    QHBoxLayout *subOptionLayout = new QHBoxLayout();
-    QHBoxLayout *startButtonLayout = new QHBoxLayout();
-    QHBoxLayout *openDatabaseLayout = new QHBoxLayout();
+    connect(startButton, &QPushButton::clicked, [=]() {
+        switch (mainOptionsComboBox->currentIndex()) {
+        case 0: // Perte
+            if (subOptionsComboBox->currentIndex() == 0) {
+                on_show_pertechargeherse_button_clicked();
+            } else if (subOptionsComboBox->currentIndex() == 1) {
+                on_show_gag2_button_clicked();
 
-    mainOptionLayout->addWidget(mainOptionButton, 1);
-    subOptionLayout->addWidget(subOptionButton, 1);
-    startButtonLayout->addWidget(startButton, 1);
-    openDatabaseLayout->addWidget(openDatabaseButton, 1);
+            } else if (subOptionsComboBox->currentIndex() == 2) {
+                on_show_tubesimple_button_clicked();
+            }
+            break;
+        case 1: // Diametre
+            if (subOptionsComboBox->currentIndex() == 0) {
+                on_show_pcdimm_button_clicked();
+            } else if (subOptionsComboBox->currentIndex() == 1) {
+                on_show_MW_button_clicked();
+            }
+            break;
+        case 2: // BDD
+            if (subOptionsComboBox->currentIndex() == 0) {
+                on_show_MW_button_clicked();
+            }
+            break;
+        }
+    });
 
-    mainOptionButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    subOptionButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    startButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    openDatabaseButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    subOptionsComboBox->addItem("Herse d'alimentation");
+    subOptionsComboBox->addItem("Goutte à goutte");
+    subOptionsComboBox->addItem("Tube simple");
 
-    mainLayout->addLayout(mainOptionLayout);
-    mainLayout->addLayout(subOptionLayout);
-    mainLayout->addLayout(startButtonLayout);
-    mainLayout->addLayout(openDatabaseLayout);
+    // Créez un QGridLayout avec 3 colonnes et 4 lignes
+    QGridLayout *gridLayout = new QGridLayout(this);
+    gridLayout->setSpacing(20);
 
-    setLayout(mainLayout);
+    // Ajoutez un QLabel sur la deuxième colonne de la première ligne
+    QLabel *label1 = new QLabel("Type de calcul");
+    label1->setAlignment(Qt::AlignCenter);
+    gridLayout->addWidget(label1, 0, 0);
 
-    this->setFixedSize(this->width()-250, this->height()-200);
+    // Ajoutez un QLabel sur la deuxième colonne de la deuxième ligne
+    QLabel *label2 = new QLabel("Type de tuyau");
+    label2->setAlignment(Qt::AlignCenter);
+    gridLayout->addWidget(label2, 1, 0);
+
+    // Ajoutez openDatabaseButton sur la première colonne de la dernière ligne
+    gridLayout->addWidget(openDatabaseButton, 3, 0);
+
+    // Ajoutez startButton sur la deuxième colonne de la troisième ligne
+    gridLayout->addWidget(startButton, 2, 1);
+
+    // Ajoutez mainOptionsComboBox sur les trois colonnes de la première ligne
+    gridLayout->addWidget(mainOptionsComboBox, 0, 1);
+
+    // Ajoutez subOptionsComboBox sur la deuxième colonne de la deuxième ligne
+    gridLayout->addWidget(subOptionsComboBox, 1, 1);
+
+    // Définir le layout pour le widget
+    setLayout(gridLayout);
+    layout()->setSizeConstraint(QLayout::SetFixedSize);
+
+    // Définir des styles pour les widgets QComboBox et le bouton de démarrage
+    QString comboBoxStyle = "QComboBox { font-weight: bold; font-size: 24px; padding: 6px 12px; min-width: 150px; }";
+    QString buttonStyle = "QPushButton { font-weight: bold; font-size: 24px; padding: 6px 12px; min-width: 100px; }";
+
+    // Créez un style pour les labels
+    QString labelStyle = "QLabel { font-weight: bold; font-size: 24px; padding: 6px 12px; }";
+
+    // Appliquez le style aux labels
+    label1->setStyleSheet(labelStyle);
+    label2->setStyleSheet(labelStyle);
+
+    mainOptionsComboBox->setStyleSheet(comboBoxStyle);
+    subOptionsComboBox->setStyleSheet(comboBoxStyle);
+    startButton->setStyleSheet(buttonStyle);
+    openDatabaseButton->setStyleSheet(openDatabaseButtonStyle);
+
 }
 
 void tout::on_show_tubesimple_button_clicked() {
@@ -177,7 +195,6 @@ void tout::on_show_gag2_button_clicked() {
 void tout::closeEvent(QCloseEvent *event) {
     QApplication::quit();
 }
-
 
 
 
