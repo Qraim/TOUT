@@ -85,7 +85,7 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db, QWidget *parent)
               unite->addItem(" m3/h");
               unite->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
               unite->setFixedHeight(40); // Fixe la taille
-              unite->setFixedWidth(80); // Fixe la taille
+              unite->setFixedWidth(100); // Fixe la taille
               headersGridLayout->addWidget(unite, 1, i);
               headersGridLayout->setAlignment(unite, Qt::AlignCenter); // Center the QComboBox
           }
@@ -316,12 +316,9 @@ bool pertechargeherse::focusNextPrevChild(bool next) {
 }
 
 
-// La fonction "AjoutLigne" est appelée pour ajouter une nouvelle ligne au
-// pertechargeherse.
 void pertechargeherse::AjoutLigne() {
 
-  if (_Donnees
-      .empty()) { // Si le vecteur "_Donnees" est vide, sort de la fonction.
+  if (_Donnees.empty()) { // Si le vecteur "_Donnees" est vide, sort de la fonction.
     return;
   }
 
@@ -335,8 +332,12 @@ void pertechargeherse::AjoutLigne() {
 
     QLineEdit *lineEdit = new QLineEdit(scrollWidget);
     // Make QLineEdit editable
-    lineEdit->setReadOnly(true);
-
+    if (i == 1 || i == 3 || i == 4 || i == 5) {
+              lineEdit->setReadOnly(false);
+              lineEdit->installEventFilter(this); // Install event filter
+    } else {
+              lineEdit->setReadOnly(true);
+    }
 
     lineEdit->setAlignment(Qt::AlignCenter);
     lineEdit->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -344,22 +345,16 @@ void pertechargeherse::AjoutLigne() {
     lineEdit->setFixedHeight(40);
     lineEdit->setStyleSheet("color: yellow;"); // Changer la couleur du texte en bleu
 
-
-    if (indices[i] != -1) { // Si l'indice n'est pas égal à -1, on remplit la
-      // case correspondante avec la donnée.
-      if (i == 0) {
-        lineEdit->setText(QString::number(
-            rowData[i], 'f', 0)); // Formatte la donnée en nombre entier s'il
-        // s'agit de la première colonne.
-      } else {
-        lineEdit->setText(
-            QString::number(rowData[indices[i]], 'f',
-                            2)); // Formatte la donnée en nombre décimal s'il
-        // s'agit d'une autre colonne.
-      }
+    if (indices[i] != -1) { // Si l'indice n'est pas égal à -1, on remplit la case correspondante avec la donnée.
+              if (i == 0) {
+                  lineEdit->setText(QString::number(static_cast<int>(rowData[i]))); // Formatte la donnée en nombre entier s'il s'agit de la première colonne.
+              } else {
+                  lineEdit->setText(
+                      QString::number(rowData[indices[i]], 'f',
+                                      2)); // Formatte la donnée en nombre décimal s'il s'agit d'une autre colonne.
+              }
     } else {
-      lineEdit->setText(
-          ""); // Si l'indice est égal à -1, on laisse la case vide.
+              lineEdit->setText(""); // Si l'indice est égal à -1, on laisse la case vide.
     }
 
     // Définit l'espacement vertical du layout.
@@ -860,12 +855,15 @@ void pertechargeherse::RafraichirTableau() {
       lineEdit->setFixedWidth(200);
 
       if (i == 0) {
-        lineEdit->setText(QString::number(donneesLigne[i], 'f', 0));
-      } QString formattedText = QString::number(donneesLigne[indicesColonnes[i]], 'f', 2);
-      if (i == 6 && donneesLigne[6] > 2) {
-        lineEdit->setStyleSheet("QLineEdit { background-color : red; color : white; }");
+        lineEdit->setText(QString::number(static_cast<int>(donneesLigne[i])));
+      } else {
+        QString formattedText = QString::number(donneesLigne[indicesColonnes[i]], 'f', 2);
+        if (i == 6 && donneesLigne[6] > 2) {
+            lineEdit->setStyleSheet("QLineEdit { background-color : red; color : white; }");
+        }
+        lineEdit->setText(formattedText);
       }
-      lineEdit->setText(formattedText);
+
 
 
       // Colorie la ligne en orange pour le milieu hydrolique.

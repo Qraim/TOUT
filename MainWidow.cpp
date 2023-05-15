@@ -33,10 +33,17 @@ MainWindow::MainWindow(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent
     gridLayout->addWidget(new QLabel("Pression : "), 1, 0);
     gridLayout->addWidget(&Pression, 1, 1);
 
+    Unite = new QComboBox();
+    Unite->addItem("m3/h");
+    Unite->addItem("l/h");
+    Unite->addItem("l/s");
+    //Unite->setFixedWidth(100);
+
     // Débit et Vitesse
     gridLayout->addWidget(new QLabel("Débit : "), 2, 0);
     gridLayout->addWidget(&debit, 2, 1);
-    gridLayout->addWidget(new QLabel("m³/h"), 2, 2);
+    gridLayout->addWidget(Unite, 2, 2);
+
     gridLayout->addWidget(new QLabel("Vitesse : "), 3, 0);
     gridLayout->addWidget(&vitesse, 3, 1);
     gridLayout->addWidget(new QLabel("m/s"), 3, 2);
@@ -176,7 +183,18 @@ float MainWindow::calcullongueurdeniv() {
 
     QString debitText = debit.text();
     debitText.replace(',', '.');
-    float debits = (debitText.toFloat()*1000)/3600;
+    float debitValue = debitText.toFloat();
+
+    QString unit = Unite->currentText();
+
+    if (unit == "l/h") {
+        debitValue = (debitValue / 1000); // Convert to m³/h
+    } else if (unit == "l/s") {
+        debitValue = (debitValue * 3.6); // Convert to m³/h
+    } // else: m³/h, pas de conversion
+
+    float debits = (debitValue * 1000) / 3600;
+
 
     QString espacementText = longueur.text();
     espacementText.replace(',', '.');

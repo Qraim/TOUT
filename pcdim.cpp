@@ -30,8 +30,13 @@ pcdim::pcdim(std::shared_ptr<bdd> db,QWidget *parent)
     labels[0] = new QLabel("Débit", this);
     mainLayout->addWidget(labels[0], 0, 0);
 
-    unitsLabels[0] = new QLabel("(m3/h)", this);
-    mainLayout->addWidget(unitsLabels[0], 0, 2);
+    Unite = new QComboBox();
+    Unite->addItem("m3/h");
+    Unite->addItem("l/h");
+    Unite->addItem("l/s");
+    Unite->setFixedWidth(100);
+    Unite->setFixedHeight(40);
+    mainLayout->addWidget(Unite, 0, 2);
 
     inputs[0] = new QLineEdit(this);
     mainLayout->addWidget(inputs[0], 0, 1);
@@ -171,7 +176,17 @@ float pcdim::calculvitesse()
 {
     QString debittext = inputs[0]->text();
     debittext.replace(',', '.');
-    float debit = (debittext.toFloat()*1000)/3600;
+    float debitValue = debittext.toFloat();
+
+    QString unit = Unite->currentText();
+
+    if (unit == "l/h") {
+        debitValue = (debitValue / 1000); // Convert to m³/h
+    } else if (unit == "l/s") {
+        debitValue = (debitValue * 3.6); // Convert to m³/h
+    } // else: m³/h, no conversion needed
+
+    float debit = (debitValue*1000)/3600;
 
     QString diametretext = innerDiameterComboBox->currentText();
     diametretext.replace(',', '.');
@@ -185,8 +200,17 @@ float pcdim::calculdiametre()
 {
     QString debittext = inputs[0]->text();
     debittext.replace(',', '.');
-    float debit_m3h = debittext.toFloat();
-    float debit_m3s = debit_m3h / 3600; // Convert m³/h to m³/s
+    float debitValue = debittext.toFloat();
+
+    QString unit = Unite->currentText();
+
+    if (unit == "l/h") {
+        debitValue = (debitValue / 1000); // Convert to m³/h
+    } else if (unit == "l/s") {
+        debitValue = (debitValue * 3.6); // Convert to m³/h
+    } // else: m³/h, no conversion needed
+
+    float debit_m3s = debitValue / 3600; // Convert m³/h to m³/s
 
     QString vitessetext = inputs[2]->text();
     vitessetext.replace(',', '.');
@@ -215,8 +239,17 @@ float pcdim::calculperte() {
 
     QString debittext = inputs[0]->text();
     debittext.replace(',', '.');
-    float debit_ls = (debittext.toFloat()*1000) / 3600;
+    float debitValue = debittext.toFloat();
 
+    QString unit = Unite->currentText();
+
+    if (unit == "l/h") {
+        debitValue = (debitValue / 1000); // Convert to m³/h
+    } else if (unit == "l/s") {
+        debitValue = (debitValue * 3.6); // Convert to m³/h
+    } // else: m³/h, no conversion needed
+
+    float debit_ls = (debitValue * 1000) / 3600;
     std::string materiel = materialComboBox->currentText().toStdString();
 
     std::tuple<float, float, double> material_properties = getMaterialProperties(materiel);

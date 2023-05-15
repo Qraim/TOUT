@@ -53,6 +53,7 @@ private:
 
     QComboBox Materiau;
     QComboBox Pression;
+    QComboBox *Unite;
 
     QLineEdit debit;
     QLineEdit vitesse;

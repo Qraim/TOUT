@@ -61,6 +61,7 @@ private:
     QComboBox *materialComboBox;
     QComboBox *pressureComboBox;
     QComboBox *innerDiameterComboBox;
+    QComboBox *Unite;
 
     ///
     /// @return
