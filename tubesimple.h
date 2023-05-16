@@ -54,6 +54,7 @@ private:
     std::shared_ptr<bdd> database;
 
     QComboBox materiau;
+    QComboBox *unite;
 
     QLineEdit debit;
     QLineEdit diametre;

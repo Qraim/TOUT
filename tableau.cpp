@@ -8,6 +8,10 @@
 
 const int ROW_HEIGHT = 40;
 const int VERTICAL_SPACING = 1;
+const double LH_TO_M3S = 1.0 / (1000.0 * 3600.0);
+const double LS_TO_M3S = 1.0 / 1000.0;
+const double M3H_TO_M3S = 1.0 / 3600.0;
+
 
 float PI =3.14159265359;
 
@@ -194,6 +198,7 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db, QWidget *parent)
   loadDataButton->setMaximumWidth(140);
 
   QPushButton *calculButton = new QPushButton("Calculer");
+  QPushButton *insererbutton = new QPushButton("Insérer");
   QPushButton *effacerButton = new QPushButton("Effacer");
   QPushButton *modifierButton = new QPushButton("Modifier");
   QPushButton *recopier = new QPushButton("Recopier");
@@ -210,6 +215,7 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db, QWidget *parent)
   connect(modifierButton, &QPushButton::clicked, this, &pertechargeherse::showUpdateDialog);
   connect(reinitialiserButton, &QPushButton::clicked, this, &pertechargeherse::refresh);
   connect(recopier, &QPushButton::clicked, this, &pertechargeherse::recopiederniereligne);
+  connect(insererbutton, &QPushButton::clicked, this, &pertechargeherse::addRow);
 
   QHBoxLayout *buttonsLayout = new QHBoxLayout();
 
@@ -218,6 +224,7 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db, QWidget *parent)
   buttonsLayout->addWidget(effacerButton);
   buttonsLayout->addWidget(modifierButton);
   buttonsLayout->addWidget(recopier);
+  buttonsLayout->addWidget(insererbutton);
   buttonsLayout->addWidget(reinitialiserButton);
   buttonsLayout->addWidget(saveAsPdfButton);
   buttonsLayout->addWidget(saveDataButton);
@@ -487,7 +494,11 @@ bool pertechargeherse::eventFilter(QObject *obj, QEvent *event) {
       enleverLigne();
       return true;
 
-    } else if (keyEvent->key() == Qt::Key_C) {
+    }  else if (keyEvent->key() == Qt::Key_I) {
+      addRow();
+      return true;
+    }
+    else if (keyEvent->key() == Qt::Key_C) {
       calcul();
       return true;
 
@@ -547,6 +558,7 @@ bool pertechargeherse::eventFilter(QObject *obj, QEvent *event) {
       loadDataWrapper();
       return true;
     }
+
   }
   else  // clique de souris dans la grille
     if (lineEdit) {
@@ -654,6 +666,10 @@ void pertechargeherse::keyPressEvent(QKeyEvent *event) {
   // si Z est appuyé ouvre la fenetre pour retirer une ligne
   else if (event->key() == Qt::Key_Z) {
     enleverLigne();
+  }
+
+  else if (event->key() == Qt::Key_I) {
+    addRow();
   }
 
   // Save as PDF (Ctrl + S)
@@ -1345,8 +1361,108 @@ void pertechargeherse::loadData(const QString &fileName) {
     _Donnees.push_back(row);
   }
 
-  // Refresh the display and recalculate the data after loading
   RafraichirTableau();
   calcul();
 }
 
+#include <QSpinBox>
+
+void pertechargeherse::addRow() {
+
+  if(_Donnees.size()==0) return;
+  // Ouvrir le QDialog pour l'ajout d'une ligne
+  QDialog addRowDialog;
+  addRowDialog.setWindowTitle("Ajouter une ligne");
+  addRowDialog.setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
+
+  // Créer les widgets
+  QSpinBox *positionSpinBox = new QSpinBox(&addRowDialog);
+  positionSpinBox->setRange(1, _Donnees.size() + 1);
+  positionSpinBox->setValue(_Donnees.size() + 1);
+
+  QLineEdit *debitSpinBox = new QLineEdit(&addRowDialog);
+  QLineEdit *diametreSpinBox = new QLineEdit(&addRowDialog);
+  QLineEdit *longueurSpinBox = new QLineEdit(&addRowDialog);
+  QLineEdit *hauteurSpinBox = new QLineEdit(&addRowDialog);
+
+  QPushButton *okButton = new QPushButton("OK", &addRowDialog);
+  QPushButton *cancelButton = new QPushButton("Annuler", &addRowDialog);
+
+  // Organiser les widgets dans une disposition
+  QFormLayout *layout = new QFormLayout(&addRowDialog);
+  layout->addRow("Position : ", positionSpinBox);
+  layout->addRow("Débit : ", debitSpinBox);
+      layout->addRow("Diamètre : ", diametreSpinBox);
+      layout->addRow("Longueur : ", longueurSpinBox);
+  layout->addRow("Hauteur : ", hauteurSpinBox);
+  layout->addWidget(okButton);
+  layout->addWidget(cancelButton);
+
+  // Connecter le bouton OK à la fonction pour insérer la nouvelle ligne
+  QObject::connect(okButton, &QPushButton::clicked, [this, &addRowDialog, positionSpinBox, debitSpinBox, diametreSpinBox, longueurSpinBox, hauteurSpinBox]() {
+      // Obtenir la position souhaitée pour la nouvelle ligne
+      int position = positionSpinBox->value() - 1;
+
+      QString debitText = debitSpinBox->text();
+      debitText.replace(',', '.');
+      float debit = debitText.toFloat();
+
+      QString diametreText = diametreSpinBox->text();
+      diametreText.replace(',', '.');
+      float diametre = diametreText.toFloat();
+
+      QString longueurtexte = longueurSpinBox->text();
+      longueurtexte.replace(',', '.');
+      float longueur = longueurtexte.toFloat();
+
+      QString hauteurtext = hauteurSpinBox->text();
+      hauteurtext.replace(',', '.');
+      float hauteur = hauteurtext.toFloat();
+
+      // Créez une nouvelle ligne avec les valeurs entrées par l'utilisateur
+      std::vector<float> newRow(11, 0.0);
+      newRow[0] = static_cast<float>(position + 1);
+      newRow[1] = static_cast<float>(debit);
+      newRow[3] = static_cast<float>(diametre);
+      newRow[4] = static_cast<float>(longueur);
+      newRow[5] = static_cast<float>(hauteur);
+
+      // Insérer la nouvelle ligne à la position souhaitée
+      this->insererLigne(position, newRow);
+
+      // Fermer le dialogue
+      addRowDialog.accept();
+  });
+
+  // Connecter le bouton Annuler pour fermer le dialogue
+  QObject::connect(cancelButton, &QPushButton::clicked, &addRowDialog, &QDialog::reject);
+
+  // Afficher le dialogue et attendre la confirmation de l'utilisateur
+  addRowDialog.exec();
+}
+
+
+
+void pertechargeherse::insererLigne(int position, const std::vector<float>& newRow) {
+  // Créer un nouveau vecteur pour stocker les données modifiées
+  std::vector<std::vector<float>> newDonnees;
+
+  // Copier les éléments existants et insérer la nouvelle ligne à la position donnée
+  for (size_t i = 0; i < _Donnees.size() + 1; ++i) {
+    if (i == position) {
+      newDonnees.push_back(newRow);
+    } else if (i > position) {
+      std::vector<float> updatedRow = _Donnees[i - 1];
+      updatedRow[0] = static_cast<float>(i + 1);
+      newDonnees.push_back(updatedRow);
+    } else {
+      newDonnees.push_back(_Donnees[i]);
+    }
+  }
+
+  // Remplacer les anciennes données par les nouvelles
+  _Donnees = newDonnees;
+
+  // Recalculer les données et mettre à jour le tableau
+  calcul();
+}

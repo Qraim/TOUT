@@ -70,8 +70,15 @@ private:
 
     void on_show_gag2_button_clicked();
 
+    QString keySequence;
+
+
 protected:
     void closeEvent(QCloseEvent *event) override;
+
+    bool eventFilter(QObject *obj, QEvent *event) override;
+signals:
+    void sequenceDetected();
 
 };
 

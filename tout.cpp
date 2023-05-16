@@ -7,6 +7,8 @@
 
 tout::tout(QWidget *parent) : QWidget(parent) {
 
+    installEventFilter(this);
+
     setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
 
     setWindowIcon(QIcon("./logo.png"));
@@ -50,9 +52,7 @@ tout::tout(QWidget *parent) : QWidget(parent) {
         case 0: // Perte
             subOptionsComboBox->addItem("Herse d'alimentation");
             subOptionsComboBox->addItem("Goutte à goutte");
-                subOptionsComboBox->addItem("Goutte à goutte 2");
-
-                subOptionsComboBox->addItem("Tube simple");
+            subOptionsComboBox->addItem("Tube simple");
             break;
         case 1: // Diametre
             subOptionsComboBox->addItem("Un peu tout");
@@ -86,7 +86,6 @@ tout::tout(QWidget *parent) : QWidget(parent) {
                 on_show_pertechargeherse_button_clicked();
             } else if (subOptionsComboBox->currentIndex() == 1) {
                 on_show_gag2_button_clicked();
-
             } else if (subOptionsComboBox->currentIndex() == 2) {
                 on_show_tubesimple_button_clicked();
             }
@@ -194,6 +193,25 @@ void tout::on_show_gag2_button_clicked() {
 
 void tout::closeEvent(QCloseEvent *event) {
     QApplication::quit();
+}
+
+bool tout::eventFilter(QObject *obj, QEvent *event) {
+    if (event->type() == QEvent::KeyPress) {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+        keySequence += keyEvent->text();
+
+        if (keySequence.length() > 4) {
+            keySequence.remove(0, 1);
+        }
+
+        if (keySequence == "dino") {
+            std::cout<<"OUI"<<std::endl;
+            emit sequenceDetected();
+            return true;
+        }
+    }
+
+    return QWidget::eventFilter(obj, event);
 }
 
 

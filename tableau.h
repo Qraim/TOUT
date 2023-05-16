@@ -137,6 +137,10 @@ private:
 
     void findWidgetIndex(QLineEdit *widget, int &row, int &col);
 
+    void addRow();
+
+    void insererLigne(int position, const std::vector<float>& newRow);
+
 protected :
 
     bool eventFilter(QObject *obj, QEvent *event) override;

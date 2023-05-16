@@ -20,6 +20,11 @@ tubesimple::tubesimple(std::shared_ptr<bdd> db, QWidget *parent)
         materiau.addItem(QString::fromStdString(matiere_name));
     }
 
+    unite = new QComboBox(this);
+    unite->addItem("m3/h");
+    unite->addItem("l/h");
+    unite->addItem("l/s");
+
     // Créé la grille
     QGridLayout *gridLayout = new QGridLayout;
 
@@ -35,18 +40,20 @@ tubesimple::tubesimple(std::shared_ptr<bdd> db, QWidget *parent)
     // On ajoute les éléments à leur place dans la grille
     gridLayout->addWidget(new QLabel("Materiau", this), 1, 0);
     gridLayout->addWidget(&materiau, 2, 0);
-    gridLayout->addWidget(new QLabel("Debit (m3/h)", this), 1, 1);
+    gridLayout->addWidget(new QLabel("Debit", this), 1, 1);
     debit.setFixedWidth(110);
     gridLayout->addWidget(&debit, 2, 1);
-    gridLayout->addWidget(new QLabel("Diametre (mm)", this), 1, 2);
+    unite->setFixedWidth(90);
+    gridLayout->addWidget(unite, 2, 2);
+    gridLayout->addWidget(new QLabel("Diametre (mm)", this), 1, 3);
     diametre.setFixedWidth(120);
-    gridLayout->addWidget(&diametre, 2, 2);
-    gridLayout->addWidget(new QLabel("Longueur (m)", this), 1, 3);
+    gridLayout->addWidget(&diametre, 2, 3);
+    gridLayout->addWidget(new QLabel("Longueur (m)", this), 1, 4);
     longueur.setFixedWidth(110);
-    gridLayout->addWidget(&longueur, 2, 3);
-    gridLayout->addWidget(new QLabel("Denivele (m)", this), 1, 4);
+    gridLayout->addWidget(&longueur, 2, 4);
+    gridLayout->addWidget(new QLabel("Denivele (m)", this), 1, 5);
     denivele.setFixedWidth(110);
-    gridLayout->addWidget(&denivele, 2, 4);
+    gridLayout->addWidget(&denivele, 2, 5);
 
     // La derniere ligne pour les résultats
     QHBoxLayout *resultLabelsLayout = new QHBoxLayout;
@@ -187,6 +194,11 @@ void tubesimple::focusNextInput() {
 }
 
 void tubesimple::calculer() {
+
+    int index = unite->currentIndex();
+    float flowRate = 0;
+    float dLS=0;
+
     
     QString debitText = debit.text();
     debitText.replace(',', '.');
@@ -200,6 +212,19 @@ void tubesimple::calculer() {
     diametreText.replace(',', '.');
     float L = diametreText.toFloat();
 
+    std::cout<<index<<std::endl;
+
+    if(index==0){
+        flowRate = D / 3600; // Convertit m³/h en m³/s
+        dLS = D /3600 * 1000;
+    }else if(index==1){
+        flowRate = D/(1000*3600);
+        dLS = D/3600;
+    } else {
+        flowRate = D/1000;
+        dLS = D;
+    }
+
     float deniveles = 0;
     double  k =0;
     float a=0;
@@ -210,7 +235,6 @@ void tubesimple::calculer() {
         deniveles = denivele.text().toFloat();
     }
 
-    float flowRate = D / 3600; // Convertit m³/h en m³/s
     float pipeDiameter = Dia / 1000; // Convertit mm en m
 
     float pipeArea = M_PI * pow(pipeDiameter / 2, 2); // Calcule l'aire de la section transversale du tuyau en m²
@@ -221,7 +245,7 @@ void tubesimple::calculer() {
     b = std::get<1>(coefficients);
     k = std::get<2>(coefficients);
 
-    float pertecharge = k * pow(D /3600 * 1000, a) * pow(Dia, b) * L; // Calcule la perte de charge en Pa
+    float pertecharge = k * pow(dLS, a) * pow(Dia, b) * L; // Calcule la perte de charge en Pa
     float variation = pertecharge+deniveles; // Calcule la variation de charge en Pa
 
     Perte.setText(QString::number(pertecharge, 'f', 2)); // Met à jour le texte de la QLineEdit "Perte"
