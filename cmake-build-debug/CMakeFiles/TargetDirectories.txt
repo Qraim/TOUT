@@ -1,4 +1,4 @@
-/Users/qraim/CLionProjects/TOUT333/cmake-build-debug/CMakeFiles/Tout.dir
-/Users/qraim/CLionProjects/TOUT333/cmake-build-debug/CMakeFiles/edit_cache.dir
-/Users/qraim/CLionProjects/TOUT333/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/Users/qraim/CLionProjects/TOUT333/cmake-build-debug/CMakeFiles/Tout_autogen.dir
+/Users/qraim/CLionProjects/TOUT/cmake-build-debug/CMakeFiles/Tout.dir
+/Users/qraim/CLionProjects/TOUT/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/qraim/CLionProjects/TOUT/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/Users/qraim/CLionProjects/TOUT/cmake-build-debug/CMakeFiles/Tout_autogen.dir

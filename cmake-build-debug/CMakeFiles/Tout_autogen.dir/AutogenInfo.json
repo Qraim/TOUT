@@ -1,17 +1,17 @@
 {
-	"BUILD_DIR" : "/Users/qraim/CLionProjects/TOUT4/cmake-build-debug/Tout_autogen",
-	"CMAKE_BINARY_DIR" : "/Users/qraim/CLionProjects/TOUT4/cmake-build-debug",
-	"CMAKE_CURRENT_BINARY_DIR" : "/Users/qraim/CLionProjects/TOUT4/cmake-build-debug",
-	"CMAKE_CURRENT_SOURCE_DIR" : "/Users/qraim/CLionProjects/TOUT4",
+	"BUILD_DIR" : "/Users/qraim/CLionProjects/TOUT/cmake-build-debug/Tout_autogen",
+	"CMAKE_BINARY_DIR" : "/Users/qraim/CLionProjects/TOUT/cmake-build-debug",
+	"CMAKE_CURRENT_BINARY_DIR" : "/Users/qraim/CLionProjects/TOUT/cmake-build-debug",
+	"CMAKE_CURRENT_SOURCE_DIR" : "/Users/qraim/CLionProjects/TOUT",
 	"CMAKE_EXECUTABLE" : "/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake",
 	"CMAKE_LIST_FILES" : 
 	[
-		"/Users/qraim/CLionProjects/TOUT4/CMakeLists.txt",
-		"/Users/qraim/CLionProjects/TOUT4/cmake-build-debug/CMakeFiles/3.25.2/CMakeSystem.cmake",
+		"/Users/qraim/CLionProjects/TOUT/CMakeLists.txt",
+		"/Users/qraim/CLionProjects/TOUT/cmake-build-debug/CMakeFiles/3.25.2/CMakeSystem.cmake",
 		"/Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.25/Modules/CMakeSystemSpecificInitialize.cmake",
 		"/Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.25/Modules/Platform/Darwin-Initialize.cmake",
-		"/Users/qraim/CLionProjects/TOUT4/cmake-build-debug/CMakeFiles/3.25.2/CMakeCCompiler.cmake",
-		"/Users/qraim/CLionProjects/TOUT4/cmake-build-debug/CMakeFiles/3.25.2/CMakeCXXCompiler.cmake",
+		"/Users/qraim/CLionProjects/TOUT/cmake-build-debug/CMakeFiles/3.25.2/CMakeCCompiler.cmake",
+		"/Users/qraim/CLionProjects/TOUT/cmake-build-debug/CMakeFiles/3.25.2/CMakeCXXCompiler.cmake",
 		"/Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.25/Modules/CMakeSystemSpecificInformation.cmake",
 		"/Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.25/Modules/CMakeGenericSystem.cmake",
 		"/Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.25/Modules/CMakeInitializeConfigs.cmake",
@@ -78,57 +78,75 @@
 		"/opt/homebrew/opt/qt@5/lib/cmake/Qt5Widgets/Qt5WidgetsMacros.cmake",
 		"/Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.25/Modules/CMakeParseArguments.cmake"
 	],
-	"CMAKE_SOURCE_DIR" : "/Users/qraim/CLionProjects/TOUT4",
+	"CMAKE_SOURCE_DIR" : "/Users/qraim/CLionProjects/TOUT",
 	"DEP_FILE" : "",
 	"DEP_FILE_RULE_NAME" : "",
 	"HEADERS" : 
 	[
 		[
-			"/Users/qraim/CLionProjects/TOUT4/MainWidow.h",
+			"/Users/qraim/CLionProjects/TOUT/MainWidow.h",
 			"MU",
 			"EWIEGA46WW/moc_MainWidow.cpp",
 			null
 		],
 		[
-			"/Users/qraim/CLionProjects/TOUT4/bdd.h",
+			"/Users/qraim/CLionProjects/TOUT/bdd.h",
 			"MU",
 			"EWIEGA46WW/moc_bdd.cpp",
 			null
 		],
 		[
-			"/Users/qraim/CLionProjects/TOUT4/gag.h",
+			"/Users/qraim/CLionProjects/TOUT/etude.h",
+			"MU",
+			"EWIEGA46WW/moc_etude.cpp",
+			null
+		],
+		[
+			"/Users/qraim/CLionProjects/TOUT/gag.h",
 			"MU",
 			"EWIEGA46WW/moc_gag.cpp",
 			null
 		],
 		[
-			"/Users/qraim/CLionProjects/TOUT4/pcdim.h",
+			"/Users/qraim/CLionProjects/TOUT/gag2.h",
+			"MU",
+			"EWIEGA46WW/moc_gag2.cpp",
+			null
+		],
+		[
+			"/Users/qraim/CLionProjects/TOUT/parcelle.h",
+			"MU",
+			"EWIEGA46WW/moc_parcelle.cpp",
+			null
+		],
+		[
+			"/Users/qraim/CLionProjects/TOUT/pcdim.h",
 			"MU",
 			"EWIEGA46WW/moc_pcdim.cpp",
 			null
 		],
 		[
-			"/Users/qraim/CLionProjects/TOUT4/tableau.h",
+			"/Users/qraim/CLionProjects/TOUT/tableau.h",
 			"MU",
 			"EWIEGA46WW/moc_tableau.cpp",
 			null
 		],
 		[
-			"/Users/qraim/CLionProjects/TOUT4/tout.h",
+			"/Users/qraim/CLionProjects/TOUT/tout.h",
 			"MU",
 			"EWIEGA46WW/moc_tout.cpp",
 			null
 		],
 		[
-			"/Users/qraim/CLionProjects/TOUT4/tubesimple.h",
+			"/Users/qraim/CLionProjects/TOUT/tubesimple.h",
 			"MU",
 			"EWIEGA46WW/moc_tubesimple.cpp",
 			null
 		]
 	],
 	"HEADER_EXTENSIONS" : [ "h", "hh", "h++", "hm", "hpp", "hxx", "in", "txx" ],
-	"INCLUDE_DIR" : "/Users/qraim/CLionProjects/TOUT4/cmake-build-debug/Tout_autogen/include",
-	"MOC_COMPILATION_FILE" : "/Users/qraim/CLionProjects/TOUT4/cmake-build-debug/Tout_autogen/mocs_compilation.cpp",
+	"INCLUDE_DIR" : "/Users/qraim/CLionProjects/TOUT/cmake-build-debug/Tout_autogen/include",
+	"MOC_COMPILATION_FILE" : "/Users/qraim/CLionProjects/TOUT/cmake-build-debug/Tout_autogen/mocs_compilation.cpp",
 	"MOC_DEFINITIONS" : [ "QT_CORE_LIB", "QT_GUI_LIB", "QT_WIDGETS_LIB" ],
 	"MOC_DEPEND_FILTERS" : 
 	[
@@ -161,27 +179,30 @@
 		"-c",
 		"/Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.25/Modules/CMakeCXXCompilerABI.cpp"
 	],
-	"MOC_PREDEFS_FILE" : "/Users/qraim/CLionProjects/TOUT4/cmake-build-debug/Tout_autogen/moc_predefs.h",
+	"MOC_PREDEFS_FILE" : "/Users/qraim/CLionProjects/TOUT/cmake-build-debug/Tout_autogen/moc_predefs.h",
 	"MOC_RELAXED_MODE" : false,
 	"MOC_SKIP" : [],
 	"MULTI_CONFIG" : false,
 	"PARALLEL" : 8,
-	"PARSE_CACHE_FILE" : "/Users/qraim/CLionProjects/TOUT4/cmake-build-debug/CMakeFiles/Tout_autogen.dir/ParseCache.txt",
+	"PARSE_CACHE_FILE" : "/Users/qraim/CLionProjects/TOUT/cmake-build-debug/CMakeFiles/Tout_autogen.dir/ParseCache.txt",
 	"QT_MOC_EXECUTABLE" : "/opt/homebrew/opt/qt@5/bin/moc",
 	"QT_UIC_EXECUTABLE" : "/opt/homebrew/opt/qt@5/bin/uic",
 	"QT_VERSION_MAJOR" : 5,
 	"QT_VERSION_MINOR" : 15,
-	"SETTINGS_FILE" : "/Users/qraim/CLionProjects/TOUT4/cmake-build-debug/CMakeFiles/Tout_autogen.dir/AutogenUsed.txt",
+	"SETTINGS_FILE" : "/Users/qraim/CLionProjects/TOUT/cmake-build-debug/CMakeFiles/Tout_autogen.dir/AutogenUsed.txt",
 	"SOURCES" : 
 	[
-		[ "/Users/qraim/CLionProjects/TOUT4/MainWidow.cpp", "MU", null ],
-		[ "/Users/qraim/CLionProjects/TOUT4/bdd.cpp", "MU", null ],
-		[ "/Users/qraim/CLionProjects/TOUT4/gag.cpp", "MU", null ],
-		[ "/Users/qraim/CLionProjects/TOUT4/main.cpp", "MU", null ],
-		[ "/Users/qraim/CLionProjects/TOUT4/pcdim.cpp", "MU", null ],
-		[ "/Users/qraim/CLionProjects/TOUT4/tableau.cpp", "MU", null ],
-		[ "/Users/qraim/CLionProjects/TOUT4/tout.cpp", "MU", null ],
-		[ "/Users/qraim/CLionProjects/TOUT4/tubesimple.cpp", "MU", null ]
+		[ "/Users/qraim/CLionProjects/TOUT/MainWidow.cpp", "MU", null ],
+		[ "/Users/qraim/CLionProjects/TOUT/bdd.cpp", "MU", null ],
+		[ "/Users/qraim/CLionProjects/TOUT/etude.cpp", "MU", null ],
+		[ "/Users/qraim/CLionProjects/TOUT/gag.cpp", "MU", null ],
+		[ "/Users/qraim/CLionProjects/TOUT/gag2.cpp", "MU", null ],
+		[ "/Users/qraim/CLionProjects/TOUT/main.cpp", "MU", null ],
+		[ "/Users/qraim/CLionProjects/TOUT/parcelle.cpp", "MU", null ],
+		[ "/Users/qraim/CLionProjects/TOUT/pcdim.cpp", "MU", null ],
+		[ "/Users/qraim/CLionProjects/TOUT/tableau.cpp", "MU", null ],
+		[ "/Users/qraim/CLionProjects/TOUT/tout.cpp", "MU", null ],
+		[ "/Users/qraim/CLionProjects/TOUT/tubesimple.cpp", "MU", null ]
 	],
 	"UIC_OPTIONS" : [],
 	"UIC_SEARCH_PATHS" : [],
