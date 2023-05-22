@@ -168,6 +168,8 @@ public:
 
     void on_show_formula_button_clicked();
 
+    QString getFormulaText(int index);
+
 };
 
 

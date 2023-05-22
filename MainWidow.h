@@ -60,6 +60,14 @@ private:
     QLineEdit longueur;
     QLineEdit denivele;
 
+    QLabel *debitLabel;
+    QLabel *vitesseLabel;
+    QLabel *longueurLabel;
+    QLabel *deniveleLabel;
+    QLabel *vitesseUnite;
+    QLabel *longueurUnite;
+    QLabel *deniveleUnite;
+
     QLabel Champresultat;
     QLineEdit Champligne;
     QLineEdit ChampVitesse;

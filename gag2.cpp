@@ -107,28 +107,22 @@ gag2::gag2(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent),database(d
 void gag2::calcul() {
 
   QString debitText = Q->text();
-  Q->clear();
-  Q->setFocus();
   debitText.replace(',', '.');
   float debit = debitText.toFloat();
 
   QString espacementText = E->text();
-  E->clear();
   espacementText.replace(',', '.');
   float espacement = espacementText.toFloat();
 
   QString diametreText = D->text();
-  D->clear();
   diametreText.replace(',', '.');
   float diametre = diametreText.toFloat();
 
   QString longueurText = L->text();
-  L->clear();
   longueurText.replace(',', '.');
   float longueur = longueurText.toFloat();
 
   QString hauteurText = H->text();
-  H->clear();
   hauteurText.replace(',', '.');
   float hauteur = hauteurText.toFloat();
 
@@ -174,6 +168,8 @@ void gag2::calcul() {
   _Hauteur->setText(QString::number(hauteur));
   _Perte->setText(QString::number(perte, 'f', 2));
   _Piezo->setText(QString::number(piezo, 'f', 2));
+
+  D->setFocus();
 
 }
 

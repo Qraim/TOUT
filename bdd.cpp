@@ -1074,42 +1074,71 @@ void bdd::on_show_formula_button_clicked() {
     formulaDialog.setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
 
     formulaDialog.setWindowTitle("Formula");
-    formulaDialog.setMinimumSize(400, 300); // Définir une taille minimale pour le QDialog
+    formulaDialog.setMinimumSize(400, 300);
 
     QVBoxLayout *layout = new QVBoxLayout();
 
-    // Créer un QHBoxLayout pour aligner le bouton en haut à droite
     QHBoxLayout *topLayout = new QHBoxLayout();
     topLayout->addStretch(1);
 
-    // Créer le bouton pour afficher les coefficients
-    QPushButton *showCoefficientsButton = new QPushButton("Afficher les coefficients", &formulaDialog);
-    topLayout->addWidget(showCoefficientsButton);
+    QLabel *selectFormulaLabel = new QLabel("Formules : ");
+    topLayout->addWidget(selectFormulaLabel);
 
-    // Ajoutez le QHBoxLayout en haut de la fenêtre
+    QComboBox *formulaSelection = new QComboBox(&formulaDialog);
+    formulaSelection->addItem("Perte de charge");
+    formulaSelection->addItem("Vitesse");
+    formulaSelection->addItem("Piezo");
+    topLayout->addWidget(formulaSelection);
+
     layout->addLayout(topLayout);
 
     QLabel *formulaLabel = new QLabel(&formulaDialog);
-    formulaLabel->setTextFormat(Qt::RichText); // Utiliser le rendu HTML
-    formulaLabel->setText(QString("<p style=\"font-size: 18pt;\"><b>Perte</b> = k * Q<sup>a</sup> * D<sup>b</sup> * L<sup>m</sup></p>"
-                                  "<p style=\"font-size: 14pt;\"><b>Unités:</b></p>"
-                                  "<ul style=\"font-size: 14pt;\">"
-                                  "<li>Perte: m</li>"
-                                  "<li>Q: L/s</li>"
-                                  "<li>D: mm</li>"
-                                  "<li>L: m</li>"
-                                  "</ul>"));
+    formulaLabel->setTextFormat(Qt::RichText);
+    formulaLabel->setText(getFormulaText(0)); // Affiche la première formule par défaut
     layout->addWidget(formulaLabel);
 
     QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok, &formulaDialog);
     layout->addWidget(buttonBox);
 
-    // Connectez le signal clicked() du bouton pour afficher les coefficients au slot montre_coef()
-    connect(showCoefficientsButton, &QPushButton::clicked, this, &bdd::montre_coef);
+    // Connectez le signal currentIndexChanged() du QComboBox à un slot pour mettre à jour la formule
+    connect(formulaSelection, QOverload<int>::of(&QComboBox::currentIndexChanged), [&](int index) {
+        formulaLabel->setText(getFormulaText(index));
+    });
+
     connect(buttonBox, &QDialogButtonBox::accepted, &formulaDialog, &QDialog::accept);
 
     formulaDialog.setLayout(layout);
     formulaDialog.exec();
 }
+
+QString bdd::getFormulaText(int index) {
+    if (index == 0) { // Perte de charge
+        return QString("<p style=\"font-size: 18pt;\"><b>Perte</b> = k * Q<sup>a</sup> * D<sup>b</sup> * L<sup>m</sup></p>"
+                       "<p style=\"font-size: 14pt;\"><b>Unités:</b></p>"
+                       "<ul style=\"font-size: 14pt;\">"
+                       "<li>Perte: m</li>"
+                       "<li>Q: L/s</li>"
+                       "<li>D: mm</li>"
+                       "<li>L: m</li>"
+                       "</ul>");
+    } else if(index == 1){ // Vitesse
+        return QString("<p style=\"font-size: 18pt;\"><b>V</b> = Q / (π * (D/2)<sup>2</sup>)</p>"
+                       "<p style=\"font-size: 14pt;\"><b>Unités:</b></p>"
+                       "<ul style=\"font-size: 14pt;\">"
+                       "<li>V: m/s</li>"
+                       "<li>Q: L/h</li>"
+                       "<li>D: mm</li>"
+                       "</ul>");
+    } else {
+        return QString("<p style=\"font-size: 18pt;\"><b>Piezo</b> = Perte + Hauteur</p>"
+                       "<p style=\"font-size: 14pt;\"><b>Unités:</b></p>"
+                       "<ul style=\"font-size: 14pt;\">"
+                       "<li>Piezo: m</li>"
+                       "<li>Perte: m</li>"
+                       "<li>Hauteur: m</li>"
+                       "</ul>");
+    }
+}
+
 
 

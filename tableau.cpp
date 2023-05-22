@@ -57,8 +57,6 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db, QWidget *parent)
                                "m/s", "m",   "m",   "m",  "m"};
 
 
-
-
     // 4 champ d'entré
     inputQ = new QLineEdit(this);
     inputD = new QLineEdit(this);
@@ -127,7 +125,7 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db, QWidget *parent)
 
     // Material ComboBox
     Materiau = new QComboBox(this);
-    Materiau->setFixedSize(75, 25);
+    Materiau->setFixedSize(100, 40);
 
     std::vector<std::string> matiere_names = database->getAllMatiereNames();
     for (const auto &matiere_name : matiere_names) {
@@ -203,12 +201,14 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db, QWidget *parent)
   QPushButton *modifierButton = new QPushButton("Modifier");
   QPushButton *recopier = new QPushButton("Recopier");
   QPushButton *reinitialiserButton = new QPushButton("Réinitialiser");
+  QPushButton *editdiam = new QPushButton("Diametre");
 
   calculButton->setMaximumWidth(140);
   effacerButton->setMaximumWidth(140);
   modifierButton->setMaximumWidth(140);
   reinitialiserButton->setMaximumWidth(140);
   recopier->setMaximumWidth(140);
+  editdiam->setMaximumWidth(140);
 
   connect(calculButton, &QPushButton::clicked, this, &pertechargeherse::calcul);
   connect(effacerButton, &QPushButton::clicked, this, &pertechargeherse::enleverLigne);
@@ -216,6 +216,7 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db, QWidget *parent)
   connect(reinitialiserButton, &QPushButton::clicked, this, &pertechargeherse::refresh);
   connect(recopier, &QPushButton::clicked, this, &pertechargeherse::recopiederniereligne);
   connect(insererbutton, &QPushButton::clicked, this, &pertechargeherse::addRow);
+  connect(editdiam, &QPushButton::clicked, this, &pertechargeherse::editDiameter);
 
   QHBoxLayout *buttonsLayout = new QHBoxLayout();
 
@@ -224,6 +225,7 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db, QWidget *parent)
   buttonsLayout->addWidget(effacerButton);
   buttonsLayout->addWidget(modifierButton);
   buttonsLayout->addWidget(recopier);
+  buttonsLayout->addWidget(editdiam);
   buttonsLayout->addWidget(insererbutton);
   buttonsLayout->addWidget(reinitialiserButton);
   buttonsLayout->addWidget(saveAsPdfButton);
@@ -498,6 +500,16 @@ bool pertechargeherse::eventFilter(QObject *obj, QEvent *event) {
       addRow();
       return true;
     }
+
+    // si M est appuyé ouvre la fenetre de modification
+    else if(keyEvent->key() == Qt::Key_P) {
+      importData();
+      return true;
+    }
+    else if (keyEvent->key() == Qt::Key_D) {
+      editDiameter();
+      return true;
+    }
     else if (keyEvent->key() == Qt::Key_C) {
       calcul();
       return true;
@@ -661,6 +673,15 @@ void pertechargeherse::keyPressEvent(QKeyEvent *event) {
   // si M est appuyé ouvre la fenetre de modification
   else if (event->key() == Qt::Key_M) {
     showUpdateDialog();
+  }
+
+  // si M est appuyé ouvre la fenetre de modification
+  else if (event->key() == Qt::Key_P) {
+    importData();
+  }
+
+  else if (event->key() == Qt::Key_D) {
+    editDiameter();
   }
 
   // si Z est appuyé ouvre la fenetre pour retirer une ligne
@@ -1465,4 +1486,132 @@ void pertechargeherse::insererLigne(int position, const std::vector<float>& newR
 
   // Recalculer les données et mettre à jour le tableau
   calcul();
+}
+
+
+void pertechargeherse::editDiameter() {
+  QDialog dialog(this);
+  dialog.setWindowTitle("Nouveau diametre");
+
+  QVBoxLayout *mainLayout = new QVBoxLayout(&dialog);
+
+  QHBoxLayout *diameterLayout = new QHBoxLayout();
+  QLabel *diameterLabel = new QLabel("Diametre : ");
+  QLineEdit *diameterEdit = new QLineEdit();
+  diameterEdit->setValidator(new QDoubleValidator());
+  diameterLayout->addWidget(diameterLabel);
+  diameterLayout->addWidget(diameterEdit);
+  mainLayout->addLayout(diameterLayout);
+
+  QHBoxLayout *lineLayout = new QHBoxLayout();
+  QLabel *startLineLabel = new QLabel("Départ : ");
+  QLineEdit *startLineEdit = new QLineEdit("1");
+  startLineEdit->setValidator(new QIntValidator());
+  QLabel *endLineLabel = new QLabel("Fin : ");
+  QLineEdit *endLineEdit = new QLineEdit(QString::number(_Donnees.size()));
+  endLineEdit->setValidator(new QIntValidator());
+  lineLayout->addWidget(startLineLabel);
+  lineLayout->addWidget(startLineEdit);
+  lineLayout->addWidget(endLineLabel);
+  lineLayout->addWidget(endLineEdit);
+  mainLayout->addLayout(lineLayout);
+
+  QHBoxLayout *buttonLayout = new QHBoxLayout();
+  QPushButton *okButton = new QPushButton("OK");
+  QPushButton *cancelButton = new QPushButton("Cancel");
+  buttonLayout->addWidget(okButton);
+  buttonLayout->addWidget(cancelButton);
+  mainLayout->addLayout(buttonLayout);
+
+  connect(okButton, &QPushButton::clicked, &dialog, &QDialog::accept);
+  connect(cancelButton, &QPushButton::clicked, &dialog, &QDialog::reject);
+
+  if (dialog.exec() == QDialog::Accepted) {
+    double diameter = diameterEdit->text().toDouble();
+    int startLine = startLineEdit->text().toInt();
+    int endLine = endLineEdit->text().toInt();
+
+    for (int i = startLine - 1; i < endLine && i < _Donnees.size(); i++) {
+      _Donnees[i][3] = diameter;
+    }
+  }
+  calcul();
+}
+
+// fonctionnalité abandonné
+void pertechargeherse::importData() {
+  QDialog dialog(this);
+  dialog.setWindowTitle("Import Data");
+
+  QVBoxLayout *mainLayout = new QVBoxLayout(&dialog);
+
+  QLabel *dataLabel = new QLabel("Paste your data:");
+  mainLayout->addWidget(dataLabel);
+
+  QPlainTextEdit *dataEdit = new QPlainTextEdit();
+  mainLayout->addWidget(dataEdit);
+
+  QHBoxLayout *diameterLayout = new QHBoxLayout();
+  QLabel *diameterLabel = new QLabel("Diameter:");
+  QLineEdit *diameterEdit = new QLineEdit();
+  diameterEdit->setValidator(new QDoubleValidator());
+  diameterLayout->addWidget(diameterLabel);
+  diameterLayout->addWidget(diameterEdit);
+  mainLayout->addLayout(diameterLayout);
+
+  QHBoxLayout *buttonLayout = new QHBoxLayout();
+  QPushButton *okButton = new QPushButton("OK");
+  QPushButton *cancelButton = new QPushButton("Cancel");
+  buttonLayout->addWidget(okButton);
+  buttonLayout->addWidget(cancelButton);
+  mainLayout->addLayout(buttonLayout);
+
+  connect(okButton, &QPushButton::clicked, &dialog, &QDialog::accept);
+  connect(cancelButton, &QPushButton::clicked, &dialog, &QDialog::reject);
+
+  if (dialog.exec() == QDialog::Accepted) {
+    if(diameterEdit->text().isEmpty()) return;
+
+    QString data = dataEdit->toPlainText();
+    data.replace(",", ".");
+    float diameter = diameterEdit->text().toFloat();
+
+    if (diameter == 0) return;
+
+    QStringList lines = data.split("\n");
+    for (int i = 0; i < lines.size(); i++) {
+
+      QStringList cols = lines[i].split(QRegExp("\\s+"));
+      if (cols.size() >= 11) {
+        for(int j=0;j<cols.size();j++){
+            std::cout<<cols[j].toStdString()<<" ";
+        }
+        std::cout<<" "<<std::endl;
+
+        float col6 = cols[7].toFloat();
+        float col11 = cols[11].toFloat();
+
+        if(i==0){
+            col6 = 0;
+            col11 = cols[11].toFloat();
+        }
+
+        std::vector<float> rowData(11);
+        rowData[0] = i + 1;
+        rowData[1] = col11;
+        rowData[2] = 0;  // sigmaDebit
+        rowData[3] = diameter;
+        rowData[4] = col6;
+        rowData[5] = 0;  // hauteur
+        rowData[6] = 0;  // vitesse
+        rowData[7] = 0;  // perteCharge
+        rowData[8] = 0;  // piezo
+        rowData[9] = 0;  // sigmaPerte
+        rowData[10] = 0; // sigmaPiezo
+
+        _Donnees.push_back(rowData);
+      }
+    }
+    calcul();
+  }
 }

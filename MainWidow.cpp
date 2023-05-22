@@ -39,22 +39,31 @@ MainWindow::MainWindow(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent
     Unite->addItem("l/s");
     //Unite->setFixedWidth(100);
 
+    debitLabel = new QLabel("Débit : ");
+    vitesseLabel = new QLabel("Vitesse : ");
+    longueurLabel = new QLabel("Longueur : ");
+    deniveleLabel = new QLabel("Dénivelé : ");
+    vitesseUnite = new QLabel("m/s");
+    longueurUnite = new QLabel("m");
+    deniveleUnite = new QLabel("mm");
+
+
     // Débit et Vitesse
-    gridLayout->addWidget(new QLabel("Débit : "), 2, 0);
+    gridLayout->addWidget(debitLabel, 2, 0);
     gridLayout->addWidget(&debit, 2, 1);
     gridLayout->addWidget(Unite, 2, 2);
 
-    gridLayout->addWidget(new QLabel("Vitesse : "), 3, 0);
+    gridLayout->addWidget(vitesseLabel, 3, 0);
     gridLayout->addWidget(&vitesse, 3, 1);
-    gridLayout->addWidget(new QLabel("m/s"), 3, 2);
+    gridLayout->addWidget(vitesseUnite, 3, 2);
 
     // Longueur et Dénivelé
-    gridLayout->addWidget(new QLabel("Longueur : "), 4, 0);
+    gridLayout->addWidget(longueurLabel, 4, 0);
     gridLayout->addWidget(&longueur, 4, 1);
-    gridLayout->addWidget(new QLabel("m"), 4, 2);
-    gridLayout->addWidget(new QLabel("Dénivelé : "), 5, 0);
+    gridLayout->addWidget(longueurUnite, 4, 2);
+    gridLayout->addWidget(deniveleLabel, 5, 0);
     gridLayout->addWidget(&denivele, 5, 1);
-    gridLayout->addWidget(new QLabel("mm"), 5, 2);
+    gridLayout->addWidget(deniveleUnite, 5, 2);
 
     // Bouton Changer en haut à droite
     Changer.setText("Changer");
@@ -122,7 +131,9 @@ MainWindow::MainWindow(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent
 
     // on déclenche les fonctions
     updateSecondComboBox(Materiau.currentIndex());
-    updateButtonState();
+    Changer.click();
+    Changer.click();
+
 }
 
 void MainWindow::onSwitchButtonClicked() {
@@ -133,10 +144,19 @@ void MainWindow::onSwitchButtonClicked() {
     longueur.setVisible(!isVisible);
     denivele.setVisible(!isVisible);
 
+    // Cacher ou afficher les labels et les unités en fonction de la visibilité des champs
+    vitesseLabel->setVisible(isVisible);
+    vitesseUnite->setVisible(isVisible);
+    longueurLabel->setVisible(!isVisible);
+    longueurUnite->setVisible(!isVisible);
+    deniveleLabel->setVisible(!isVisible);
+    deniveleUnite->setVisible(!isVisible);
+
     debit.setFocus();
 
     updateButtonState();
 }
+
 
 void MainWindow::updateSecondComboBox(int index) {
     Pression.clear(); // Clear the contents to replace them

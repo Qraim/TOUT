@@ -212,8 +212,6 @@ void tubesimple::calculer() {
     diametreText.replace(',', '.');
     float L = diametreText.toFloat();
 
-    std::cout<<index<<std::endl;
-
     if(index==0){
         flowRate = D / 3600; // Convertit m³/h en m³/s
         dLS = D /3600 * 1000;
@@ -259,6 +257,11 @@ void tubesimple::calculer() {
         Vitesse.setStyleSheet("");
         str = QString::number(v, 'f', 2);
     }
+
+    debit.clear();
+    diametre.clear();
+    longueur.clear();
+    denivele.clear();
 
     Vitesse.setText(str); // Met à jour le texte de la QLineEdit "Vitesse"
 }

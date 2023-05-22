@@ -36,11 +36,16 @@ tout::tout(QWidget *parent) : QWidget(parent) {
     goutte2 = std::make_unique<gag2>(database,nullptr);
     goutte2->setWindowFlags(Qt::Window);
 
+    etud = std::make_unique<etude>(database, nullptr);
+    etud->setWindowFlags(Qt::Window);
+
     // Créez le premier QComboBox avec des options principales
     QComboBox *mainOptionsComboBox = new QComboBox(this);
     mainOptionsComboBox->addItem("Perte de charge");
     mainOptionsComboBox->addItem("Diametre");
     mainOptionsComboBox->addItem("Débit");
+    mainOptionsComboBox->addItem("Etude");
+
 
         // Créez le deuxième QComboBox pour les sous-options
         QComboBox *subOptionsComboBox = new QComboBox(this);
@@ -59,6 +64,10 @@ tout::tout(QWidget *parent) : QWidget(parent) {
             break;
         case 2 :
             subOptionsComboBox->addItem("Tube simple");
+            break;
+
+        case 3 :
+            subOptionsComboBox->addItem("Etude");
             break;
         }
     });
@@ -102,6 +111,8 @@ tout::tout(QWidget *parent) : QWidget(parent) {
                 on_show_MW_button_clicked();
             }
             break;
+        case 3:
+            on_show_etud_button_clicked();
         }
     });
 
@@ -191,6 +202,11 @@ void tout::on_show_gag2_button_clicked() {
     goutte2->show();
 }
 
+void tout::on_show_etud_button_clicked(){
+    etud->show();
+}
+
+
 void tout::closeEvent(QCloseEvent *event) {
     QApplication::quit();
 }
@@ -198,21 +214,30 @@ void tout::closeEvent(QCloseEvent *event) {
 bool tout::eventFilter(QObject *obj, QEvent *event) {
     if (event->type() == QEvent::KeyPress) {
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-        keySequence += keyEvent->text();
 
-        if (keySequence.length() > 4) {
-            keySequence.remove(0, 1);
-        }
+        // Vérifier si la touche Shift est enfoncée
+        bool shiftPressed = keyEvent->modifiers() & Qt::ShiftModifier;
 
-        if (keySequence == "dino") {
-            std::cout<<"OUI"<<std::endl;
-            emit sequenceDetected();
-            return true;
+        // Gérer les raccourcis si la touche Shift est enfoncée
+        if (shiftPressed) {
+            switch (keyEvent->key()) {
+            case Qt::Key_1:
+                on_show_pertechargeherse_button_clicked();
+                return true;
+            case Qt::Key_2:
+                on_show_gag2_button_clicked();
+                return true;
+            case Qt::Key_3:
+                on_show_tubesimple_button_clicked();
+                return true;
+                // Ajoutez d'autres raccourcis ici
+            }
         }
     }
 
     return QWidget::eventFilter(obj, event);
 }
+
 
 
 

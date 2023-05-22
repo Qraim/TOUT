@@ -297,6 +297,7 @@ void pcdim::calculate()
         inputs[0]->setText(QString::number(debit));
         return;
     }
+
 }
 
 bool pcdim::eventFilter(QObject *obj, QEvent *event)

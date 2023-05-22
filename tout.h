@@ -13,6 +13,7 @@
 #include "MainWidow.h"
 #include "gag.h"
 #include "gag2.h"
+#include "etude.h"
 
 #include <QApplication>
 #include <QPushButton>
@@ -49,6 +50,8 @@ private:
     std::unique_ptr<MainWindow> MW;
     std::unique_ptr<gag> goutte;
     std::unique_ptr<gag2> goutte2;
+    std::unique_ptr<etude> etud;
+
 
     /// @brief Affiche la fenêtre de l'outil de calcul de perte de charge pour une herse d'alimentation.
     void on_show_pertechargeherse_button_clicked();
@@ -69,6 +72,9 @@ private:
     void on_show_gag_button_clicked();
 
     void on_show_gag2_button_clicked();
+
+    void on_show_etud_button_clicked();
+
 
     QString keySequence;
 

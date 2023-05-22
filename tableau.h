@@ -24,6 +24,7 @@
 #include <QDialog>
 #include <QDebug>
 #include <QTimer>
+#include <QPlainTextEdit>
 
 
 #include <vector>
@@ -140,6 +141,11 @@ private:
     void addRow();
 
     void insererLigne(int position, const std::vector<float>& newRow);
+
+    void editDiameter();
+
+    void importData();
+
 
 protected :
 
