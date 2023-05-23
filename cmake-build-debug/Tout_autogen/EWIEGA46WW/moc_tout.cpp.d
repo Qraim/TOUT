@@ -176,6 +176,7 @@
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtCore.framework/Versions/5/Headers/qvarlengtharray.h \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtCore.framework/Versions/5/Headers/qvector.h \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtCore.framework/Versions/5/Headers/qversiontagging.h \
+  /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtGui.framework/Versions/5/Headers/QClipboard \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtGui.framework/Versions/5/Headers/QCloseEvent \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtGui.framework/Versions/5/Headers/QDoubleValidator \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtGui.framework/Versions/5/Headers/QIcon \
@@ -184,6 +185,7 @@
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtGui.framework/Versions/5/Headers/QStandardItemModel \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtGui.framework/Versions/5/Headers/qabstracttextdocumentlayout.h \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtGui.framework/Versions/5/Headers/qbrush.h \
+  /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtGui.framework/Versions/5/Headers/qclipboard.h \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtGui.framework/Versions/5/Headers/qcolor.h \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtGui.framework/Versions/5/Headers/qcursor.h \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtGui.framework/Versions/5/Headers/qevent.h \
@@ -241,6 +243,7 @@
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/QScrollBar \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/QShortcut \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/QSpacerItem \
+  /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/QSpinBox \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/QStackedWidget \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/QTableWidget \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/QTableWidgetItem \
@@ -276,6 +279,7 @@
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/qshortcut.h \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/qsizepolicy.h \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/qslider.h \
+  /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/qspinbox.h \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/qstackedwidget.h \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/qstyle.h \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/qstyleoption.h \

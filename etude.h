@@ -16,6 +16,7 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QFormLayout>
+#include <QClipboard>
 #include "parcelle.h"
 
 class etude : public QWidget
@@ -31,14 +32,15 @@ private :
     std::vector<parcelle> _parcelles;
     bool milieu;
     bool limitations;
+    bool poste;
 
     QScrollArea *scrollArea;
     QWidget *scrollAreaWidgetContents;
     QGridLayout *gridLayout;
     QVBoxLayout *mainLayout;
 
-    void setupUI();
     void init();
+    void traitements(QString data);
     void rafraichirTableau();
     void clearchild();
     void initCalcul();
@@ -46,6 +48,10 @@ private :
     void calcul();
     void updateDonnees();
     void showOptionsDialog();
+    void chooseCommandPost();
+    void appelSetDiametreDialog();
+    void updateDiameter(int row, const QString& newDiameter);
+
 };
 
 #endif // ETUDE_H
