@@ -166,6 +166,9 @@ public:
     ///
     void montre_coef();
 
+    ///
+    /// @brief Affiche les formules nécéssaire aux calculs
+    ///
     void on_show_formula_button_clicked();
 
     QString getFormulaText(int index);

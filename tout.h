@@ -71,8 +71,14 @@ private:
     /// @brief Affiche la fenêtre de l'outil de calcul de perte de charge pour un goutte à goutte.
     void on_show_gag_button_clicked();
 
+    ///
+    /// @brief Affiche la fenetre de goutte à goutte
+    ///
     void on_show_gag2_button_clicked();
 
+    ///
+    /// @brief Affiche la fenetre d'étude de cas
+    ///
     void on_show_etud_button_clicked();
 
 

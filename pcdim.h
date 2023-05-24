@@ -65,39 +65,39 @@ private:
 
     ///
     /// @return
-    /// Calcule le débit en fonction des champs de l'interface utilisateur et renvoie le résultat
+    /// @brief Calcule le débit en fonction des champs de l'interface utilisateur et renvoie le résultat
     ///
     float calculdebit();
 
     /// @return
-    /// Calcule la vitesse de l'eau en fonction des champs de l'interface utilisateur et renvoie le résultat
+    /// @brief Calcule la vitesse de l'eau en fonction des champs de l'interface utilisateur et renvoie le résultat
     float calculvitesse();
 
     ///
     /// @return
-    /// Calcule le diamètre interne de la canalisation en fonction des champs de l'interface utilisateur et renvoie le résultat
+    /// @brief Calcule le diamètre interne de la canalisation en fonction des champs de l'interface utilisateur et renvoie le résultat
     float calculdiametre();
 
     ///
     /// @return
-    /// Calcule les pertes de charge en fonction des champs de l'interface utilisateur et renvoie le résultat
+    /// @brief Calcule les pertes de charge en fonction des champs de l'interface utilisateur et renvoie le résultat
     float calculperte();
 
     ///
     /// @param obj : Objet pour lequel l'événement doit être filtré
     /// @param event : Événement qui doit être filtré
     /// @return
-    /// Filtre les événements pour l'objet donné et retourne true si l'événement doit être traité normalement, sinon false.
+    /// @brief Filtre les événements pour l'objet donné et retourne true si l'événement doit être traité normalement, sinon false.
     bool eventFilter(QObject *obj, QEvent *event) override;
 
     ///
     /// @param pipe_material : Matériau de la canalisation
     /// @return
-    /// Renvoie un tuple contenant les propriétés matérielles de la canalisation en fonction du matériau de la canalisation
+    /// @brief Renvoie un tuple contenant les propriétés matérielles de la canalisation en fonction du matériau de la canalisation
     std::tuple<float, float, float> getMaterialProperties(const std::string &pipe_material);
 
     ///
-    /// Affiche le tableau des diamètres de la canalisation dans une nouvelle fenêtre
+    /// @brief Affiche le tableau des diamètres de la canalisation dans une nouvelle fenêtre
     void showDiametersTable();
 
     void updateComboBoxes();

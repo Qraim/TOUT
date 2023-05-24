@@ -80,67 +80,67 @@ private:
 
     ///
     /// @param index : Parametre de la combobox1
-    /// Selectionne les parametres en fonction de la premier combobox
+    /// @brief Selectionne les parametres en fonction de la premier combobox
     void updateSecondComboBox(int index);
 
     ///
     /// @return
-    /// Permet de lancer le bon calcul en fonction des parametres disponibles
+    /// @brief Permet de lancer le bon calcul en fonction des parametres disponibles
     float calculer();
 
     ///
     /// @return
-    /// Permet de lancer la fonction calculer() sur le boutton est pressé
+    /// @brief Permet de lancer la fonction calculer() sur le boutton est pressé
     void onButtonClicked();
 
     ///
     /// @return
-    /// Permet d'activer ou de désactiver le bouton Calculer si les champs actifs sont vides
+    /// @brief Permet d'activer ou de désactiver le bouton Calculer si les champs actifs sont vides
     void updateButtonState();
 
     ///
     /// @return
-    /// Permet de cacher/révéler les boutons suivant le besoin de l'utilisateur
+    /// @brief Permet de cacher/révéler les boutons suivant le besoin de l'utilisateur
     void onSwitchButtonClicked();
 
     ///
     /// @return
-    /// Si Entrée est appuyé, soit lancer le calcul, soit changer le champ actif
+    /// @brief Si Entrée est appuyé, soit lancer le calcul, soit changer le champ actif
     void onReturnPressed();
 
     ///
     /// @return
-    /// Calcul du perimetre suivant le débit et la vitesse
+    /// @brief Calcul du perimetre suivant le débit et la vitesse
     float calculdebitvitesse();
 
     ///
     /// @return
-    ///  Calcul du perimetre suivant le débit, le denivelé et une longueurs
+    /// @brief Calcul du perimetre suivant le débit, le denivelé et une longueurs
     float calcullongueurdeniv();
 
     ///
     /// @param diametre : diametre intérieur nécéssaire renvoyé par le calcul
-    /// Renvoie parmis un std::map de tuyau celui qui à le diametre intérieur supérieur le plus proche
+    /// @brief Renvoie parmis un std::map de tuyau celui qui à le diametre intérieur supérieur le plus proche
     void Gettuyau(float diametre);
 
     ///
     /// @param event : appuie sur une touche quelconque
-    /// Permet des raccourcis clavier tel que UP,DOWN, SHIFT + UP,...
+    /// @brief Permet des raccourcis clavier tel que UP,DOWN, SHIFT + UP,...
     void keyPressEvent(QKeyEvent *event);
 
     ///
     /// @return
-    /// Change le champ actif pour le champ antérieur
+    /// @brief Change le champ actif pour le champ antérieur
     void focusPreviousInput();
 
     ///
     /// @return
-    /// Change le champ actif pour le champ suivant
+    /// @brief Change le champ actif pour le champ suivant
     void focusNextInput();
 
     ///
     /// @param vitesse : Vitesse de l'eau calculer
-    /// Permet de rendre visible et de remplir le champ vitesse
+    /// @brief Permet de rendre visible et de remplir le champ vitesse
     void setvitesse(int vitesse);
 };
 

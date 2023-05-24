@@ -132,25 +132,45 @@ private:
     /// @param fileName : Chemin du fichier dans lequel enregistrer le rapport PDF
     void createPdfReport(const QString &fileName);
 
+    ///
+    /// @brief Modifi la valeur d'une case
+    ///
     void on_lineEdit_editingFinished(const QString &text, int row, int column);
 
+    ///
+    /// @brief Permet de mettre le focus sur la prochaine case
+    ///
     bool focusNextPrevChild(bool next) override;
 
+    ///
+    /// @brief Permet de trouver les coordonnées d'une case
+    ///
     void findWidgetIndex(QLineEdit *widget, int &row, int &col);
 
+    ///
+    /// @brief Ajoute une ligne dans le vecteur
+    ///
     void addRow();
 
+    ///
+    /// @brief Ajoute une ligne entre deux ligne dans le vecteur
+    ///
     void insererLigne(int position, const std::vector<float>& newRow);
 
+    ///
+    /// @brief Permet de changer plusieur diametres d'un seul coup
+    ///
     void editDiameter();
 
+    ///
+    /// @brief Non utilisable car on n'en voulait pas
+    ///
     void importData();
 
 
 protected :
 
     bool eventFilter(QObject *obj, QEvent *event) override;
-
 
     /// @brief Enregistre les données sous forme de PDF.
     void saveAsPdf();

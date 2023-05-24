@@ -69,17 +69,35 @@ private :
     QComboBox *unite;
     QComboBox *Materiau;
 
-
+    ///
+    /// @brief Effectue un calcul en fonction des valeurs entrées.
+    ///
     void calcul();
 
+    ///
+    /// @brief Un filtre d'événement personnalisé pour gérer la navigation entre les widgets QLineEdit.
+    ///
     bool eventFilter(QObject *obj, QEvent *event);
 
+    ///
+    /// @brief Vérifie si toutes les entrées sont remplies.
+    ///
     bool allInputsFilled();
 
+    ///
+    /// @param lineedit : pointeur vers le QLineEdit trouvé
+    /// @brief Vérifie si l'objet donné est un des widgets QLineEdit ciblés pour le remplissage.
+    ///
     bool isTargetLineEdit(QLineEdit *lineEdit);
 
+    ///
+    /// @brief Met le focus sur le widget QLineEdit suivant.
+    ///
     void focusNextTargetChild();
 
+    ///
+    /// @brief Met le focus sur le widget QLineEdit précédent.
+    ///
     void focusPreviousTargetChild();
 };
 

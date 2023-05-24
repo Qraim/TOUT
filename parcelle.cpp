@@ -5,8 +5,10 @@
 #include "parcelle.h"
 
 
-parcelle::parcelle(std::vector<std::vector<float>> &data,int indexdebut, int indexfin,   std::shared_ptr<bdd> db): database(db) {
+parcelle::parcelle(std::vector<std::vector<float>> &data,int indexdebut, int indexfin,   std::shared_ptr<bdd> db, QString nom): database(db), _nom(nom) {
   // Redimensionner _Donnees pour qu'il ait la même taille que la plage de data que nous copions
+  _indexdebut = indexdebut;
+  _indexfin = indexfin;
   _Donnees.resize(indexfin - indexdebut);
   _diameters.resize(_Donnees.size());
   int cpt = 0;
@@ -75,41 +77,45 @@ void parcelle::calcul() {
 
   float denivele_gauche = 0;
   float denivele_droit = 0;
+  float perted = 0;
+  float perteg = 0;
 
   // Calcul de la perte de charge et du dénivelé du côté gauche du poste de commande
-  for (size_t i = 0; i <= poste_de_commande; ++i) {
+  for (size_t i = 0; i < poste_de_commande-_indexdebut; ++i) {
     float Dia = _diameters[i];
     float dLS = _Donnees[i][9] / 1000; // Convertir le débit en l/s
     float L = _Donnees[i][1];
-    _PerteCharge[i] = k * std::pow(dLS, a) * std::pow(Dia, b) * L;
+    float perte = k * std::pow(dLS, a) * std::pow(Dia, b) * L;
+    _PerteCharge[i] = perte;
+    perteg += perte;
 
     // Calcul du dénivelé
-    if(i == poste_de_commande)
+    if(i == poste_de_commande-_indexdebut-1)
       denivele_gauche = _Donnees[0][3] - _Donnees[i][3];
   }
 
   // Calcul de la perte de charge et du dénivelé du côté droit du poste de commande
-  for (size_t i = poste_de_commande; i < _Donnees.size(); ++i) {
+  for (size_t i = poste_de_commande-_indexdebut; i < _Donnees.size(); ++i) {
     float Dia = _diameters[i];
     float dLS = _Donnees[i][9] / 1000; // Convertir le débit en l/s
     float L = _Donnees[i][1];
-    _PerteCharge[i] = k * std::pow(dLS, a) * std::pow(Dia, b) * L;
+    float perte = k * std::pow(dLS, a) * std::pow(Dia, b) * L;
+    _PerteCharge[i] = perte;
+    perted += perte;
+
     // Calcul du dénivelé
-    if(i == poste_de_commande)
-      denivele_droit = _Donnees[_Donnees.size()-1][3] - _Donnees[i+1][3];
+    if(i == _Donnees.size()-1)
+        denivele_droit = _Donnees[i][3] - _Donnees[poste_de_commande-_indexdebut-1][3];
   }
+  _Donnees[poste_de_commande-_indexdebut - 2][17] = perteg; // Stocke perteg à la ligne au-dessus du poste de commande
+  _Donnees[poste_de_commande-_indexdebut - 2][18] = denivele_gauche; // Stocke denivele_gauche à la ligne au-dessus du poste de commande
+  _Donnees[poste_de_commande-_indexdebut - 2][19] = denivele_gauche + perteg; // Stocke denivele_gauche à la ligne au-dessus du poste de commande
 
-  float perte =0;
-  for(int i = 0; i <_PerteCharge.size(); i++){
-    perte+=_PerteCharge[i];
-  }
+  _Donnees[poste_de_commande-_indexdebut][17] = perted; // Stocke perted à la ligne en dessous du poste de commande
+  _Donnees[poste_de_commande-_indexdebut][18] = denivele_droit; // Stocke denivele_droit à la ligne en dessous du poste de commande
+  _Donnees[poste_de_commande-_indexdebut][19] = denivele_droit + perted; // Stocke denivele_droit à la ligne en dessous du poste de commande
 
-  std::cout<<"perte : "<<perte<<std::endl;
-  std::cout<<"denivele_gauche : "<<denivele_gauche<<std::endl;
-  std::cout<<"denivele_droit : "<<denivele_droit<<std::endl;
-}
-
-
+ }
 
 void parcelle::setDiametreDialog() {
   QDialog diameterDialog;
@@ -147,14 +153,14 @@ void parcelle::setDiametreDialog() {
   dialogLayout.addWidget(&startLabel);
 
   QSpinBox startSpinBox;
-  startSpinBox.setRange(1, _Donnees.size() - 1);
+  startSpinBox.setRange(_indexdebut+1, _indexfin-1);
   dialogLayout.addWidget(&startSpinBox);
 
   QLabel endLabel("Arrive");
   dialogLayout.addWidget(&endLabel);
 
   QSpinBox endSpinBox;
-  endSpinBox.setRange(1, _Donnees.size());
+  endSpinBox.setRange(_indexdebut+2, _indexfin);
   dialogLayout.addWidget(&endSpinBox);
 
   // Qlabel
@@ -194,7 +200,7 @@ void parcelle::setDiametreDialog() {
   QObject::connect(&setButton, &QPushButton::clicked, [this, &diameterDialog, &innerDiameterComboBox, &startSpinBox, &endSpinBox, &label]() {
     float diameter = innerDiameterComboBox.currentText().toFloat();
 
-    for(int i=startSpinBox.value()-1; i<endSpinBox.value();i++) {
+    for(int i=0; i<_Donnees.size();i++) {
       _diameters[i] = diameter;
       _Donnees[i][15] = diameter;
     }
@@ -237,4 +243,13 @@ void parcelle::modifiedia(int index, float diameters){
   _diameters[index] = diameters;
   _Donnees[index][15] = diameters;
 }
+const QString &parcelle::getNom() const { return _nom; }
+void parcelle::setNom(const QString &nom) { _nom = nom; }
 
+int parcelle::getIndexdebut() const {
+    return _indexdebut;
+}
+
+int parcelle::getIndexfin() const {
+    return _indexfin;
+}
