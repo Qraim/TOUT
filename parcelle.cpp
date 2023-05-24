@@ -200,12 +200,15 @@ void parcelle::setDiametreDialog() {
   QObject::connect(&setButton, &QPushButton::clicked, [this, &diameterDialog, &innerDiameterComboBox, &startSpinBox, &endSpinBox, &label]() {
     float diameter = innerDiameterComboBox.currentText().toFloat();
 
-    for(int i=0; i<_Donnees.size();i++) {
-      _diameters[i] = diameter;
-      _Donnees[i][15] = diameter;
-    }
+      int startIndex = startSpinBox.value() - _indexdebut - 1 ;
+      int endIndex = endSpinBox.value() - _indexdebut;
 
-    int nonZeroCount = std::count_if(_diameters.begin(), _diameters.end(), [](float val) { return val != 0.0f; });
+      for(int i = startIndex; i < endIndex; i++) {
+          _diameters[i] = diameter;
+          _Donnees[i][15] = diameter;
+      }
+
+      int nonZeroCount = std::count_if(_diameters.begin(), _diameters.end(), [](float val) { return val != 0.0f; });
 
     QString text = QString::number(nonZeroCount) + "/" + QString::number(_diameters.size());
 
