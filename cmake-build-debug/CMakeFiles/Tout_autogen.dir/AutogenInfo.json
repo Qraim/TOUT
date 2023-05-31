@@ -114,6 +114,18 @@
 			null
 		],
 		[
+			"/Users/qraim/CLionProjects/TOUT/game.h",
+			"MU",
+			"EWIEGA46WW/moc_game.cpp",
+			null
+		],
+		[
+			"/Users/qraim/CLionProjects/TOUT/gamescene.h",
+			"MU",
+			"EWIEGA46WW/moc_gamescene.cpp",
+			null
+		],
+		[
 			"/Users/qraim/CLionProjects/TOUT/parcelle.h",
 			"MU",
 			"EWIEGA46WW/moc_parcelle.cpp",
@@ -141,6 +153,12 @@
 			"/Users/qraim/CLionProjects/TOUT/tubesimple.h",
 			"MU",
 			"EWIEGA46WW/moc_tubesimple.cpp",
+			null
+		],
+		[
+			"/Users/qraim/CLionProjects/TOUT/view.h",
+			"MU",
+			"EWIEGA46WW/moc_view.cpp",
 			null
 		]
 	],
@@ -197,12 +215,15 @@
 		[ "/Users/qraim/CLionProjects/TOUT/etude.cpp", "MU", null ],
 		[ "/Users/qraim/CLionProjects/TOUT/gag.cpp", "MU", null ],
 		[ "/Users/qraim/CLionProjects/TOUT/gag2.cpp", "MU", null ],
+		[ "/Users/qraim/CLionProjects/TOUT/game.cpp", "MU", null ],
+		[ "/Users/qraim/CLionProjects/TOUT/gamescene.cpp", "MU", null ],
 		[ "/Users/qraim/CLionProjects/TOUT/main.cpp", "MU", null ],
 		[ "/Users/qraim/CLionProjects/TOUT/parcelle.cpp", "MU", null ],
 		[ "/Users/qraim/CLionProjects/TOUT/pcdim.cpp", "MU", null ],
 		[ "/Users/qraim/CLionProjects/TOUT/tableau.cpp", "MU", null ],
 		[ "/Users/qraim/CLionProjects/TOUT/tout.cpp", "MU", null ],
-		[ "/Users/qraim/CLionProjects/TOUT/tubesimple.cpp", "MU", null ]
+		[ "/Users/qraim/CLionProjects/TOUT/tubesimple.cpp", "MU", null ],
+		[ "/Users/qraim/CLionProjects/TOUT/view.cpp", "MU", null ]
 	],
 	"UIC_OPTIONS" : [],
 	"UIC_SEARCH_PATHS" : [],

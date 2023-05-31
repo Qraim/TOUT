@@ -97,7 +97,6 @@ void etude::showOptionsDialog() {
 }
 
 
-// Méthode pour extraire les données du texte
 void etude::init()
 {
   _Donnees.clear();
@@ -108,38 +107,43 @@ void etude::init()
 
   if(!originalText.isEmpty()){
     traitements(originalText);
-    initCalcul();
-    return;
+  } else {
+    QDialog dialog(this);
+    dialog.setWindowTitle("Importer les données");
+
+    QVBoxLayout *mainLayout = new QVBoxLayout(&dialog);
+
+    QLabel *dataLabel = new QLabel("Collez vos données:");
+    mainLayout->addWidget(dataLabel);
+
+    QPlainTextEdit *dataEdit = new QPlainTextEdit();
+    mainLayout->addWidget(dataEdit);
+
+    QHBoxLayout *buttonLayout = new QHBoxLayout();
+    QPushButton *okButton = new QPushButton("OK");
+    QPushButton *cancelButton = new QPushButton("Annuler");
+    buttonLayout->addWidget(okButton);
+    buttonLayout->addWidget(cancelButton);
+    mainLayout->addLayout(buttonLayout);
+
+    connect(okButton, &QPushButton::clicked, &dialog, &QDialog::accept);
+    connect(cancelButton, &QPushButton::clicked, &dialog, &QDialog::reject);
+
+    if (dialog.exec() == QDialog::Accepted) {
+      QString data = dataEdit->toPlainText();
+      traitements(data);
+    }
   }
 
-  QDialog dialog(this);
-  dialog.setWindowTitle("Importer les données");
-
-  QVBoxLayout *mainLayout = new QVBoxLayout(&dialog);
-
-  QLabel *dataLabel = new QLabel("Collez vos données:");
-  mainLayout->addWidget(dataLabel);
-
-  QPlainTextEdit *dataEdit = new QPlainTextEdit();
-  mainLayout->addWidget(dataEdit);
-
-  QHBoxLayout *buttonLayout = new QHBoxLayout();
-  QPushButton *okButton = new QPushButton("OK");
-  QPushButton *cancelButton = new QPushButton("Annuler");
-  buttonLayout->addWidget(okButton);
-  buttonLayout->addWidget(cancelButton);
-  mainLayout->addLayout(buttonLayout);
-
-  connect(okButton, &QPushButton::clicked, &dialog, &QDialog::accept);
-  connect(cancelButton, &QPushButton::clicked, &dialog, &QDialog::reject);
-
-  if (dialog.exec() == QDialog::Accepted) {
-    QString data = dataEdit->toPlainText();
-    traitements(data);
+  // Ajouter une parcelle avec toutes les données
+  if (!_Donnees.empty()) {
+    QString nomParcelle = "parcelle 1";
     initCalcul();
-    return;
+    _parcelles.push_back(parcelle(_Donnees, 0, _Donnees.size(),database, nomParcelle));
+    rafraichirTableau();
   }
 }
+
 
 void etude::traitements(QString data){
   // Remplacer les virgules par des points
@@ -180,6 +184,7 @@ void etude::clearchild() {
   }
 }
 
+#include <QScrollBar>
 
 void etude::rafraichirTableau() {
 
@@ -187,11 +192,14 @@ void etude::rafraichirTableau() {
     updateDonnees(); // Met à jour les données
   }
 
+  // Sauvegarder la position actuelle des barres de défilement
+  int scrollPosVertical = scrollArea->verticalScrollBar()->value();
+  int scrollPosHorizontal = scrollArea->horizontalScrollBar()->value();
   // Supprime toutes les cases du tableau.
   clearchild();
 
   // Initialize headers
-  QStringList headers = {"Num", "Long","NbAsp", "Zamont", "Zaval", "InterD", "InterF","DebitG","Esp","DebitC","DebitL","PeigneZAm","PeigneZAv","oui","non","Diametre", "Nom", "Perte", "Denivele", "Piezo"};
+  QStringList headers = {"Num", "Long","NbAsp", "Zamont", "Zaval", "InterD", "InterF","DebitG","Esp","DebitC","DebitL","PeigneZAm","PeigneZAv","DRAm","DRAv","Diametre", "Nom", "Perte/Vitesse", "Denivele", "Piezo"};
 
   for (int i = 0; i < headers.size(); ++i) {
     QLabel *headerLabel = new QLabel(headers[i], this);
@@ -210,13 +218,18 @@ void etude::rafraichirTableau() {
   std::vector<int> limitesParcelles;
   std::vector<int> commandPosts;
   std::vector<QString> nom;
+  std::vector<float> longueurs;
+  std::vector<float> debits;
+
   int totalRows = 0;
   for (auto& parcel : _parcelles) {
     const std::vector<std::vector<float>>& parcelData = parcel.getDonnees();
     totalRows += parcelData.size();
     nom.push_back(parcel.getNom());
+    longueurs.push_back(parcel.getLongueur());
     milieuxHydro.push_back(totalRows - parcelData.size() / 2);
     limitesParcelles.push_back(totalRows);
+    debits.push_back(parcel.getDebit());
     if(parcel.getPosteDeCommande()!=0){
       commandPosts.push_back(parcel.getPosteDeCommande());
     }
@@ -236,6 +249,16 @@ void etude::rafraichirTableau() {
       textColor = "QLineEdit { color: white;background-color : blue; }"; // Limite entre deux parcelles
     }
 
+    // Vérifiez si la ligne actuelle est à un ou deux postes de commande.
+    int distanceToNearestCommandPost = std::numeric_limits<int>::max();
+    for (int commandPost : commandPosts) {
+      int distance = abs(ligne - commandPost);
+      if (distance < distanceToNearestCommandPost) {
+        distanceToNearestCommandPost = distance;
+      }
+    }
+
+
     for (int i = 0; i < donneesLigne.size(); ++i) {
       if(i==16){
         QLabel *lineEdit = new QLabel(this);
@@ -250,41 +273,56 @@ void etude::rafraichirTableau() {
         QLineEdit *lineEdit = new QLineEdit(this);
         lineEdit->setStyleSheet(textColor);
         lineEdit->setAlignment(Qt::AlignCenter);
+        lineEdit->setReadOnly(true);
         lineEdit->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
         lineEdit->setFixedHeight(hauteur);
         lineEdit->setFixedWidth(largueur);
+
         QString formattedText;
         if (i == 0) {
           formattedText = QString::number(static_cast<int>(donneesLigne[i]));
-        } else if(i>15){
-          // Check if the value is 0. If it is, display an empty string.
+        } else if(i>15 && i != 18 && i != 19){
           formattedText = (donneesLigne[i] == 0.0f) ? "" : QString::number(donneesLigne[i], 'f', 2);
-        } else {
-            formattedText = QString::number(donneesLigne[i], 'f', 2);
+        } else if (i == 18 || i == 19) { // Pour les colonnes 18 et 19
+          formattedText = (donneesLigne[i] == 0.0f) ? "" : QString::number(donneesLigne[i], 'f', 2) + "m"; // Ajoutez "m" si la valeur n'est pas vide
+        } else if (i == 17) {
+          QString suffix;
+          if (distanceToNearestCommandPost == 1) {
+            suffix = "m";
+          } else if (distanceToNearestCommandPost == 2) {
+            suffix = "m/s";
+          }
+          formattedText = (donneesLigne[i] == 0.0f) ? "" : QString::number(donneesLigne[i], 'f', 2) + suffix;
+        }else {
+          formattedText = QString::number(donneesLigne[i], 'f', 2);
         }
+
 
         lineEdit->setText(formattedText);
         gridLayout->setVerticalSpacing(0);
         gridLayout->addWidget(lineEdit, ligne, i);
         // Ajoute un signal pour la 16ème colonne
-          if (i == 15) {
-              // Connecte textEdited signal comme avant
-              connect(lineEdit, &QLineEdit::textEdited, [this, ligne](const QString& newDiameter) {
-                  this->updateDiameter(ligne-1, newDiameter);
+        if (i == 15) {
+          lineEdit->installEventFilter(this);
+          lineEdit->setStyleSheet("QLineEdit { color: yellow; }");
+          lineEdit->setReadOnly(false);
+          // Connecte textEdited signal comme avant
+          connect(lineEdit, &QLineEdit::textEdited, [this, ligne](const QString& newDiameter) {
+            this->updateDiameter(ligne-1, newDiameter);
+          });
+
+          if(limitesParcelles.size()!=0){
+            // Trouvez la dernière ligne de la parcelle actuelle
+            int lastRowOfParcel = limitesParcelles[parcelIndex];
+            // Si la ligne actuelle est la dernière ligne de la parcelle, connectez le signal editingFinished() à la méthode calcul()
+            if (ligne == lastRowOfParcel) {
+              connect(lineEdit, &QLineEdit::editingFinished, [this, parcelIndex] {
+                this->_parcelles[parcelIndex].calcul();
               });
-
-              if(limitesParcelles.size()!=0){
-                  // Trouvez la dernière ligne de la parcelle actuelle
-                  int lastRowOfParcel = limitesParcelles[parcelIndex];
-                  // Si la ligne actuelle est la dernière ligne de la parcelle, connectez le signal editingFinished() à la méthode calcul()
-                  if (ligne == lastRowOfParcel) {
-                      connect(lineEdit, &QLineEdit::editingFinished, [this, parcelIndex] {
-                          this->_parcelles[parcelIndex].calcul();
-                      });
-                  }
-              }
-
+            }
           }
+
+        }
       }
     }
 
@@ -303,6 +341,33 @@ void etude::rafraichirTableau() {
         this->_parcelles[parcelIndex].setNom(newName);
       });
       gridLayout->addWidget(parcelNameLineEdit, ligne, 16);  // Ajoute le QLineEdit à la 16e colonne
+
+      // Crée un QLineEdit pour la longueur de la parcelle
+      QLineEdit *parcelLengthLineEdit = new QLineEdit(this);
+      parcelLengthLineEdit->setAlignment(Qt::AlignCenter);
+      QString parcelLength = QString::number(longueurs[parcelIndex], 'f', 2) + " m";  // Converti la longueur en QString
+      parcelLengthLineEdit->setText(parcelLength);
+      parcelLengthLineEdit->setFixedHeight(hauteur);
+      parcelLengthLineEdit->setFixedWidth(largueur);
+      parcelLengthLineEdit->setStyleSheet(textColor);
+
+      // Crée un QLineEdit pour le debit de la parcelle
+      QLineEdit *parcelDebitLineEdit = new QLineEdit(this);
+      parcelDebitLineEdit->setAlignment(Qt::AlignCenter);
+      QString text;
+      if(debits[parcelIndex]>1000){
+        text = QString::number(debits[parcelIndex]/1000, 'f', 2) + " m3/h";
+      } else {
+        text = QString::number(debits[parcelIndex], 'f', 2) + " L/h";
+
+      }
+      parcelDebitLineEdit->setText(text);
+      parcelDebitLineEdit->setFixedHeight(hauteur);
+      parcelDebitLineEdit->setFixedWidth(largueur);
+      parcelDebitLineEdit->setStyleSheet(textColor);
+
+      gridLayout->addWidget(parcelLengthLineEdit, ligne, 17);  // Ajoute le QLineEdit à la 17e colonne
+      gridLayout->addWidget(parcelDebitLineEdit, ligne, 18);  // Ajoute le QLineEdit à la 17e colonne
 
       parcelIndex++;
     }
@@ -323,33 +388,44 @@ void etude::rafraichirTableau() {
   // Définit l'espacement vertical et l'alignement.
   gridLayout->setVerticalSpacing(0);
   gridLayout->setAlignment(Qt::AlignTop);
+
+  // Restaurer les positions des barres de défilement après le rafraîchissement
+  scrollArea->verticalScrollBar()->setValue(scrollPosVertical);
+  scrollArea->horizontalScrollBar()->setValue(scrollPosHorizontal);
 }
 
 void etude::initCalcul() {
+
   // Crée un QDialog pour recueillir les valeurs.
   QDialog dialog(this);
   dialog.setWindowTitle("Entrer les valeurs");
 
-  // Crée deux QLineEdit pour les valeurs.
-  QLineEdit debitGoutteurLineEdit;
-  QLineEdit espacementGoutteurLineEdit;
-
   // Crée un bouton OK.
   QPushButton okButton("OK");
 
+  // Crée des boutons radio pour les valeurs par défaut
+  QRadioButton default1Button("2.2L / 0.6m");
+  QRadioButton default2Button("1.6L / 0.5m");
+
   // Crée un layout pour le QDialog.
   QFormLayout formLayout(&dialog);
-  formLayout.addRow("Débit goutteur:", &debitGoutteurLineEdit);
-  formLayout.addRow("Espacement goutteur:", &espacementGoutteurLineEdit);
+  formLayout.addRow(&default1Button);
+  formLayout.addRow(&default2Button);
   formLayout.addWidget(&okButton);
 
   // Connecte le signal du bouton OK pour appeler la fonction 'calcul' lorsque le bouton est cliqué.
   connect(&okButton, &QPushButton::clicked, [&]() {
-    QString debitGoutteurStr = debitGoutteurLineEdit.text().replace(",", ".");
-    QString espacementGoutteurStr = espacementGoutteurLineEdit.text().replace(",", ".");
+    float debitGoutteur = 0.0f;
+    float espacementGoutteur = 0.0f;
 
-    float debitGoutteur = debitGoutteurStr.toFloat();
-    float espacementGoutteur = espacementGoutteurStr.toFloat();
+    if (default1Button.isChecked()) {
+      debitGoutteur = 2.2f;
+      espacementGoutteur = 0.6f;
+    }
+    else if (default2Button.isChecked()) {
+      debitGoutteur = 1.6f;
+      espacementGoutteur = 0.5f;
+    }
 
     for(int i=0;i<_Donnees.size();i++){
       _Donnees[i][7] = debitGoutteur;
@@ -392,7 +468,6 @@ void etude::calcul(){
     _Donnees[i][14] = zaval - zamont;
 
   }
-  rafraichirTableau();
 }
 
 void etude::divideData() {
@@ -400,24 +475,25 @@ void etude::divideData() {
 
   if(_parcelles.size()!=0){
     updateDonnees();
-      for (auto& parcel : _parcelles) {
-          // Obtenir les données de la parcelle
-          std::vector<std::vector<float>> parcelData = parcel.getDonnees();
+    _parcelles.clear();
+    for (auto& parcel : _parcelles) {
+      // Obtenir les données de la parcelle
+      std::vector<std::vector<float>> parcelData = parcel.getDonnees();
 
-          // Mettre à zéro les colonnes 15, 16, 17, 18, 19 de chaque ligne de données
-          for (auto& row : parcelData) {
-              if (row.size() > 19) { // Vérifie que les indices à zéro sont valides
-                  row[15] = 0.0;
-                  row[16] = 0.0;
-                  row[17] = 0.0;
-                  row[18] = 0.0;
-                  row[19] = 0.0;
-              }
-          }
-
-          // Ajouter les données de la parcelle à _Donnees
-          _Donnees.insert(_Donnees.end(), parcelData.begin(), parcelData.end());
+      // Mettre à zéro les colonnes 15, 16, 17, 18, 19 de chaque ligne de données
+      for (auto& row : parcelData) {
+        if (row.size() > 19) { // Vérifie que les indices à zéro sont valides
+          row[15] = 0.0;
+          row[16] = 0.0;
+          row[17] = 0.0;
+          row[18] = 0.0;
+          row[19] = 0.0;
+        }
       }
+
+      // Ajouter les données de la parcelle à _Donnees
+      _Donnees.insert(_Donnees.end(), parcelData.begin(), parcelData.end());
+    }
 
     _parcelles.clear();
 
@@ -463,7 +539,7 @@ void etude::divideData() {
       currentLength += _Donnees[i][1];
       if((currentLength >= longueurcible && i != startIndex) || i == _Donnees.size() - 1){
         endIndex = i;
-        QString nomParcelle = "parcelle" + QString::number(_parcelles.size() + 1);
+        QString nomParcelle = QString("parcelle %1").arg(_parcelles.size() + 1);
         _parcelles.push_back(parcelle(_Donnees, startIndex, endIndex + 1,database, nomParcelle));
         startIndex = i + 1;
         currentLength = 0;
@@ -509,30 +585,35 @@ void etude::chooseCommandPost() {
   for (auto& parcel : _parcelles) {
     const std::vector<std::vector<float>>& parcelData = parcel.getDonnees();
     if (!parcelData.empty() && !parcelData[0].empty()) {
-      // Créer une combobox pour cette parcelle
-        // Créer une combobox pour cette parcelle
-        QComboBox* rangeNumberComboBox = new QComboBox(&dialog);
+      QComboBox* rangeNumberComboBox = new QComboBox(&dialog);
 
-        // Remplir la combobox avec les numéros de rang pour cette parcelle
-        int defaultIndex = -1;
-        for (size_t i = 0; i < parcelData.size(); ++i) {
-            int rangeNumber = static_cast<int>(parcelData[i][0]);
-            rangeNumberComboBox->addItem(QString::number(rangeNumber));
-            if (rangeNumber == parcel.getMilieuhydro()) {
-                defaultIndex = i;
-            }
-        }
+      // Map from range number to the index of that range in parcelData
+      QMap<int, int> rangeToIndexMap;
+      int hydroIndex = parcel.getMilieuhydro();
+      int defaultIndex = -1;
 
-        // Si un milieu hydraulique a été trouvé, le définir comme valeur par défaut
-        if (defaultIndex != -1) {
-            rangeNumberComboBox->setCurrentIndex(defaultIndex);
-        }
+      for (size_t i = 0; i < parcelData.size(); ++i) {
+        int rangeNumber = static_cast<int>(parcelData[i][0]);
+        rangeNumberComboBox->addItem(QString::number(rangeNumber));
+        rangeToIndexMap.insert(rangeNumber, i);
+      }
+
+      // Récupère le numéro de rang correspondant à l'index du milieu hydrolique
+      int rangeNumberHydro = static_cast<int>(parcelData[hydroIndex][0]);
+
+      // Récupère l'index de ce numéro de rang dans la comboBox
+      defaultIndex = rangeNumberComboBox->findText(QString::number(rangeNumberHydro));
+
+      if (defaultIndex != -1) {
+        rangeNumberComboBox->setCurrentIndex(defaultIndex);
+      }
+
 
       // Ajouter la combobox au layout du QDialog
       dialogLayout.addWidget(rangeNumberComboBox);
 
       // Ajouter la combobox et la parcelle correspondante à la QMap
-        comboBoxToParcelMap.insert(rangeNumberComboBox, &parcel);
+      comboBoxToParcelMap.insert(rangeNumberComboBox, &parcel);
     }
   }
 
@@ -569,11 +650,10 @@ void etude::appelSetDiametreDialog() {
 
   // On remplit avec les noms des parcelles
   for (size_t i = 0; i < _parcelles.size(); ++i) {
-      comboBox.addItem(_parcelles[i].getNom());
+    comboBox.addItem(_parcelles[i].getNom());
   }
 
-
-    layout.addWidget(&comboBox);
+  layout.addWidget(&comboBox);
   layout.addWidget(&launchButton);
   dialog.setLayout(&layout);
 
@@ -599,4 +679,133 @@ void etude::updateDiameter(int row, const QString& newDiameter) {
     }
     row -= parcel.getDonnees().size();
   }
+}
+
+#include <QTimer>
+
+bool etude::eventFilter(QObject *obj, QEvent *event) {
+  if (event->type() == QEvent::FocusIn) {
+    QLineEdit *lineEdit = qobject_cast<QLineEdit*>(obj);
+    if (lineEdit) {
+      // Use a singleShot QTimer to delay the selectAll() call
+      QTimer::singleShot(0, lineEdit, SLOT(selectAll()));
+    }
+  } else if (event->type() == QEvent::KeyPress) {
+    QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
+
+    if (keyEvent->key() == Qt::Key_D) {
+      changerDiametreDialog();
+      return true;
+    }
+
+    // Handle KeyPress event as before
+    if (keyEvent->key() == Qt::Key_Tab) {
+      QLineEdit *lineEdit = qobject_cast<QLineEdit*>(obj);
+      if (lineEdit) {
+        int currentRow = gridLayout->indexOf(lineEdit) / gridLayout->columnCount();
+        QLineEdit* nextLineEdit = findNextDiameterLineEdit(currentRow + 1);
+        if (nextLineEdit) {
+          nextLineEdit->setFocus();
+          nextLineEdit->selectAll();
+          return true;  // Mark event as handled
+        } else {
+          return true; // Add condition for the last QLineEdit
+        }
+      }
+    }
+  }
+  // Standard event processing
+  return QObject::eventFilter(obj, event);
+}
+
+
+
+QLineEdit* etude::findNextDiameterLineEdit(int startRow)
+{
+  int totalRows = gridLayout->rowCount();
+
+  // Commence la recherche
+  for (int row = startRow; row < totalRows; ++row)
+  {
+    // Prend les widgets de la 15eme colonne
+    QWidget* widget = gridLayout->itemAtPosition(row, 15)->widget();
+
+    // SI c'est un QLineEdit
+    QLineEdit* lineEdit = qobject_cast<QLineEdit*>(widget);
+    if (lineEdit)
+    {
+      // Trouvé donc retourné
+      return lineEdit;
+    }
+  }
+
+  // Pas trouvé
+  return nullptr;
+}
+
+void etude::modifierdiametre(int debut, int fin, float dia){
+  if(debut > fin){
+    std::swap(debut, fin); // Swap if the indices are not in ascending order
+  }
+  int i = 0 ;
+  for(auto & parcelle : _parcelles){
+    auto & datas = parcelle.getDonnees();
+    for(int j = 0; j < datas.size();j++){
+      if(i>=debut && i<=fin){
+        //datas[j][15] = dia;
+        parcelle.modifiedia(j,dia);
+      }
+      i++;
+    }
+  }
+  rafraichirTableau();
+}
+
+#include <QDialog>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QVBoxLayout>
+#include <QLabel>
+#include <QIntValidator>
+
+
+void etude::changerDiametreDialog() {
+  QDialog dialog(nullptr);
+  dialog.setWindowTitle("Changer diametre");
+
+  // Validations
+  auto intValidator = new QIntValidator(0, 100);
+  auto doubleValidator = new QDoubleValidator(0.0, 100.0, 2);
+
+  // Create and setup the line edits
+  std::string d = std::to_string(_Donnees.size()) ;
+  QLineEdit indiceDebutLineEdit(QString::fromStdString("0"));
+  indiceDebutLineEdit.setValidator(intValidator);
+  QLineEdit indiceFinLineEdit(QString::fromStdString(d));
+  indiceFinLineEdit.setValidator(intValidator);
+  QLineEdit diametreLineEdit;
+  diametreLineEdit.setValidator(doubleValidator);
+
+  QPushButton button("Appliquer");
+
+  QVBoxLayout layout;
+  layout.addWidget(new QLabel("Indice de début:"));
+  layout.addWidget(&indiceDebutLineEdit);
+  layout.addWidget(new QLabel("Indice de fin:"));
+  layout.addWidget(&indiceFinLineEdit);
+  layout.addWidget(new QLabel("Nouveau diametre:"));
+  layout.addWidget(&diametreLineEdit);
+  layout.addWidget(&button);
+  dialog.setLayout(&layout);
+
+  // When the button is clicked, get the data and call modifierdiametre
+  QObject::connect(&button, &QPushButton::clicked, [&]() {
+    int debut = indiceDebutLineEdit.text().toInt();
+    int fin = indiceFinLineEdit.text().toInt();
+    float diametre = diametreLineEdit.text().toFloat();
+    modifierdiametre(debut, fin, diametre);
+    dialog.close();
+  });
+
+  dialog.exec();
 }

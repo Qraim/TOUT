@@ -15,6 +15,8 @@ tout::tout(QWidget *parent) : QWidget(parent) {
 
     setWindowTitle(QString::fromStdString("PACHA"));
 
+    jeu = std::make_unique<View>();
+
     database = std::make_shared<bdd>(nullptr);
     database->setWindowFlags(Qt::Window);
 
@@ -211,6 +213,10 @@ void tout::closeEvent(QCloseEvent *event) {
     QApplication::quit();
 }
 
+void tout::on_show_jeu_clicked() {
+    jeu->show();
+}
+
 bool tout::eventFilter(QObject *obj, QEvent *event) {
     if (event->type() == QEvent::KeyPress) {
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
@@ -230,7 +236,17 @@ bool tout::eventFilter(QObject *obj, QEvent *event) {
             case Qt::Key_3:
                 on_show_tubesimple_button_clicked();
                 return true;
-                // Ajoutez d'autres raccourcis ici
+            case Qt::Key_4:
+                on_show_pcdimm_button_clicked();
+                return true;
+            case Qt::Key_5:
+                on_show_MW_button_clicked();
+                return true;
+            case Qt::Key_6:
+                on_show_etud_button_clicked();
+                return true;
+            case Qt::Key_7 :
+                on_show_jeu_clicked();
             }
         }
     }

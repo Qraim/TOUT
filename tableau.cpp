@@ -769,6 +769,8 @@ void pertechargeherse::calcul() {
     longueur = _Donnees[i][4];
     hauteur = _Donnees[i][5];
 
+    std::cout<<longueur<<std::endl;
+
     if(unit==0){ // l/h
       // Calcule le débit en m3/s.
       debitM3 = sigmaDebit / 1000 /3600;

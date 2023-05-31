@@ -93,13 +93,18 @@
   /Users/qraim/CLionProjects/TOUT/etude.h \
   /Users/qraim/CLionProjects/TOUT/gag.h \
   /Users/qraim/CLionProjects/TOUT/gag2.h \
+  /Users/qraim/CLionProjects/TOUT/game.h \
+  /Users/qraim/CLionProjects/TOUT/gamescene.h \
   /Users/qraim/CLionProjects/TOUT/parcelle.h \
   /Users/qraim/CLionProjects/TOUT/pcdim.h \
   /Users/qraim/CLionProjects/TOUT/tableau.h \
   /Users/qraim/CLionProjects/TOUT/tubesimple.h \
+  /Users/qraim/CLionProjects/TOUT/view.h \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtCore.framework/Versions/5/Headers/QDebug \
+  /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtCore.framework/Versions/5/Headers/QElapsedTimer \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtCore.framework/Versions/5/Headers/QFile \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtCore.framework/Versions/5/Headers/QLocale \
+  /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtCore.framework/Versions/5/Headers/QSize \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtCore.framework/Versions/5/Headers/QString \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtCore.framework/Versions/5/Headers/QTextStream \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtCore.framework/Versions/5/Headers/QTimer \
@@ -121,6 +126,7 @@
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtCore.framework/Versions/5/Headers/qcoreevent.h \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtCore.framework/Versions/5/Headers/qdatastream.h \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtCore.framework/Versions/5/Headers/qdebug.h \
+  /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtCore.framework/Versions/5/Headers/qelapsedtimer.h \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtCore.framework/Versions/5/Headers/qeventloop.h \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtCore.framework/Versions/5/Headers/qfile.h \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtCore.framework/Versions/5/Headers/qfiledevice.h \
@@ -201,6 +207,7 @@
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtGui.framework/Versions/5/Headers/qkeysequence.h \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtGui.framework/Versions/5/Headers/qmatrix.h \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtGui.framework/Versions/5/Headers/qpaintdevice.h \
+  /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtGui.framework/Versions/5/Headers/qpainter.h \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtGui.framework/Versions/5/Headers/qpalette.h \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtGui.framework/Versions/5/Headers/qpen.h \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtGui.framework/Versions/5/Headers/qpixelformat.h \
@@ -230,6 +237,8 @@
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/QDialog \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/QDialogButtonBox \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/QFormLayout \
+  /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/QGraphicsScene \
+  /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/QGraphicsView \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/QGridLayout \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/QHBoxLayout \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/QHeaderView \
@@ -239,6 +248,7 @@
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/QMainWindow \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/QPlainTextEdit \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/QPushButton \
+  /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/QRadioButton \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/QScrollArea \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/QScrollBar \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/QShortcut \
@@ -264,6 +274,8 @@
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/qdialogbuttonbox.h \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/qformlayout.h \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/qframe.h \
+  /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/qgraphicsscene.h \
+  /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/qgraphicsview.h \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/qgridlayout.h \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/qheaderview.h \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/qlabel.h \
@@ -273,6 +285,7 @@
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/qmainwindow.h \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/qplaintextedit.h \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/qpushbutton.h \
+  /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/qradiobutton.h \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/qrubberband.h \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/qscrollarea.h \
   /opt/homebrew/Cellar/qt@5/5.15.8_3/lib/QtWidgets.framework/Versions/5/Headers/qscrollbar.h \

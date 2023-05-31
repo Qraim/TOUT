@@ -9,6 +9,7 @@
 #include <QSpinBox>
 #include <QSpinBox>
 #include <QDialog>
+#include <QRadioButton>
 
 #include "bdd.h"
 class parcelle {
@@ -25,7 +26,7 @@ public:
     ///
     /// @brief Récupère les données associées.
     ///
-    const std::vector<std::vector<float>> &getDonnees() const;
+    std::vector<std::vector<float>> &getDonnees() ;
 
     ///
     /// @brief Récupère le poste de commande.
@@ -45,7 +46,7 @@ public:
     void setDiametreDialog();
 
     ///
-    /// @brief Récupère le nom.
+    /// @brief Récupère le nom de la parcelle.
     ///
     const QString &getNom() const;
 
@@ -81,19 +82,29 @@ public:
     ///
     int trouvemilieuhydro();
 
+    ///
+    /// @brief retourne la longueur de la parcelle
+    ///
+    float getLongueur() const;
+
+    ///
+    /// @brief retourne le débit totql de la parcelle
+    ///
+    float getDebit() const;
 
 private:
 
     std::shared_ptr<bdd> database;
+    std::vector<std::vector<float>> _Donnees;
+    std::vector<float> _diameters;
     QString _nom;
     int milieuhydro;
     int poste_de_commande;
     int _indexdebut;
     int _indexfin;
-    std::vector<std::vector<float>> _Donnees;
-    std::vector<float> _PerteCharge; // Nouveau champ pour stocker les pertes de charge
-    std::vector<float> _diameters;
-
+    float _longueur;
+    bool amont;
+    float _debit;
 
 };
 

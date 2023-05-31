@@ -17,6 +17,8 @@
 #include <QPushButton>
 #include <QFormLayout>
 #include <QClipboard>
+#include <QRadioButton>
+
 #include "parcelle.h"
 
 class etude : public QWidget
@@ -103,7 +105,12 @@ private :
     ///
     void updateDiameter(int row, const QString& newDiameter);
 
+    QLineEdit* findNextDiameterLineEdit(int startRow);
 
+    bool eventFilter(QObject *obj, QEvent *event);
+
+    void modifierdiametre(int debut, int fin, float dia);
+    void changerDiametreDialog();
 };
 
 #endif // ETUDE_H

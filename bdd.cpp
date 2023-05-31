@@ -2,7 +2,6 @@
 // Created by qraim on 11/04/23.
 //
 
-#include <QAbstractButton>
 #include "bdd.h"
 #include <iomanip>
 
@@ -144,7 +143,7 @@ bdd::bdd(QWidget *parent)
     QPushButton *button1 = new QPushButton("Afficher", this);
     QPushButton *button2 = new QPushButton("Modifier", this);
     QPushButton *button3 = new QPushButton("Ajouter", this);
-    QPushButton *button4 = new QPushButton("Suprimmer", this);
+    QPushButton *button4 = new QPushButton("Supprimmr", this);
     QPushButton *button5 = new QPushButton("Liste tuyaux", this);
     QPushButton *button6 = new QPushButton("Coefficient", this);
     QPushButton *button7 = new QPushButton("Trouver", this);
