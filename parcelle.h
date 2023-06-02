@@ -16,7 +16,7 @@ class parcelle {
 
 public:
 
-    parcelle(std::vector<std::vector<float>> &data, int indexdebut, int indexfin, std::shared_ptr<bdd> db, QString nom);
+    parcelle(std::vector<std::vector<float>> &data, int indexdebut, int indexfin, std::shared_ptr<bdd> db, QString nom, bool amont2 = true);
 
     ///
     /// @brief Récupère le milieu hydrologique.

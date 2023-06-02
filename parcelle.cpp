@@ -5,9 +5,9 @@
 #include "parcelle.h"
 
 
-parcelle::parcelle(std::vector<std::vector<float>> &data,int indexdebut, int indexfin,   std::shared_ptr<bdd> db, QString nom): database(db), _nom(nom) {
+parcelle::parcelle(std::vector<std::vector<float>> &data,int indexdebut, int indexfin,   std::shared_ptr<bdd> db, QString nom,bool amont2): database(db), _nom(nom) {
   _longueur=0;
-  amont = true;
+  amont = amont2;
   _calcul = false;
   _indexdebut = indexdebut;
   _indexfin = indexfin;
@@ -94,37 +94,48 @@ void parcelle::calcul() {
   // Fonction lambda pour effectuer des calculs communs
   auto calculCommun = [&](size_t i) {
     float Dia = _diameters[i]; // Diamètre
-    float debitlh = _Donnees[i][9]; // Débit
+    float debitlh = _Donnees[i][10]; // Débit
     sigmadebit+=debitlh; // Débit cumulé
-    float L = _Donnees[i][8]; // Longueur de la conduite
+    float L = _Donnees[i][1]; // Longueur de la conduite
+
     // Calcul de la perte de charge
     float perte = k * std::pow(sigmadebit/3600, a) * std::pow(Dia, b) * L;
-    // Calcul de l'aire de la conduite
-    float A = pi * std::pow(Dia/2, 2);
-    // Calcul de la vitesse de l'eau dans la conduite
-    float vitesse = ((sigmadebit * 1000) / 3600 ) / A;
-    return std::make_tuple(perte, vitesse);
+    return perte;
   };
 
   // Calcul de la perte de charge, de la vitesse et du dénivelé du côté gauche du poste de commande
-  for (size_t i = 0; i < debut; ++i) {
-    auto [perte, vitesse] = calculCommun(i);
+  for (size_t i = 0; i < debut+1; ++i) {
+    auto perte = calculCommun(i);
     perteg += perte; // Cumul de la perte de charge
-    vitesse_gauche = vitesse; // Stockage de la vitesse
     // Calcul du dénivelé
     denivele_gauche = i == fin_gauche && amont ? _Donnees[0][3] - _Donnees[i][3] : _Donnees[0][4] - _Donnees[i][4];
   }
 
+  // Calcule l'aire du tuyau.
+  float aireTuyau = (pi * pow((_diameters[debut]/1000) / 2, 2));
+
+  // Calcule la vitesse.
+  vitesse_gauche = (_Donnees[debut][8]/(1000*3600)) / aireTuyau;
+
+  for(auto i : _Donnees[debut]){
+    std::cout<<i<<" ";
+  }
+
+
   sigmadebit = 0; // Réinitialisation de la variable sigmadebit pour le côté droit
 
   // Calcul de la perte de charge, de la vitesse et du dénivelé du côté droit du poste de commande
-  for (size_t i = debut; i < _Donnees.size(); ++i) {
-    auto [perte, vitesse] = calculCommun(i);
+  for (size_t i = debut+1; i < _Donnees.size(); ++i) {
+    auto perte = calculCommun(i);
     perted += perte; // Cumul de la perte de charge
-    vitesse_droite = vitesse; // Stockage de la vitesse
     // Calcul du dénivelé
     denivele_droit = i == fin_droit && amont ? _Donnees[i][3] - _Donnees[fin_gauche][3] : _Donnees[i][4] - _Donnees[fin_gauche][4];
   }
+
+  aireTuyau = (pi * pow((_diameters[debut+1]/1000) / 2, 2));
+
+  // Calcule la vitesse.
+  vitesse_droite = (_Donnees[debut+1][8]/(1000*3600)) / aireTuyau;
 
   // Stockage des valeurs calculées dans le tableau _Donnees pour le côté gauche
   _Donnees[fin_gauche - 1][17] = perteg;
@@ -162,10 +173,11 @@ void parcelle::setDiametreDialog() {
   }
 
   QDialog diameterDialog;
+  diameterDialog.setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
+
   diameterDialog.setWindowTitle("Choix Diametre");
 
   QVBoxLayout dialogLayout;
-
   // Amont/Aval Radio Buttons
   QRadioButton *amontButton = new QRadioButton("Amont", &diameterDialog);
   QRadioButton *avalButton = new QRadioButton("Aval", &diameterDialog);
@@ -371,3 +383,7 @@ int parcelle::getPosteDeCommande() const {
 bool parcelle::isCalcul() const {
   return _calcul;
 }
+
+
+
+

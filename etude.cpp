@@ -99,6 +99,7 @@ void etude::showOptionsDialog() {
 
 void etude::init()
 {
+  bool amont = true;
   _Donnees.clear();
   _parcelles.clear();
 
@@ -107,8 +108,40 @@ void etude::init()
 
   if(!originalText.isEmpty()){
     traitements(originalText);
+    QDialog dialog(this);
+    dialog.setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
+
+    dialog.setWindowTitle("Amont/Aval");
+
+    QVBoxLayout *mainLayout = new QVBoxLayout(&dialog);
+
+    QRadioButton *amontButton = new QRadioButton("Amont", &dialog);
+    QRadioButton *avalButton = new QRadioButton("Aval", &dialog);
+
+    mainLayout->addWidget(amontButton);
+    mainLayout->addWidget(avalButton);
+
+    QHBoxLayout *buttonLayout = new QHBoxLayout();
+    QPushButton *okButton = new QPushButton("OK", &dialog);
+    QPushButton *cancelButton = new QPushButton("Annuler", &dialog);
+
+    buttonLayout->addWidget(okButton);
+    buttonLayout->addWidget(cancelButton);
+
+    mainLayout->addLayout(buttonLayout);
+
+    connect(okButton, &QPushButton::clicked, &dialog, &QDialog::accept);
+    connect(cancelButton, &QPushButton::clicked, &dialog, &QDialog::reject);
+
+    if (dialog.exec() == QDialog::Accepted) {
+        amont = amontButton->isChecked();
+    }
+
+
   } else {
     QDialog dialog(this);
+    dialog.setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
+
     dialog.setWindowTitle("Importer les données");
 
     QVBoxLayout *mainLayout = new QVBoxLayout(&dialog);
@@ -139,7 +172,7 @@ void etude::init()
   if (!_Donnees.empty()) {
     QString nomParcelle = "parcelle 1";
     initCalcul();
-    _parcelles.push_back(parcelle(_Donnees, 0, _Donnees.size(),database, nomParcelle));
+    _parcelles.push_back(parcelle(_Donnees, 0, _Donnees.size(),database, nomParcelle, amont));
     rafraichirTableau();
   }
 }
@@ -423,6 +456,7 @@ void etude::initCalcul() {
 
   // Crée un QDialog pour recueillir les valeurs.
   QDialog dialog(this);
+  dialog.setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
   dialog.setWindowTitle("Entrer les valeurs");
 
   // Crée un bouton OK.
@@ -496,88 +530,130 @@ void etude::calcul(){
 }
 
 void etude::divideData() {
-
-
-  if(_parcelles.size()!=0){
+  if(!_parcelles.empty()){
     updateDonnees();
     _parcelles.clear();
-    for (auto& parcel : _parcelles) {
-      // Obtenir les données de la parcelle
-      std::vector<std::vector<float>> parcelData = parcel.getDonnees();
-
-      // Mettre à zéro les colonnes 15, 16, 17, 18, 19 de chaque ligne de données
-      for (auto& row : parcelData) {
-        if (row.size() > 19) { // Vérifie que les indices à zéro sont valides
-          row[15] = 0.0;
-          row[16] = 0.0;
-          row[17] = 0.0;
-          row[18] = 0.0;
-          row[19] = 0.0;
-        }
-      }
-
-      // Ajouter les données de la parcelle à _Donnees
-      _Donnees.insert(_Donnees.end(), parcelData.begin(), parcelData.end());
-    }
-
-    _parcelles.clear();
-
   }
 
-  // Crée un QDialog pour recueillir le nombre de parties.
-  QDialog dialog(this);
-  dialog.setWindowTitle("Entrer le nombre de parties");
-
-  // Crée un QLineEdit pour le nombre.
-  QLineEdit nombreparcelleLineEdit;
-
-  // Crée un bouton OK.
-  QPushButton okButton("OK");
-
-  // Crée un layout pour le QDialog.
-  QFormLayout formLayout(&dialog);
-  formLayout.addRow("Nombre de parties:", &nombreparcelleLineEdit);
-  formLayout.addWidget(&okButton);
-
-  // Connecte le signal du bouton OK pour appeler la fonction de division lorsque le bouton est cliqué.
-  connect(&okButton, &QPushButton::clicked, [&]() {
-    int nombreparcelle = nombreparcelleLineEdit.text().toInt();
-
-    // Calcule la longueur totale des rangs
-    float longueurtotale = 0;
-    for(const auto& row : _Donnees){
-      longueurtotale += row[1];
-    }
-
-    // La longueur cible pour chaque parcelle
-    float longueurcible = longueurtotale / nombreparcelle;
-
-    // Indices de début et de fin pour chaque parcelle
-    int startIndex = 0;
-    int endIndex = 0;
-
-    // Longueur cumulée pour la parcelle actuelle
-    float currentLength = 0;
-
-    // Création des parcelles
-    for(int i = 0; i < _Donnees.size(); ++i){
-      currentLength += _Donnees[i][1];
-      if((currentLength >= longueurcible && i != startIndex) || i == _Donnees.size() - 1){
-        endIndex = i;
-        QString nomParcelle = QString("parcelle %1").arg(_parcelles.size() + 1);
-        _parcelles.push_back(parcelle(_Donnees, startIndex, endIndex + 1,database, nomParcelle));
-        startIndex = i + 1;
-        currentLength = 0;
+  for (auto& parcel : _parcelles) {
+    std::vector<std::vector<float>> parcelData = parcel.getDonnees();
+    for (auto& row : parcelData) {
+      if (row.size() > 19) {
+        row[15] = 0.0;
+        row[16] = 0.0;
+        row[17] = 0.0;
+        row[18] = 0.0;
+        row[19] = 0.0;
       }
     }
+    _Donnees.insert(_Donnees.end(), parcelData.begin(), parcelData.end());
+  }
 
-    rafraichirTableau();
-    dialog.accept();
+  QDialog dialog(this);
+  dialog.setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
+  dialog.setWindowTitle("Diviser les données");
+
+  QRadioButton autoButton("Automatique");
+  QRadioButton manualButton("Manuel");
+  QLineEdit startIndexLineEdit;
+  QLineEdit endIndexLineEdit;
+  QLineEdit nombreparcelleLineEdit;
+
+  QLabel remainingLinesLabel;
+
+  QFormLayout formLayout(&dialog);
+  formLayout.addRow(&autoButton);
+  formLayout.addRow(&manualButton);
+
+  formLayout.addRow("Nombre de parcelles:", &nombreparcelleLineEdit);
+  formLayout.addRow("Index de début:", &startIndexLineEdit);
+      formLayout.addRow("Index de fin:", &endIndexLineEdit);
+  formLayout.addRow("Lignes restantes:", &remainingLinesLabel);
+
+  autoButton.setChecked(true);
+  startIndexLineEdit.setEnabled(false);
+  endIndexLineEdit.setEnabled(false);
+
+  connect(&autoButton, &QRadioButton::clicked, [&]() {
+      startIndexLineEdit.setEnabled(false);
+      endIndexLineEdit.setEnabled(false);
+      nombreparcelleLineEdit.setEnabled(true);
   });
 
-  // Affiche le QDialog.
-  dialog.exec();
+  connect(&manualButton, &QRadioButton::clicked, [&]() {
+      startIndexLineEdit.setEnabled(true);
+      endIndexLineEdit.setEnabled(true);
+      nombreparcelleLineEdit.setEnabled(false);
+
+  });
+
+  // Création du bouton OK et Cancel
+  QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
+  formLayout.addWidget(&buttonBox);
+  connect(&buttonBox, SIGNAL(accepted()), &dialog, SLOT(accept()));
+  connect(&buttonBox, SIGNAL(rejected()), &dialog, SLOT(reject()));
+
+  int nextStartIndex = 0;
+
+  while (nextStartIndex < _Donnees.size()) {
+    remainingLinesLabel.setText(QString::number(_Donnees.size() - nextStartIndex));
+
+    if (dialog.exec() == QDialog::Accepted) {
+      if (autoButton.isChecked()) {
+        int nombreparcelle = nombreparcelleLineEdit.text().toInt();
+
+        // Calcule la longueur totale des rangs
+        float longueurtotale = 0;
+        for(const auto& row : _Donnees){
+          longueurtotale += row[1];
+        }
+
+        // La longueur cible pour chaque parcelle
+        float longueurcible = longueurtotale / nombreparcelle;
+
+        // Indices de début et de fin pour chaque parcelle
+        int startIndex = 0;
+        int endIndex = 0;
+
+        // Longueur cumulée pour la parcelle actuelle
+        float currentLength = 0;
+
+        // Création des parcelles
+        for(int i = 0; i < _Donnees.size(); ++i){
+          currentLength += _Donnees[i][1];
+          if((currentLength >= longueurcible && i != startIndex) || i == _Donnees.size() - 1){
+            endIndex = i;
+            QString nomParcelle = QString("parcelle %1").arg(_parcelles.size() + 1);
+            _parcelles.push_back(parcelle(_Donnees, startIndex, endIndex + 1,database, nomParcelle));
+            startIndex = i + 1;
+            currentLength = 0;
+          }
+        }
+        nextStartIndex = _Donnees.size();
+      } else if (manualButton.isChecked()) {
+        int startIndex = startIndexLineEdit.text().toInt()-1;
+        int endIndex = endIndexLineEdit.text().toInt()-1;
+
+        if (startIndex >= nextStartIndex && endIndex < _Donnees.size() && startIndex < endIndex) {
+
+          QString nomParcelle = QString("parcelle %1").arg(_parcelles.size() + 1);
+          _parcelles.push_back(parcelle(_Donnees, startIndex, endIndex + 1,database, nomParcelle));
+
+          nextStartIndex = endIndex + 1;
+
+          startIndexLineEdit.setText(QString::number(endIndex+2));
+          endIndexLineEdit.setText(QString::number(endIndex+3));
+
+        } else {
+        }
+      }
+    } else {
+      break;
+    }
+  }
+  rafraichirTableau();
 }
+
 
 
 
@@ -599,6 +675,8 @@ void etude::updateDonnees() {
 void etude::chooseCommandPost() {
   // Créer un QDialog pour le choix du poste de commande
   QDialog dialog(this);
+  dialog.setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
+
   dialog.setWindowTitle("Choisir le poste de commande");
 
   // Créer un layout pour le QDialog
@@ -669,6 +747,8 @@ void etude::chooseCommandPost() {
 
 void etude::appelSetDiametreDialog() {
   QDialog dialog;
+  dialog.setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
+
   QVBoxLayout layout;
   QComboBox comboBox;
   QPushButton launchButton("Lancer");
@@ -796,6 +876,8 @@ void etude::modifierdiametre(int debut, int fin, float dia){
 
 void etude::changerDiametreDialog() {
   QDialog dialog(nullptr);
+  dialog.setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
+
   dialog.setWindowTitle("Changer diametre");
 
   // Validations

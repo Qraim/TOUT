@@ -21,10 +21,10 @@
 
 #include "parcelle.h"
 
-const QString WHITE_TEXT = "QLineEdit { color: white; }";
-const QString RED_TEXT = "QLineEdit { color: white; background-color : red; }";
-const QString ORANGE_TEXT = "QLineEdit { color: white; background-color : orange; }";
-const QString BLUE_TEXT = "QLineEdit { color: white; background-color : blue; }";
+const QString WHITE_TEXT = "QLineEdit { color: white; border: 1px solid gray; border-radius: 4px;padding: 2px 4px; }";
+const QString RED_TEXT = "QLineEdit { color: white; background-color : red;border: 1px solid gray; border-radius: 4px;padding: 2px 4px; }";
+const QString ORANGE_TEXT = "QLineEdit { color: white; background-color : orange; border: 1px solid gray; border-radius: 4px;padding: 2px 4px;}";
+const QString BLUE_TEXT = "QLineEdit { color: white; background-color : blue;border: 1px solid gray; border-radius: 4px;padding: 2px 4px; }";
 
 
 struct ParcelInfo {

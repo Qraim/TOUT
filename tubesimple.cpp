@@ -227,6 +227,8 @@ void tubesimple::calculer() {
     float a=0;
     float b = 0 ;
 
+    float M_PI = 3.141592653;
+
     // Si l'input de dénivelé n'est pas vide, on le convertit en float et on le stocke dans la variable deniveles
     if(!denivele.text().isEmpty()){
         deniveles = denivele.text().toFloat();
@@ -242,11 +244,10 @@ void tubesimple::calculer() {
     b = std::get<1>(coefficients);
     k = std::get<2>(coefficients);
 
+
     float pertecharge = k * pow(dLS, a) * pow(Dia, b) * L; // Calcule la perte de charge en Pa
     float variation = pertecharge+deniveles; // Calcule la variation de charge en Pa
 
-    Perte.setText(QString::number(pertecharge, 'f', 2)); // Met à jour le texte de la QLineEdit "Perte"
-    Piezo.setText(QString::number(variation, 'f', 2)); // Met à jour le texte de la QLineEdit "Piezo"
 
     QString str = "";
     if (v > 2) { // Si la vitesse d'écoulement est supérieure à 2 m/s, on change la couleur de la QLineEdit "Vitesse" en rouge
@@ -262,7 +263,11 @@ void tubesimple::calculer() {
     longueur.clear();
     denivele.clear();
 
+    Perte.setStyleSheet("color : white;");
     Vitesse.setText(str); // Met à jour le texte de la QLineEdit "Vitesse"
+    Perte.setText(QString::number(pertecharge, 'f', 2)); // Met à jour le texte de la QLineEdit "Perte"
+    Piezo.setText(QString::number(variation, 'f', 2)); // Met à jour le texte de la QLineEdit "Piezo"
+
 }
 
 
