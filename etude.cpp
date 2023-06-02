@@ -198,6 +198,9 @@ void etude::rafraichirTableau() {
   // Supprime toutes les cases du tableau.
   clearchild();
 
+  bool amont = _parcelles[0].isAmont();
+
+
   // Initialize headers
   QStringList headers = {"Num", "Long","NbAsp", "Zamont", "Zaval", "InterD", "InterF","DebitG","Esp","DebitC","DebitL","PeigneZAm","PeigneZAv","DRAm","DRAv","Diametre", "Nom", "Perte/Vitesse", "Denivele", "Piezo"};
 
@@ -211,51 +214,50 @@ void etude::rafraichirTableau() {
     gridLayout->addWidget(headerLabel, 0, i);
   }
 
+
   // Initialise le numéro de ligne.
   int ligne = 1;
 
-  std::vector<int> milieuxHydro;
-  std::vector<int> limitesParcelles;
-  std::vector<int> commandPosts;
-  std::vector<QString> nom;
-  std::vector<float> longueurs;
-  std::vector<float> debits;
-
   int totalRows = 0;
+  std::vector<ParcelInfo> parcelInfos;
   for (auto& parcel : _parcelles) {
+    ParcelInfo info;
+    totalRows += parcel.getDonnees().size();
     const std::vector<std::vector<float>>& parcelData = parcel.getDonnees();
-    totalRows += parcelData.size();
-    nom.push_back(parcel.getNom());
-    longueurs.push_back(parcel.getLongueur());
-    milieuxHydro.push_back(totalRows - parcelData.size() / 2);
-    limitesParcelles.push_back(totalRows);
-    debits.push_back(parcel.getDebit());
-    if(parcel.getPosteDeCommande()!=0){
-      commandPosts.push_back(parcel.getPosteDeCommande());
-    }
+    info.milieuHydro = totalRows - parcelData.size() / 2;
+    info.limiteParcelle = totalRows;
+    info.commandPost = parcel.getPosteDeCommande();
+    info.nom = parcel.getNom();
+    info.longueur = parcel.getLongueur();
+    info.debit = parcel.getDebit();
+
+
+    parcelInfos.push_back(info);
   }
+
   int parcelIndex = 0;  // Ajoutez ceci avant la boucle sur _parcelles
 
   // Ajoute les données au tableau.
   for (const std::vector<float> &donneesLigne : _Donnees) {
 
     // Détermine la couleur du texte.
-    QString textColor = "QLineEdit { color: white; }";
-    if (std::find(commandPosts.begin(), commandPosts.end(), ligne) != commandPosts.end() && poste) {
-      textColor = "QLineEdit { color: white;background-color : red; }"; // Poste de commande
-    } else if (std::find(milieuxHydro.begin(), milieuxHydro.end(), ligne) != milieuxHydro.end() && milieu) {
-      textColor = "QLineEdit { color: white; background-color : orange; }"; // Milieu hydrolique
-    } else if (std::find(limitesParcelles.begin(), limitesParcelles.end(), ligne) != limitesParcelles.end() && limitations) {
-      textColor = "QLineEdit { color: white;background-color : blue; }"; // Limite entre deux parcelles
-    }
-
-    // Vérifiez si la ligne actuelle est à un ou deux postes de commande.
+    QString textColor = WHITE_TEXT;
     int distanceToNearestCommandPost = std::numeric_limits<int>::max();
-    for (int commandPost : commandPosts) {
-      int distance = abs(ligne - commandPost);
-      if (distance < distanceToNearestCommandPost) {
-        distanceToNearestCommandPost = distance;
+
+    // Trouvez la parcelle à laquelle cette ligne appartient
+    auto parcelInfoIt = std::find_if(parcelInfos.begin(), parcelInfos.end(),
+                                     [ligne](const ParcelInfo& info) { return ligne <= info.limiteParcelle; });
+
+    if (parcelInfoIt != parcelInfos.end()) {
+      const ParcelInfo& info = *parcelInfoIt;
+      if (ligne == info.commandPost && poste) {
+        textColor = RED_TEXT; // Poste de commande
+      } else if (ligne == info.milieuHydro && milieu) {
+        textColor = ORANGE_TEXT; // Milieu hydrolique
+      } else if (ligne == info.limiteParcelle && limitations) {
+        textColor = BLUE_TEXT; // Limite entre deux parcelles
       }
+      distanceToNearestCommandPost = std::abs(ligne - info.commandPost);
     }
 
 
@@ -281,10 +283,6 @@ void etude::rafraichirTableau() {
         QString formattedText;
         if (i == 0) {
           formattedText = QString::number(static_cast<int>(donneesLigne[i]));
-        } else if(i>15 && i != 18 && i != 19){
-          formattedText = (donneesLigne[i] == 0.0f) ? "" : QString::number(donneesLigne[i], 'f', 2);
-        } else if (i == 18 || i == 19) { // Pour les colonnes 18 et 19
-          formattedText = (donneesLigne[i] == 0.0f) ? "" : QString::number(donneesLigne[i], 'f', 2) + "m"; // Ajoutez "m" si la valeur n'est pas vide
         } else if (i == 17) {
           QString suffix;
           if (distanceToNearestCommandPost == 1) {
@@ -293,7 +291,14 @@ void etude::rafraichirTableau() {
             suffix = "m/s";
           }
           formattedText = (donneesLigne[i] == 0.0f) ? "" : QString::number(donneesLigne[i], 'f', 2) + suffix;
-        }else {
+        }
+        else if(i>15 && i != 18 && i != 19){
+          formattedText = (donneesLigne[i] == 0.0f) ? "" : QString::number(donneesLigne[i], 'f', 2);
+        } else if (i == 18 || i == 19) { // Pour les colonnes 18 et 19
+          formattedText = (donneesLigne[i] == 0.0f) ? "" : QString::number(donneesLigne[i], 'f', 2) + "m"; // Ajoutez "m" si la valeur n'est pas vide
+        }
+
+        else {
           formattedText = QString::number(donneesLigne[i], 'f', 2);
         }
 
@@ -311,31 +316,29 @@ void etude::rafraichirTableau() {
             this->updateDiameter(ligne-1, newDiameter);
           });
 
-          if(limitesParcelles.size()!=0){
+          if(!parcelInfos.empty()){
             // Trouvez la dernière ligne de la parcelle actuelle
-            int lastRowOfParcel = limitesParcelles[parcelIndex];
+            int lastRowOfParcel = parcelInfoIt->limiteParcelle;
             // Si la ligne actuelle est la dernière ligne de la parcelle, connectez le signal editingFinished() à la méthode calcul()
             if (ligne == lastRowOfParcel) {
+              int parcelIndex = std::distance(parcelInfos.begin(), parcelInfoIt);
               connect(lineEdit, &QLineEdit::editingFinished, [this, parcelIndex] {
                 this->_parcelles[parcelIndex].calcul();
               });
             }
           }
 
+
         }
       }
     }
 
-    // Vérifie si cette ligne est un milieu hydraulique
-    if (std::find(limitesParcelles.begin(), limitesParcelles.end(), ligne) != limitesParcelles.end()) {
-      QLineEdit *parcelNameLineEdit = new QLineEdit(this);
-      parcelNameLineEdit->setAlignment(Qt::AlignCenter);
-      QString parcelName = nom[parcelIndex];
-      parcelNameLineEdit->setText(parcelName);
-      parcelNameLineEdit->setFixedHeight(hauteur);
-      parcelNameLineEdit->setFixedWidth(largueur);
-      parcelNameLineEdit->setStyleSheet(textColor);
+    // Vérifie si cette ligne est une limite de parcelle
+    if (parcelInfoIt != parcelInfos.end() && ligne == parcelInfoIt->limiteParcelle) {
+      ParcelInfo& info = *parcelInfoIt;
+      int parcelIndex = std::distance(parcelInfos.begin(), parcelInfoIt);
 
+      QLineEdit *parcelNameLineEdit = createLineEdit(info.nom, textColor, this, false);
       // Connecte le signal textChanged au slot setNom
       connect(parcelNameLineEdit, &QLineEdit::textChanged, [this, parcelIndex](const QString& newName) {
         this->_parcelles[parcelIndex].setNom(newName);
@@ -343,37 +346,46 @@ void etude::rafraichirTableau() {
       gridLayout->addWidget(parcelNameLineEdit, ligne, 16);  // Ajoute le QLineEdit à la 16e colonne
 
       // Crée un QLineEdit pour la longueur de la parcelle
-      QLineEdit *parcelLengthLineEdit = new QLineEdit(this);
-      parcelLengthLineEdit->setAlignment(Qt::AlignCenter);
-      QString parcelLength = QString::number(longueurs[parcelIndex], 'f', 2) + " m";  // Converti la longueur en QString
-      parcelLengthLineEdit->setText(parcelLength);
-      parcelLengthLineEdit->setFixedHeight(hauteur);
-      parcelLengthLineEdit->setFixedWidth(largueur);
-      parcelLengthLineEdit->setStyleSheet(textColor);
+      QLineEdit *parcelLengthLineEdit = createLineEdit(QString::number(info.longueur, 'f', 2) + " m", textColor, this);
+      gridLayout->addWidget(parcelLengthLineEdit, ligne, 17);  // Ajoute le QLineEdit à la 17e colonne
 
       // Crée un QLineEdit pour le debit de la parcelle
-      QLineEdit *parcelDebitLineEdit = new QLineEdit(this);
-      parcelDebitLineEdit->setAlignment(Qt::AlignCenter);
       QString text;
-      if(debits[parcelIndex]>1000){
-        text = QString::number(debits[parcelIndex]/1000, 'f', 2) + " m3/h";
+      if(info.debit > 1000) {
+        text = QString::number(info.debit / 1000, 'f', 2) + " m3/h";
       } else {
-        text = QString::number(debits[parcelIndex], 'f', 2) + " L/h";
-
+        text = QString::number(info.debit, 'f', 2) + " L/h";
       }
-      parcelDebitLineEdit->setText(text);
-      parcelDebitLineEdit->setFixedHeight(hauteur);
-      parcelDebitLineEdit->setFixedWidth(largueur);
-      parcelDebitLineEdit->setStyleSheet(textColor);
-
-      gridLayout->addWidget(parcelLengthLineEdit, ligne, 17);  // Ajoute le QLineEdit à la 17e colonne
-      gridLayout->addWidget(parcelDebitLineEdit, ligne, 18);  // Ajoute le QLineEdit à la 17e colonne
-
-      parcelIndex++;
+      QLineEdit *parcelDebitLineEdit = createLineEdit(text, textColor, this);
+      gridLayout->addWidget(parcelDebitLineEdit, ligne, 18);  // Ajoute le QLineEdit à la 18e colonne
     }
+
 
     // Incrémente le numéro de ligne.
     ligne++;
+  }
+
+  // Contrôle de visibilité des colonnes après avoir rempli la grille
+  if (amont) {
+    for (int i = 0; i < gridLayout->columnCount(); ++i) {
+      if (i == 4 || i == 6) {
+        for (int j = 0; j < gridLayout->rowCount(); ++j) {
+          if (gridLayout->itemAtPosition(j, i) && gridLayout->itemAtPosition(j, i)->widget()) {
+            gridLayout->itemAtPosition(j, i)->widget()->setVisible(false);
+          }
+        }
+      }
+    }
+  } else {
+    for (int i = 0; i < gridLayout->columnCount(); ++i) {
+      if (i == 3 || i == 5) {
+        for (int j = 0; j < gridLayout->rowCount(); ++j) {
+          if (gridLayout->itemAtPosition(j, i) && gridLayout->itemAtPosition(j, i)->widget()) {
+            gridLayout->itemAtPosition(j, i)->widget()->setVisible(false);
+          }
+        }
+      }
+    }
   }
 
   // Calcule la hauteur du widget de défilement et ajuste sa hauteur minimum et
@@ -393,6 +405,19 @@ void etude::rafraichirTableau() {
   scrollArea->verticalScrollBar()->setValue(scrollPosVertical);
   scrollArea->horizontalScrollBar()->setValue(scrollPosHorizontal);
 }
+
+QLineEdit* etude::createLineEdit(const QString& text, const QString& style, QWidget* parent, bool readOnly) {
+  QLineEdit *lineEdit = new QLineEdit(parent);
+  lineEdit->setStyleSheet(style);
+  lineEdit->setAlignment(Qt::AlignCenter);
+  lineEdit->setReadOnly(readOnly);
+  lineEdit->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+  lineEdit->setFixedHeight(hauteur);
+  lineEdit->setFixedWidth(largueur);
+  lineEdit->setText(text);
+  return lineEdit;
+}
+
 
 void etude::initCalcul() {
 
@@ -809,3 +834,16 @@ void etude::changerDiametreDialog() {
 
   dialog.exec();
 }
+
+void etude::refresh(){
+  clearchild();
+  _Donnees.clear();
+  _parcelles.clear();
+  milieu = true;
+  limitations = true;
+  poste = true;
+}
+
+
+
+

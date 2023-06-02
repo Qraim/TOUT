@@ -205,6 +205,7 @@ void tout::on_show_gag2_button_clicked() {
 }
 
 void tout::on_show_etud_button_clicked(){
+    etud->refresh();
     etud->showMaximized();
 }
 

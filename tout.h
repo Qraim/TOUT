@@ -84,8 +84,6 @@ private:
     void on_show_etud_button_clicked();
 
 
-    QString keySequence;
-
 
 protected:
     void closeEvent(QCloseEvent *event) override;

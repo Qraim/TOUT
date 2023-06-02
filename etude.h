@@ -21,13 +21,33 @@
 
 #include "parcelle.h"
 
+const QString WHITE_TEXT = "QLineEdit { color: white; }";
+const QString RED_TEXT = "QLineEdit { color: white; background-color : red; }";
+const QString ORANGE_TEXT = "QLineEdit { color: white; background-color : orange; }";
+const QString BLUE_TEXT = "QLineEdit { color: white; background-color : blue; }";
+
+
+struct ParcelInfo {
+  int milieuHydro;
+  int limiteParcelle;
+  int commandPost;
+  QString nom;
+  float longueur;
+  float debit;
+
+
+};
+
+
 class etude : public QWidget
 {
     Q_OBJECT
-public:
-    etude(std::shared_ptr<bdd> db,QWidget *parent = nullptr);
 
-signals:
+  public:
+    etude(std::shared_ptr<bdd> db,QWidget *parent = nullptr);
+    void refresh();
+
+
 private :
     std::shared_ptr<bdd> database;
     std::vector<std::vector<float>> _Donnees;
@@ -110,7 +130,10 @@ private :
     bool eventFilter(QObject *obj, QEvent *event);
 
     void modifierdiametre(int debut, int fin, float dia);
+
     void changerDiametreDialog();
+    QLineEdit *createLineEdit(const QString &text, const QString &style,
+                              QWidget *parent, bool readOnly = true);
 };
 
 #endif // ETUDE_H

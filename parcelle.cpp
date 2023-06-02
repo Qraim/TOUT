@@ -8,6 +8,7 @@
 parcelle::parcelle(std::vector<std::vector<float>> &data,int indexdebut, int indexfin,   std::shared_ptr<bdd> db, QString nom): database(db), _nom(nom) {
   _longueur=0;
   amont = true;
+  _calcul = false;
   _indexdebut = indexdebut;
   _indexfin = indexfin;
 
@@ -69,94 +70,75 @@ int parcelle::trouvemilieuhydro() {
   return 0;
 }
 
-
-
-int parcelle::getMilieuhydro() const { return milieuhydro; }
-void parcelle::setPosteDeCommande(int posteDeCommande) {
-  poste_de_commande = posteDeCommande;
-}
-int parcelle::getPosteDeCommande() const { return poste_de_commande; }
-
-
 void parcelle::calcul() {
+  // Si poste_de_commande est à zéro, on sort de la fonction
   if(poste_de_commande==0)
     return;
 
-  double a,b,k;
+  // Coefficients pour le calcul de la perte de charge
+  double a=1.75, b=-4.85, k=831743.11;
 
-  a=1.75;
-  b=-4.85;
-  k=831743.11;
+  // Initialisation des variables nécessaires pour les calculs
+  float denivele_gauche = 0, denivele_droit = 0;
+  float perted = 0, perteg = 0, sigmadebit = 0;
+  float vitesse_gauche = 0, vitesse_droite = 0;
 
-  float denivele_gauche = 0;
-  float denivele_droit = 0;
-  float perted = 0;
-  float perteg = 0;
-  float sigmadebit = 0;
-
-  float vitesse_gauche = 0; // Nouvelle variable pour stocker la vitesse à gauche
-  float vitesse_droite = 0; // Nouvelle variable pour stocker la vitesse à droite
-
+  // Constante pour le calcul de l'aire de la conduite
   const float pi = 3.14159265358979323846;
 
+  // Indices pour la première et la dernière ligne du côté gauche et du côté droit du poste de commande
+  size_t debut = poste_de_commande-_indexdebut;
+  size_t fin_gauche = debut - 1;
+  size_t fin_droit = _Donnees.size() - 1;
 
-  // Calcul de la perte de charge et du dénivelé du côté gauche du poste de commande
-  for (size_t i = 0; i < poste_de_commande-_indexdebut; ++i) {
-    float Dia = _diameters[i];
-    float debitlh = _Donnees[i][9]; // Convertir le débit en l/s
-    sigmadebit+=debitlh;
-    float L = _Donnees[i][8];
+  // Fonction lambda pour effectuer des calculs communs
+  auto calculCommun = [&](size_t i) {
+    float Dia = _diameters[i]; // Diamètre
+    float debitlh = _Donnees[i][9]; // Débit
+    sigmadebit+=debitlh; // Débit cumulé
+    float L = _Donnees[i][8]; // Longueur de la conduite
+    // Calcul de la perte de charge
     float perte = k * std::pow(sigmadebit/3600, a) * std::pow(Dia, b) * L;
-    perteg += perte;
+    // Calcul de l'aire de la conduite
+    float A = pi * std::pow(Dia/2, 2);
+    // Calcul de la vitesse de l'eau dans la conduite
+    float vitesse = ((sigmadebit * 1000) / 3600 ) / A;
+    return std::make_tuple(perte, vitesse);
+  };
 
-    // Calcul de la vitesse
-    float A = pi * std::pow(Dia/2, 2); // Calcul de l'aire en m²
-    vitesse_gauche = ((sigmadebit * 1000) / 3600 ) / A; // Calcul de la vitesse en m/s
-
+  // Calcul de la perte de charge, de la vitesse et du dénivelé du côté gauche du poste de commande
+  for (size_t i = 0; i < debut; ++i) {
+    auto [perte, vitesse] = calculCommun(i);
+    perteg += perte; // Cumul de la perte de charge
+    vitesse_gauche = vitesse; // Stockage de la vitesse
     // Calcul du dénivelé
-    if(i == poste_de_commande-_indexdebut-1 && amont)
-      denivele_gauche = _Donnees[0][3] - _Donnees[i][3];
-    else
-      denivele_gauche = _Donnees[0][4] - _Donnees[i][4];
-
+    denivele_gauche = i == fin_gauche && amont ? _Donnees[0][3] - _Donnees[i][3] : _Donnees[0][4] - _Donnees[i][4];
   }
 
-  sigmadebit = 0;
+  sigmadebit = 0; // Réinitialisation de la variable sigmadebit pour le côté droit
 
-  // Calcul de la perte de charge et du dénivelé du côté droit du poste de commande
-  for (size_t i = poste_de_commande-_indexdebut; i < _Donnees.size(); ++i) {
-    float Dia = _diameters[i]; // mm
-    float debitlh = _Donnees[i][9]; // l/h
-    sigmadebit += debitlh;
-    float L = _Donnees[i][8]; // m
-    float perte = k * std::pow(sigmadebit / 3600, a) * std::pow(Dia, b) * L;
-    perted += perte;
-
-    // Calcul de la vitesse
-    float A = pi * std::pow(Dia/2, 2); // Calcul de l'aire en m²
-    vitesse_droite = ((sigmadebit * 1000) / 3600) / A; // Calcul de la vitesse en m/s
-
+  // Calcul de la perte de charge, de la vitesse et du dénivelé du côté droit du poste de commande
+  for (size_t i = debut; i < _Donnees.size(); ++i) {
+    auto [perte, vitesse] = calculCommun(i);
+    perted += perte; // Cumul de la perte de charge
+    vitesse_droite = vitesse; // Stockage de la vitesse
     // Calcul du dénivelé
-    if(i == _Donnees.size()-1 && amont)
-      denivele_droit = _Donnees[i][3] - _Donnees[poste_de_commande-_indexdebut-1][3];
-    else
-      denivele_droit = _Donnees[i][4] - _Donnees[poste_de_commande-_indexdebut-1][4];
-
+    denivele_droit = i == fin_droit && amont ? _Donnees[i][3] - _Donnees[fin_gauche][3] : _Donnees[i][4] - _Donnees[fin_gauche][4];
   }
 
-  std::cout<<"Gauche : " << vitesse_gauche<<std::endl;
-  std::cout<<"Droite : " << vitesse_droite<<std::endl;
+  // Stockage des valeurs calculées dans le tableau _Donnees pour le côté gauche
+  _Donnees[fin_gauche - 1][17] = perteg;
+  _Donnees[fin_gauche - 1][18] = denivele_gauche;
+  _Donnees[fin_gauche - 1][19] = denivele_gauche + perteg;
+  _Donnees[debut - 3][17] = vitesse_gauche;
 
-  _Donnees[poste_de_commande-_indexdebut - 2][17] = perteg; // Stocke perteg à la ligne au-dessus du poste de commande
-  _Donnees[poste_de_commande-_indexdebut - 3][17] = vitesse_gauche; // Stocke perteg à la ligne au-dessus du poste de commande
-  _Donnees[poste_de_commande-_indexdebut - 2][18] = denivele_gauche; // Stocke denivele_gauche à la ligne au-dessus du poste de commande
-  _Donnees[poste_de_commande-_indexdebut - 2][19] = denivele_gauche + perteg; // Stocke piezo à la ligne au-dessus du poste de commande
+  // Stockage des valeurs calculées dans le tableau _Donnees pour le côté droit
+  _Donnees[debut][17] = perted;
+  _Donnees[debut][18] = denivele_droit;
+  _Donnees[debut][19] = denivele_droit + perted;
+  _Donnees[debut + 1][17] = vitesse_droite;
 
-  _Donnees[poste_de_commande-_indexdebut][17] = perted; // Stocke perted à la ligne en dessous du poste de commande
-  _Donnees[poste_de_commande-_indexdebut+1][17] = vitesse_droite; // Stocke perted à la ligne en dessous du poste de commande
-  _Donnees[poste_de_commande-_indexdebut][18] = denivele_droit; // Stocke denivele_droit à la ligne en dessous du poste de commande
-  _Donnees[poste_de_commande-_indexdebut][19] = denivele_droit + perted; // Stocke denivele_droit à la ligne en dessous du poste de commande
-
+  _calcul = true;
 }
 
 void parcelle::setDiametreDialog() {
@@ -347,9 +329,13 @@ void parcelle::modifiedia(int index, float diameters){
   _Donnees[index][15] = diameters;
 }
 
-const QString &parcelle::getNom() const { return _nom; }
+const QString &parcelle::getNom() const {
+  return _nom;
+}
 
-void parcelle::setNom(const QString &nom) { _nom = nom; }
+void parcelle::setNom(const QString &nom) {
+  _nom = nom;
+}
 
 int parcelle::getIndexdebut() const {
   return _indexdebut;
@@ -367,4 +353,21 @@ float parcelle::getDebit() const {
   return _debit;
 }
 
+bool parcelle::isAmont() const {
+  return amont;
+}
 
+int parcelle::getMilieuhydro() const {
+  return milieuhydro;
+}
+
+void parcelle::setPosteDeCommande(int posteDeCommande) {
+  poste_de_commande = posteDeCommande;
+}
+
+int parcelle::getPosteDeCommande() const {
+  return poste_de_commande;
+}
+bool parcelle::isCalcul() const {
+  return _calcul;
+}

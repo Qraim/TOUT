@@ -78,6 +78,11 @@ public:
     int getIndexfin() const;
 
     ///
+    /// @brief retourne le bool amont pour gérer l'affichage
+    /// @return
+    bool isAmont() const;
+
+    ///
     /// @brief Trouve et retourne le milieu hydrologique.
     ///
     int trouvemilieuhydro();
@@ -105,7 +110,10 @@ private:
     float _longueur;
     bool amont;
     float _debit;
+    bool _calcul;
 
+  public:
+    bool isCalcul() const;
 };
 
 #endif // TOUT_PARCELLE_H
