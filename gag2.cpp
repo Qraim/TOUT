@@ -138,7 +138,12 @@ void gag2::calcul() {
   b = std::get<1>(coefficients);
   k = std::get<2>(coefficients);
 
-  float arosseurs = longueur / espacement ;
+  float arosseurs = 0 ;
+
+  if(espacement!=0)
+    arosseurs = longueur / espacement ;
+  else
+    return;
 
   double perte = 0;
   double piezo = 0;

@@ -53,6 +53,8 @@ private :
     std::vector<std::vector<float>> _Donnees;
     std::vector<parcelle> _parcelles;
 
+    std::string _matiere;
+
     bool milieu;
     bool limitations;
     bool poste;
@@ -109,7 +111,7 @@ private :
     void showOptionsDialog();
 
     ///
-    /// @brief Permet de choisir le poste de commande.
+    /// @brief Permet de choisir l'emplacement du poste de commande.
     ///
     void chooseCommandPost();
 

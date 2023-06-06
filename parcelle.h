@@ -108,12 +108,18 @@ private:
     int _indexdebut;
     int _indexfin;
     float _longueur;
+    std::string _matiere;
     bool amont;
     float _debit;
     bool _calcul;
 
   public:
     bool isCalcul() const;
+    void setDiametreDialog(std::string matiere);
+    void checkAndAdjustCommandPost();
+    void calcul_droit();
+    void calcul_droit(float a, float b, double k);
+    void calcul_gauche(float a, float b, double k);
 };
 
 #endif // TOUT_PARCELLE_H

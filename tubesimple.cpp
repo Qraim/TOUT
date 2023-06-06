@@ -227,8 +227,6 @@ void tubesimple::calculer() {
     float a=0;
     float b = 0 ;
 
-    float M_PI = 3.141592653;
-
     // Si l'input de dénivelé n'est pas vide, on le convertit en float et on le stocke dans la variable deniveles
     if(!denivele.text().isEmpty()){
         deniveles = denivele.text().toFloat();

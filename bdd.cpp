@@ -1125,7 +1125,7 @@ QString bdd::getFormulaText(int index) {
                        "<p style=\"font-size: 14pt;\"><b>Unités:</b></p>"
                        "<ul style=\"font-size: 14pt;\">"
                        "<li>V: m/s</li>"
-                       "<li>Q: L/h</li>"
+                       "<li>Q: m3/s</li>"
                        "<li>D: mm</li>"
                        "</ul>");
     } else {

@@ -33,7 +33,6 @@
 #include <QScrollArea>
 #include <QScrollBar>
 #include <QDialog>
-#include "view.h"
 
 #include <QCloseEvent>
 
@@ -52,7 +51,6 @@ private:
     std::unique_ptr<gag> goutte;
     std::unique_ptr<gag2> goutte2;
     std::unique_ptr<etude> etud;
-    std::unique_ptr<View> jeu;
 
 
     /// @brief Affiche la fenêtre de l'outil de calcul de perte de charge pour une herse d'alimentation.

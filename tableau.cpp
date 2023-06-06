@@ -6,12 +6,12 @@
 #include <QDir>
 #include <QFileDialog>
 
-const int ROW_HEIGHT = 40;
-const int VERTICAL_SPACING = 1;
 const double LH_TO_M3S = 1.0 / (1000.0 * 3600.0);
 const double LS_TO_M3S = 1.0 / 1000.0;
 const double M3H_TO_M3S = 1.0 / 3600.0;
 
+const int ROW_HEIGHT = 40;
+const int VERTICAL_SPACING = 1;
 
 float PI =3.14159265359;
 
@@ -759,7 +759,6 @@ void pertechargeherse::calcul() {
   // Effectue les calculs pour chaque ligne de données.
   for (int i = 0; i < _Donnees.size(); ++i) {
 
-
     // Calcule le cumul de débit.
     sigmaDebit += _Donnees[i][1];
     _Donnees[i][2] = sigmaDebit;
@@ -768,8 +767,6 @@ void pertechargeherse::calcul() {
     diametre = _Donnees[i][3];
     longueur = _Donnees[i][4];
     hauteur = _Donnees[i][5];
-
-    std::cout<<longueur<<std::endl;
 
     if(unit==0){ // l/h
       // Calcule le débit en m3/s.

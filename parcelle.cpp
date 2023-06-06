@@ -26,8 +26,8 @@ parcelle::parcelle(std::vector<std::vector<float>> &data,int indexdebut, int ind
     }
     cpt++;
   }
-
   milieuhydro = trouvemilieuhydro();
+
 
   for(auto it : _Donnees) {
     _longueur+= it[1];
@@ -43,6 +43,7 @@ int parcelle::trouvemilieuhydro() {
   // Vérifiez que _Donnees n'est pas vide
   if (_Donnees.empty()) {
     return 0;
+
   }
 
   // Calculer le débit cumulé total
@@ -61,7 +62,7 @@ int parcelle::trouvemilieuhydro() {
     if (_Donnees[i].size() < 11) {
       continue;
     }
-    cumulatedDebit += _Donnees[i][10];
+    cumulatedDebit += _Donnees[i][9];
     if(cumulatedDebit >= debitTotal / 2){
       return i;
     }
@@ -75,87 +76,29 @@ void parcelle::calcul() {
   if(poste_de_commande==0)
     return;
 
-  // Coefficients pour le calcul de la perte de charge
-  double a=1.75, b=-4.85, k=831743.11;
+  // Coefficients pour le calcul de la perte de charg
+  std::tuple<float, float, double> coefficients = database->get_material_coefficients(_matiere);
+  float a = std::get<0>(coefficients);
+  float b = std::get<1>(coefficients);
+  double k = std::get<2>(coefficients);
 
-  // Initialisation des variables nécessaires pour les calculs
-  float denivele_gauche = 0, denivele_droit = 0;
-  float perted = 0, perteg = 0, sigmadebit = 0;
-  float vitesse_gauche = 0, vitesse_droite = 0;
+  if (a!= 0 && b!= 0 && k!=0){
+    calcul_gauche(a,b,k);
+    calcul_droit(a,b,k);
 
-  // Constante pour le calcul de l'aire de la conduite
-  const float pi = 3.14159265358979323846;
-
-  // Indices pour la première et la dernière ligne du côté gauche et du côté droit du poste de commande
-  size_t debut = poste_de_commande-_indexdebut;
-  size_t fin_gauche = debut - 1;
-  size_t fin_droit = _Donnees.size() - 1;
-
-  // Fonction lambda pour effectuer des calculs communs
-  auto calculCommun = [&](size_t i) {
-    float Dia = _diameters[i]; // Diamètre
-    float debitlh = _Donnees[i][10]; // Débit
-    sigmadebit+=debitlh; // Débit cumulé
-    float L = _Donnees[i][1]; // Longueur de la conduite
-
-    // Calcul de la perte de charge
-    float perte = k * std::pow(sigmadebit/3600, a) * std::pow(Dia, b) * L;
-    return perte;
-  };
-
-  // Calcul de la perte de charge, de la vitesse et du dénivelé du côté gauche du poste de commande
-  for (size_t i = 0; i < debut+1; ++i) {
-    auto perte = calculCommun(i);
-    perteg += perte; // Cumul de la perte de charge
-    // Calcul du dénivelé
-    denivele_gauche = i == fin_gauche && amont ? _Donnees[0][3] - _Donnees[i][3] : _Donnees[0][4] - _Donnees[i][4];
   }
-
-  // Calcule l'aire du tuyau.
-  float aireTuyau = (pi * pow((_diameters[debut]/1000) / 2, 2));
-
-  // Calcule la vitesse.
-  vitesse_gauche = (_Donnees[debut][8]/(1000*3600)) / aireTuyau;
-
-  for(auto i : _Donnees[debut]){
-    std::cout<<i<<" ";
-  }
-
-
-  sigmadebit = 0; // Réinitialisation de la variable sigmadebit pour le côté droit
-
-  // Calcul de la perte de charge, de la vitesse et du dénivelé du côté droit du poste de commande
-  for (size_t i = debut+1; i < _Donnees.size(); ++i) {
-    auto perte = calculCommun(i);
-    perted += perte; // Cumul de la perte de charge
-    // Calcul du dénivelé
-    denivele_droit = i == fin_droit && amont ? _Donnees[i][3] - _Donnees[fin_gauche][3] : _Donnees[i][4] - _Donnees[fin_gauche][4];
-  }
-
-  aireTuyau = (pi * pow((_diameters[debut+1]/1000) / 2, 2));
-
-  // Calcule la vitesse.
-  vitesse_droite = (_Donnees[debut+1][8]/(1000*3600)) / aireTuyau;
-
-  // Stockage des valeurs calculées dans le tableau _Donnees pour le côté gauche
-  _Donnees[fin_gauche - 1][17] = perteg;
-  _Donnees[fin_gauche - 1][18] = denivele_gauche;
-  _Donnees[fin_gauche - 1][19] = denivele_gauche + perteg;
-  _Donnees[debut - 3][17] = vitesse_gauche;
-
-  // Stockage des valeurs calculées dans le tableau _Donnees pour le côté droit
-  _Donnees[debut][17] = perted;
-  _Donnees[debut][18] = denivele_droit;
-  _Donnees[debut][19] = denivele_droit + perted;
-  _Donnees[debut + 1][17] = vitesse_droite;
 
   _calcul = true;
 }
 
-void parcelle::setDiametreDialog() {
+
+
+void parcelle::setDiametreDialog(std::string matiere) {
+
+  _matiere=matiere;
 
   if(poste_de_commande==0){
-    setPosteDeCommande(trouvemilieuhydro());
+    setPosteDeCommande(milieuhydro);
   }
 
   bool toutlestuyaux = true;
@@ -374,7 +317,18 @@ int parcelle::getMilieuhydro() const {
 }
 
 void parcelle::setPosteDeCommande(int posteDeCommande) {
-  poste_de_commande = posteDeCommande;
+  for (auto& row : _Donnees) {
+    if (row.size() > 19) {
+      row[17] = 0.0; // Effacement des résultats de calculs
+      row[18] = 0.0;
+      row[19] = 0.0;
+    }
+  }
+
+  if(posteDeCommande==_indexdebut+1)
+    poste_de_commande=milieuhydro+_indexdebut+1;
+  else
+    poste_de_commande=posteDeCommande;
 }
 
 int parcelle::getPosteDeCommande() const {
@@ -384,6 +338,122 @@ bool parcelle::isCalcul() const {
   return _calcul;
 }
 
+const float pi = 3.14159265358979323846;
 
 
 
+void parcelle::calcul_droit(float a, float b, double k) {
+
+  int debut = poste_de_commande-_indexdebut;
+  int fin_gauche = debut - 1;
+  int fin_droit = _Donnees.size() - 1;
+
+  // Initialisation des variables nécessaires pour les calculs
+  float denivele_droit = 0;
+  float perted = 0, sigmadebit = 0;
+  float vitesse_droite = 0;
+  float debit_droit = 0;
+
+  for(int i = debut; i < _Donnees.size(); ++i) {
+    debit_droit += _Donnees[i][9];
+  }
+
+  // Calcul de la perte de charge, de la vitesse et du dénivelé du côté droit du poste de commande
+  for (int i = debut; i < _Donnees.size(); ++i) {
+
+    float Dia = _diameters[i]; // Diamètre en mm
+    sigmadebit += _Donnees[i][9]; // Débit en l/h
+    float L = _Donnees[i][5]; // Longueur de la conduite en mètre
+
+    // Calcul de la perte de charge
+    float perte = k * std::pow(sigmadebit/3600, a) * std::pow(Dia, b) * L;
+    perted += perte; // Cumul de la perte de charge
+
+    // Imprime les informations de débogage de manière structurée
+    std::cout << "----- Information de la conduite (droite) -----" << std::endl;
+    std::cout << "Tuyau: " << _Donnees[i][0] << std::endl;
+    std::cout << "Diamètre (D): " << Dia << " mm" << std::endl;
+    std::cout << "Débit cumulatif (sigmadebit): " << sigmadebit << " l/h" << std::endl;
+    std::cout << "Intervale (L): " << L << " m" << std::endl;
+    std::cout << "Coefficients: " << "a=" << a << ", b=" << b << ", k=" << k << std::endl;
+    std::cout << "Perte de charge calculée : " << perte << std::endl;
+    std::cout << "Perte de charge cumulée (perted): " << perted << std::endl;
+    std::cout << "-----------------------------------------------" << std::endl;
+  }
+
+  // Calcul de la vitesse seulement pour le rang juste au-dessus du poste de commande
+  float diameterMeters = _diameters[debut] / 1000; // Diameter in meters
+  float flowRateLitersPerHour = debit_droit; // Flow rate in liters per hour
+  float flowRateLitersPerSecond = flowRateLitersPerHour / 3600.0; // Convert l/h to l/s
+  float flowRateCubicMetersPerSecond = flowRateLitersPerSecond / 1000; // Convert l/s to m³/s
+  float pipeArea = pi * pow(diameterMeters / 2, 2);
+  vitesse_droite = flowRateCubicMetersPerSecond / pipeArea;
+
+  // Calcul du dénivelé
+  denivele_droit =  amont ? _Donnees[fin_droit][3] - _Donnees[fin_gauche+1][3] : _Donnees[fin_droit][4] - _Donnees[fin_gauche+1][4];
+
+  // Stockage des valeurs calculées dans le tableau _Donnees pour le côté droit
+  _Donnees[debut][17] = perted;
+  _Donnees[debut][18] = denivele_droit;
+  _Donnees[debut][19] = denivele_droit + perted;
+  _Donnees[debut+1][17] = vitesse_droite; // Nouvelle colonne pour la vitesse
+}
+
+void parcelle::calcul_gauche(float a, float b, double k) {
+  int debut = poste_de_commande-_indexdebut;
+  int fin_gauche = debut - 1;
+
+  float denivele_gauche = 0;
+  float perteg = 0;
+  float sigmadebit = 0;
+  float debit_gauche = 0;
+
+  float vitesse_gauche = 0;
+  for(int i=0; i<_Donnees.size();i++){
+    if(i<debut){
+      debit_gauche+=_Donnees[i][9];
+    }
+  }
+
+  // Calcul de la perte de charge, de la vitesse et du dénivelé du côté gauche du poste de commande
+  for (int i = 0; i < debut; ++i) {
+
+    float Dia = _diameters[i]; // Diamètre en mm
+    sigmadebit += _Donnees[i][9]; // Débit en l/h
+    float L = _Donnees[i][5]; // Longueur de la conduite en mètre
+
+    // Calcul de la perte de charge
+    float perte = k * std::pow(sigmadebit/3600, a) * std::pow(Dia, b) * L;
+    perteg += perte; // Cumul de la perte de charge
+
+    // Imprime les informations de débogage de manière structurée
+    std::cout << "----- Information de la conduite (gauche) -----" << std::endl;
+    std::cout << "Tuyau: " << _Donnees[i][0] << std::endl;
+    std::cout << "Diamètre (D): " << Dia << " mm" << std::endl;
+    std::cout << "Débit cumulatif (sigmadebit): " << sigmadebit << " l/h" << std::endl;
+    std::cout << "Intervale (L): " << L << " m" << std::endl;
+    std::cout << "Coefficients: " << "a=" << a << ", b=" << b << ", k=" << k << std::endl;
+    std::cout << "Perte de charge calculée : " << perte << std::endl;
+    std::cout << "Perte de charge cumulée (perteg): " << perteg << std::endl;
+    std::cout << "-----------------------------------------------" << std::endl;
+  }
+
+
+  // Calcul de la vitesse seulement pour le rang juste en dessous du poste de commande
+  float diameterMeters = _diameters[fin_gauche] / 1000; // Diameter in meters
+  float flowRateLitersPerHour = debit_gauche; // Flow rate in liters per hour
+  float flowRateLitersPerSecond = flowRateLitersPerHour / 3600.0; // Convert l/h to l/s
+  float flowRateCubicMetersPerSecond = flowRateLitersPerSecond / 1000; // Convert l/s to m³/s
+  float pipeArea = pi * pow(diameterMeters / 2, 2);
+  vitesse_gauche = flowRateCubicMetersPerSecond / pipeArea;
+
+
+  // Calcul du dénivelé
+  denivele_gauche = amont ? _Donnees[0][3] - _Donnees[fin_gauche][3] : _Donnees[0][4] - _Donnees[fin_gauche][4];
+
+  // Stockage des valeurs calculées dans le tableau _Donnees pour le côté gauche
+  _Donnees[fin_gauche-1][17] = perteg;
+  _Donnees[fin_gauche-1][18] = denivele_gauche;
+  _Donnees[fin_gauche-1][19] = denivele_gauche + perteg;
+  _Donnees[debut-3][17] = vitesse_gauche; // Nouvelle colonne pour la vitesse
+}

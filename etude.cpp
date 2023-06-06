@@ -116,6 +116,7 @@ void etude::init()
     QVBoxLayout *mainLayout = new QVBoxLayout(&dialog);
 
     QRadioButton *amontButton = new QRadioButton("Amont", &dialog);
+    amontButton->setChecked(true);
     QRadioButton *avalButton = new QRadioButton("Aval", &dialog);
 
     mainLayout->addWidget(amontButton);
@@ -257,7 +258,7 @@ void etude::rafraichirTableau() {
     ParcelInfo info;
     totalRows += parcel.getDonnees().size();
     const std::vector<std::vector<float>>& parcelData = parcel.getDonnees();
-    info.milieuHydro = totalRows - parcelData.size() / 2;
+    info.milieuHydro = parcel.getMilieuhydro()+parcel.getIndexdebut()+1;
     info.limiteParcelle = totalRows;
     info.commandPost = parcel.getPosteDeCommande();
     info.nom = parcel.getNom();
@@ -464,7 +465,16 @@ void etude::initCalcul() {
 
   // Crée des boutons radio pour les valeurs par défaut
   QRadioButton default1Button("2.2L / 0.6m");
+  default1Button.setChecked(true);
   QRadioButton default2Button("1.6L / 0.5m");
+  QComboBox matierebox(this);
+
+  matierebox.setFixedSize(100, 40);
+
+  std::vector<std::string> matiere_names = database->getAllMatiereNames();
+  for (const auto &matiere_name : matiere_names) {
+    matierebox.addItem(QString::fromStdString(matiere_name));
+  }
 
   // Crée un layout pour le QDialog.
   QFormLayout formLayout(&dialog);
@@ -474,6 +484,7 @@ void etude::initCalcul() {
 
   // Connecte le signal du bouton OK pour appeler la fonction 'calcul' lorsque le bouton est cliqué.
   connect(&okButton, &QPushButton::clicked, [&]() {
+    _matiere = matierebox.currentText().toStdString();
     float debitGoutteur = 0.0f;
     float espacementGoutteur = 0.0f;
 
@@ -694,6 +705,7 @@ void etude::chooseCommandPost() {
       QMap<int, int> rangeToIndexMap;
       int hydroIndex = parcel.getMilieuhydro();
       int defaultIndex = -1;
+      int commandPost = parcel.getPosteDeCommande();
 
       for (size_t i = 0; i < parcelData.size(); ++i) {
         int rangeNumber = static_cast<int>(parcelData[i][0]);
@@ -701,11 +713,18 @@ void etude::chooseCommandPost() {
         rangeToIndexMap.insert(rangeNumber, i);
       }
 
-      // Récupère le numéro de rang correspondant à l'index du milieu hydrolique
-      int rangeNumberHydro = static_cast<int>(parcelData[hydroIndex][0]);
+      int defaultRangeNumber;
 
-      // Récupère l'index de ce numéro de rang dans la comboBox
-      defaultIndex = rangeNumberComboBox->findText(QString::number(rangeNumberHydro));
+      // If command post is already chosen, use it as default
+      if (commandPost != -1) {
+        defaultRangeNumber = commandPost;
+      } else if (hydroIndex >= 0 && hydroIndex < parcelData.size()) {
+        // Else use the range number corresponding to the hydroIndex in parcelData
+        defaultRangeNumber = static_cast<int>(parcelData[hydroIndex][0]);
+      }
+
+      // Find the index of this range number in the comboBox
+      defaultIndex = rangeNumberComboBox->findText(QString::number(defaultRangeNumber));
 
       if (defaultIndex != -1) {
         rangeNumberComboBox->setCurrentIndex(defaultIndex);
@@ -735,6 +754,8 @@ void etude::chooseCommandPost() {
         selectedParcel->setPosteDeCommande(rangeNumber);
       }
     }
+
+    updateDonnees();
     rafraichirTableau();
     dialog.accept();
   });
@@ -767,7 +788,7 @@ void etude::appelSetDiametreDialog() {
                    [this, &comboBox]() {
                      int index = comboBox.currentIndex();
                      if (index >= 0 && index < _parcelles.size()) {
-                       _parcelles[index].setDiametreDialog();
+                       _parcelles[index].setDiametreDialog(_matiere);
                        updateDonnees();
                        rafraichirTableau();
                      }
@@ -880,18 +901,12 @@ void etude::changerDiametreDialog() {
 
   dialog.setWindowTitle("Changer diametre");
 
-  // Validations
-  auto intValidator = new QIntValidator(0, 100);
-  auto doubleValidator = new QDoubleValidator(0.0, 100.0, 2);
 
   // Create and setup the line edits
   std::string d = std::to_string(_Donnees.size()) ;
   QLineEdit indiceDebutLineEdit(QString::fromStdString("0"));
-  indiceDebutLineEdit.setValidator(intValidator);
   QLineEdit indiceFinLineEdit(QString::fromStdString(d));
-  indiceFinLineEdit.setValidator(intValidator);
   QLineEdit diametreLineEdit;
-  diametreLineEdit.setValidator(doubleValidator);
 
   QPushButton button("Appliquer");
 
