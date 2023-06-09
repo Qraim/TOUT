@@ -7,7 +7,7 @@
         <entry key="Debug">
           <value>
             <PerProfileState>
-              <option name="myQmlPath" value="/opt/homebrew/Cellar/qt@5/5.15.8_3/qml" />
+              <option name="myQmlPath" value="/opt/homebrew/Cellar/qt@5/5.15.9/qml" />
               <option name="myQtBinPath" value="/opt/homebrew/opt/qt@5/bin" />
             </PerProfileState>
           </value>

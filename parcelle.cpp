@@ -35,7 +35,22 @@ parcelle::parcelle(std::vector<std::vector<float>> &data,int indexdebut, int ind
 
 }
 
-std::vector<std::vector<float>> &parcelle::getDonnees() {
+void parcelle::setDonnees(const std::vector<std::vector<float>> &donnees) {
+  _Donnees = donnees;
+}
+
+void parcelle::setMilieuhydro(int milieuhydro) {
+  parcelle::milieuhydro = milieuhydro;
+}
+void parcelle::setIndexdebut(int indexdebut) { _indexdebut = indexdebut; }
+void parcelle::setIndexfin(int indexfin) { _indexfin = indexfin; }
+void parcelle::setLongueur(float longueur) { _longueur = longueur; }
+void parcelle::setMatiere(const std::string &matiere) { _matiere = matiere; }
+void parcelle::setAmont(bool amont) { parcelle::amont = amont; }
+void parcelle::setDebit(float debit) { _debit = debit; }
+void parcelle::setCalcul(bool calcul) { _calcul = calcul; }
+
+std::vector<std::vector<float>> &parcelle::getDonnees(){
   return _Donnees;
 }
 
@@ -82,6 +97,14 @@ void parcelle::calcul() {
   float b = std::get<1>(coefficients);
   double k = std::get<2>(coefficients);
 
+
+  auto aspesseurs = trouveaspersseurs();
+  if(!aspesseurs.empty()){
+    calculaspersseurs(aspesseurs,a,b,k);
+    return;
+  }
+
+
   if (a!= 0 && b!= 0 && k!=0){
     calcul_gauche(a,b,k);
     calcul_droit(a,b,k);
@@ -121,17 +144,7 @@ void parcelle::setDiametreDialog(std::string matiere) {
   diameterDialog.setWindowTitle("Choix Diametre");
 
   QVBoxLayout dialogLayout;
-  // Amont/Aval Radio Buttons
-  QRadioButton *amontButton = new QRadioButton("Amont", &diameterDialog);
-  QRadioButton *avalButton = new QRadioButton("Aval", &diameterDialog);
-  amontButton->setChecked(true);  // Amont is default
 
-  // Add these to the layout
-  dialogLayout.addWidget(amontButton);
-  dialogLayout.addWidget(avalButton);
-
-
-  // Material Label and ComboBox
   QLabel materialLabel("Matiere");
   dialogLayout.addWidget(&materialLabel);
 
@@ -188,20 +201,6 @@ void parcelle::setDiametreDialog(std::string matiere) {
 
 
   diameterDialog.setLayout(&dialogLayout);
-
-  // Connect radio button signals to update the 'amont' variable
-  QObject::connect(amontButton, &QRadioButton::toggled, [&](bool checked) {
-    if (checked) {
-      amont = true;
-    }
-  });
-
-  QObject::connect(avalButton, &QRadioButton::toggled, [&](bool checked) {
-    if (checked) {
-      amont = false;
-    }
-  });
-
 
 
   // Connections
@@ -328,7 +327,11 @@ void parcelle::setPosteDeCommande(int posteDeCommande) {
   if(posteDeCommande==_indexdebut+1)
     poste_de_commande=milieuhydro+_indexdebut+1;
   else
-    poste_de_commande=posteDeCommande;
+    poste_de_commande=posteDeCommande-_indexdebut;
+  /*for(auto &it : _Donnees[poste_de_commande]){
+    std::cout<<it<<" ";
+  }
+  std::cout<<std::endl;*/
 }
 
 int parcelle::getPosteDeCommande() const {
@@ -340,11 +343,9 @@ bool parcelle::isCalcul() const {
 
 const float pi = 3.14159265358979323846;
 
-
-
 void parcelle::calcul_droit(float a, float b, double k) {
 
-  int debut = poste_de_commande-_indexdebut;
+  int debut = poste_de_commande;
   int fin_gauche = debut - 1;
   int fin_droit = _Donnees.size() - 1;
 
@@ -354,12 +355,12 @@ void parcelle::calcul_droit(float a, float b, double k) {
   float vitesse_droite = 0;
   float debit_droit = 0;
 
-  for(int i = debut; i < _Donnees.size(); ++i) {
+  for(int i = fin_droit; i >=debut; --i) {
     debit_droit += _Donnees[i][9];
   }
 
   // Calcul de la perte de charge, de la vitesse et du dénivelé du côté droit du poste de commande
-  for (int i = debut; i < _Donnees.size(); ++i) {
+  for (int i = fin_droit; i >=debut; --i) {
 
     float Dia = _diameters[i]; // Diamètre en mm
     sigmadebit += _Donnees[i][9]; // Débit en l/h
@@ -369,7 +370,7 @@ void parcelle::calcul_droit(float a, float b, double k) {
     float perte = k * std::pow(sigmadebit/3600, a) * std::pow(Dia, b) * L;
     perted += perte; // Cumul de la perte de charge
 
-    // Imprime les informations de débogage de manière structurée
+/*    // Imprime les informations de débogage de manière structurée
     std::cout << "----- Information de la conduite (droite) -----" << std::endl;
     std::cout << "Tuyau: " << _Donnees[i][0] << std::endl;
     std::cout << "Diamètre (D): " << Dia << " mm" << std::endl;
@@ -378,14 +379,19 @@ void parcelle::calcul_droit(float a, float b, double k) {
     std::cout << "Coefficients: " << "a=" << a << ", b=" << b << ", k=" << k << std::endl;
     std::cout << "Perte de charge calculée : " << perte << std::endl;
     std::cout << "Perte de charge cumulée (perted): " << perted << std::endl;
-    std::cout << "-----------------------------------------------" << std::endl;
+    std::cout << "-----------------------------------------------" << std::endl;*/
   }
 
+ /* std::cout << "--------------------------------"<<std::endl;
+  std::cout << "Débit cumulé droite : "<<debit_droit<<std::endl;
+  std::cout << "--------------------------------"<<std::endl;*/
+
+
   // Calcul de la vitesse seulement pour le rang juste au-dessus du poste de commande
-  float diameterMeters = _diameters[debut] / 1000; // Diameter in meters
-  float flowRateLitersPerHour = debit_droit; // Flow rate in liters per hour
-  float flowRateLitersPerSecond = flowRateLitersPerHour / 3600.0; // Convert l/h to l/s
-  float flowRateCubicMetersPerSecond = flowRateLitersPerSecond / 1000; // Convert l/s to m³/s
+  float diameterMeters = _diameters[debut] / 1000; // Diametre en metres
+  float flowRateLitersPerHour = debit_droit; // Debit en litres par heure
+  float flowRateLitersPerSecond = flowRateLitersPerHour / 3600.0; // Convert l/h en l/s
+  float flowRateCubicMetersPerSecond = flowRateLitersPerSecond / 1000; // Convert l/s en m³/s
   float pipeArea = pi * pow(diameterMeters / 2, 2);
   vitesse_droite = flowRateCubicMetersPerSecond / pipeArea;
 
@@ -396,11 +402,11 @@ void parcelle::calcul_droit(float a, float b, double k) {
   _Donnees[debut][17] = perted;
   _Donnees[debut][18] = denivele_droit;
   _Donnees[debut][19] = denivele_droit + perted;
-  _Donnees[debut+1][17] = vitesse_droite; // Nouvelle colonne pour la vitesse
+  _Donnees[debut+1][17] = vitesse_droite;
 }
 
 void parcelle::calcul_gauche(float a, float b, double k) {
-  int debut = poste_de_commande-_indexdebut;
+  int debut = poste_de_commande;
   int fin_gauche = debut - 1;
 
   float denivele_gauche = 0;
@@ -409,14 +415,12 @@ void parcelle::calcul_gauche(float a, float b, double k) {
   float debit_gauche = 0;
 
   float vitesse_gauche = 0;
-  for(int i=0; i<_Donnees.size();i++){
-    if(i<debut){
+  for(int i=0; i< poste_de_commande;i++){
       debit_gauche+=_Donnees[i][9];
-    }
   }
 
   // Calcul de la perte de charge, de la vitesse et du dénivelé du côté gauche du poste de commande
-  for (int i = 0; i < debut; ++i) {
+  for (int i = 0; i < poste_de_commande; ++i) {
 
     float Dia = _diameters[i]; // Diamètre en mm
     sigmadebit += _Donnees[i][9]; // Débit en l/h
@@ -438,22 +442,119 @@ void parcelle::calcul_gauche(float a, float b, double k) {
     std::cout << "-----------------------------------------------" << std::endl;
   }
 
-
+  std::cout << "--------------------------------"<<std::endl;
+  std::cout << "Débit cumulé gauche : "<<debit_gauche<<std::endl;
+  std::cout << "--------------------------------"<<std::endl;
   // Calcul de la vitesse seulement pour le rang juste en dessous du poste de commande
-  float diameterMeters = _diameters[fin_gauche] / 1000; // Diameter in meters
-  float flowRateLitersPerHour = debit_gauche; // Flow rate in liters per hour
-  float flowRateLitersPerSecond = flowRateLitersPerHour / 3600.0; // Convert l/h to l/s
-  float flowRateCubicMetersPerSecond = flowRateLitersPerSecond / 1000; // Convert l/s to m³/s
+  float diameterMeters = _diameters[poste_de_commande-1] / 1000; // Diametre en metres
+  float flowRateLitersPerHour = debit_gauche; // Debit en litres par heure
+  float flowRateLitersPerSecond = flowRateLitersPerHour / 3600.0; // Convert l/h en l/s
+  float flowRateCubicMetersPerSecond = flowRateLitersPerSecond / 1000; // Convert l/s en m³/s
   float pipeArea = pi * pow(diameterMeters / 2, 2);
   vitesse_gauche = flowRateCubicMetersPerSecond / pipeArea;
-
 
   // Calcul du dénivelé
   denivele_gauche = amont ? _Donnees[0][3] - _Donnees[fin_gauche][3] : _Donnees[0][4] - _Donnees[fin_gauche][4];
 
   // Stockage des valeurs calculées dans le tableau _Donnees pour le côté gauche
-  _Donnees[fin_gauche-1][17] = perteg;
+  _Donnees[fin_gauche-1][17] = perteg ;
   _Donnees[fin_gauche-1][18] = denivele_gauche;
   _Donnees[fin_gauche-1][19] = denivele_gauche + perteg;
-  _Donnees[debut-3][17] = vitesse_gauche; // Nouvelle colonne pour la vitesse
+  _Donnees[debut-3][17] = vitesse_gauche;
+}
+
+const std::vector<float> &parcelle::getDiameters() const { return _diameters; }
+const std::string &parcelle::getMatiere() const { return _matiere; }
+
+void parcelle::addDiameter(float a){
+  if(a> 0 ){
+    _diameters.push_back(a);
+  }
+}
+
+std::vector<int> parcelle::trouveaspersseurs() {
+  std::vector<int> result;
+  for (int i = 0; i < _Donnees.size(); i++) {
+    if (_Donnees[i][2] != 0) {
+      result.push_back(i);
+    }
+  }
+  return result;
+}
+
+#include <QInputDialog>
+
+void parcelle::calculaspersseurs(std::vector<int> &indice, float a, float b, double k ){
+  bool ok;
+  int cpt = 0 ;
+  showDialogWithTable();
+
+  float inputValue = QInputDialog::getDouble(nullptr, "QInputDialog::getDouble()",
+                                             "Débit en m³/h:", 25, -10000, 10000, 2, &ok);
+
+  if (ok) {
+
+    // If user clicked OK, then convert inputValue from m³/h to l/h
+    float debit = inputValue * 1000 / 3600;
+    float perte = 0;
+
+    for(auto & it : indice){
+      float L = _Donnees[it][5]; // Longueur de la conduite en mètre
+
+      for(auto & it2 : _tableValues[cpt]){
+        // Calcul de la perte de charge
+        perte += k * std::pow(debit, a) * std::pow(it2, b) * L;
+      }
+
+      _Donnees[it][17] = perte;
+    }
+  }
+}
+
+
+void parcelle::showDialogWithTable() {
+  std::vector<int> indices = trouveaspersseurs();
+
+  // Create a dialog
+  QDialog *dialog = new QDialog();
+  dialog->setWindowTitle("Grid Dialog");
+
+  // Create a grid layout
+  QGridLayout *gridLayout = new QGridLayout();
+
+  _tableValues.resize(indices.size()); // initialize the outer vector with the number of rows
+
+  // Fill the grid
+  for (int i = 0; i < indices.size(); ++i) {
+    int numColumns = indices[i];
+    _tableValues[i].resize(numColumns, 0.0f); // initialize the inner vector with the number of columns
+    for (int j = 0; j < numColumns; ++j) {
+      QLineEdit *lineEdit = new QLineEdit();
+      QObject::connect(lineEdit, &QLineEdit::textChanged, [=](const QString &text) { onLineEditChanged(text, i, j); });
+      gridLayout->addWidget(lineEdit, i, j);
+    }
+  }
+
+  // Use a layout to add the grid to the dialog
+  QVBoxLayout *layout = new QVBoxLayout();
+  layout->addLayout(gridLayout);
+  dialog->setLayout(layout);
+
+  // Show the dialog
+  dialog->exec();
+
+  // Cleanup
+  delete dialog;
+}
+
+void parcelle::onLineEditChanged(const QString &text, int row, int col) {
+  bool ok;
+  float value = text.toFloat(&ok);
+  if (ok) { // if conversion to float is successful
+    _tableValues[row][col] = value;
+  }
+}
+
+std::vector<std::vector<float>> parcelle::getTableValues() {
+  return _tableValues;
 }

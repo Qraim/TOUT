@@ -25,6 +25,7 @@ const QString WHITE_TEXT = "QLineEdit { color: white; border: 1px solid gray; bo
 const QString RED_TEXT = "QLineEdit { color: white; background-color : red;border: 1px solid gray; border-radius: 4px;padding: 2px 4px; }";
 const QString ORANGE_TEXT = "QLineEdit { color: white; background-color : orange; border: 1px solid gray; border-radius: 4px;padding: 2px 4px;}";
 const QString BLUE_TEXT = "QLineEdit { color: white; background-color : blue;border: 1px solid gray; border-radius: 4px;padding: 2px 4px; }";
+const QString PINK_TEXT = "QLineEdit { color: white; background-color : pink;border: 1px solid gray; border-radius: 4px;padding: 2px 4px; }";
 
 
 struct ParcelInfo {
@@ -58,7 +59,7 @@ private :
     bool milieu;
     bool limitations;
     bool poste;
-
+    bool premier;
     QScrollArea *scrollArea;
     QWidget *scrollAreaWidgetContents;
     QGridLayout *gridLayout;
@@ -131,11 +132,28 @@ private :
 
     bool eventFilter(QObject *obj, QEvent *event);
 
+    /// @brief permet de changer le diametre entre les indexes spécifié
+    /// @param debut : index de debut
+    /// @param fin : index de fin
+    /// @param dia : valeur à appliquer
     void modifierdiametre(int debut, int fin, float dia);
 
+    /// @brief Qdialog pour changer les diametres
     void changerDiametreDialog();
+
     QLineEdit *createLineEdit(const QString &text, const QString &style,
                               QWidget *parent, bool readOnly = true);
+
+    void exportPdf(const QString &fileName);
+
+    void savePdf();
+
+    void init2();
+
+    void saveToFile(const std::string& filename);
+
+    void loadFromFile(const std::string& filename);
+    void saveToFile(const std::string &filename) const;
 };
 
 #endif // ETUDE_H

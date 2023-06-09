@@ -8,7 +8,7 @@ etude::etude(std::shared_ptr<bdd> db,QWidget *parent)
   milieu = true;
   limitations = true;
   poste = true;
-
+  premier = true;
   // MainLayout
   mainLayout = new QVBoxLayout();
 
@@ -21,7 +21,7 @@ etude::etude(std::shared_ptr<bdd> db,QWidget *parent)
   QPushButton *postebutton = new QPushButton("Poste", this);
   QPushButton *calcul = new QPushButton("calcul", this);
 
-  connect(initButton, &QPushButton::clicked, this, &etude::init);
+  connect(initButton, &QPushButton::clicked, this, &etude::init2);
   connect(divideButton, &QPushButton::clicked, this, &etude::divideData);
   connect(postebutton, &QPushButton::clicked, this, &etude::chooseCommandPost);
   connect(calcul, &QPushButton::clicked, this, &etude::appelSetDiametreDialog);
@@ -59,6 +59,7 @@ etude::etude(std::shared_ptr<bdd> db,QWidget *parent)
 }
 
 void etude::showOptionsDialog() {
+
   // Créer un QDialog pour les options
   QDialog optionsDialog(this);
   optionsDialog.setWindowTitle("Options");
@@ -69,11 +70,16 @@ void etude::showOptionsDialog() {
   limitationParcelleCheckBox->setChecked(limitations);
   QCheckBox *postecheckbox = new QCheckBox("Poste", this);
   postecheckbox->setChecked(poste);
+
+  QCheckBox *premiere = new QCheckBox("Premier rang", this);
+  premiere->setChecked(poste);
+
   // Créer un layout pour le QDialog
   QVBoxLayout dialogLayout(&optionsDialog);
   dialogLayout.addWidget(milieuHydroCheckBox);
   dialogLayout.addWidget(limitationParcelleCheckBox);
   dialogLayout.addWidget(postecheckbox);
+  dialogLayout.addWidget(premiere);
 
   // Ajouter un bouton OK
   QPushButton okButton("OK");
@@ -91,6 +97,7 @@ void etude::showOptionsDialog() {
   milieu = milieuHydroCheckBox->isChecked();
   limitations = limitationParcelleCheckBox->isChecked();
   poste = postecheckbox->isChecked();
+  premier = premiere->isChecked();
 
   // Rafraichir le tableau pour prendre en compte les nouvelles options d'affichage
   rafraichirTableau();
@@ -184,7 +191,13 @@ void etude::traitements(QString data){
   data.replace(',', '.');
 
   QStringList lines = data.split("\n");
-  for (int i = 3; i < lines.size()-1; i++) {
+  for (int i = 0; i < lines.size()-1; i++) {
+
+    // Ignore lines that start with "Parcelle", "Intervalle", or "Nombre"
+    if (lines[i].startsWith("Parcelle") || lines[i].startsWith("Intervalle") || lines[i].startsWith("Nombre")) {
+      std::cout<<lines[i].toStdString()<<std::endl;
+      continue;
+    }
 
     QStringList cols = lines[i].split(QRegExp("\\s+"));
 
@@ -194,9 +207,9 @@ void etude::traitements(QString data){
     }
 
     std::vector<float> rowData(20);
-    rowData[0] = _Donnees.size()+1; // numero du rang
+    rowData[0] = cols[2].toInt(); // numero du rang
     rowData[1] = cols[3].toFloat(); // Longueur du rang
-    rowData[2] = cols[4].toFloat(); // Nombre d'asperseu
+    rowData[2] = cols[4].toFloat(); // Nombre d'asperseurs
     rowData[3] = cols[5].toFloat(); // Zamont du rang
     rowData[4] = cols[6].toFloat(); // Zaval du rang
     if(i==3){
@@ -209,6 +222,7 @@ void etude::traitements(QString data){
     _Donnees.push_back(rowData);
   }
 }
+
 
 void etude::clearchild() {
   QLayoutItem *item;
@@ -260,12 +274,10 @@ void etude::rafraichirTableau() {
     const std::vector<std::vector<float>>& parcelData = parcel.getDonnees();
     info.milieuHydro = parcel.getMilieuhydro()+parcel.getIndexdebut()+1;
     info.limiteParcelle = totalRows;
-    info.commandPost = parcel.getPosteDeCommande();
+    info.commandPost = parcel.getPosteDeCommande() + parcel.getIndexdebut();
     info.nom = parcel.getNom();
     info.longueur = parcel.getLongueur();
     info.debit = parcel.getDebit();
-
-
     parcelInfos.push_back(info);
   }
 
@@ -290,6 +302,8 @@ void etude::rafraichirTableau() {
         textColor = ORANGE_TEXT; // Milieu hydrolique
       } else if (ligne == info.limiteParcelle && limitations) {
         textColor = BLUE_TEXT; // Limite entre deux parcelles
+      } else if (donneesLigne[0]==1 && premier){
+        textColor = PINK_TEXT; //premiere ligne d'une parcelle
       }
       distanceToNearestCommandPost = std::abs(ligne - info.commandPost);
     }
@@ -361,8 +375,6 @@ void etude::rafraichirTableau() {
               });
             }
           }
-
-
         }
       }
     }
@@ -696,46 +708,34 @@ void etude::chooseCommandPost() {
   // Créer une QMap pour mapper le numéro de rang à l'index dans le vecteur de données
   QMap<QComboBox*, parcelle*> comboBoxToParcelMap;
 
+  int globalIndex = 0;
+
   for (auto& parcel : _parcelles) {
     const std::vector<std::vector<float>>& parcelData = parcel.getDonnees();
     if (!parcelData.empty() && !parcelData[0].empty()) {
-      QComboBox* rangeNumberComboBox = new QComboBox(&dialog);
+      QComboBox* rangeIndexComboBox = new QComboBox(&dialog);
 
-      // Map from range number to the index of that range in parcelData
-      QMap<int, int> rangeToIndexMap;
-      int hydroIndex = parcel.getMilieuhydro();
       int defaultIndex = -1;
-      int commandPost = parcel.getPosteDeCommande();
+      int commandPost = parcel.getPosteDeCommande() + parcel.getIndexdebut();
 
       for (size_t i = 0; i < parcelData.size(); ++i) {
-        int rangeNumber = static_cast<int>(parcelData[i][0]);
-        rangeNumberComboBox->addItem(QString::number(rangeNumber));
-        rangeToIndexMap.insert(rangeNumber, i);
+        rangeIndexComboBox->addItem(QString::number(globalIndex));
+        ++globalIndex;
       }
 
-      int defaultRangeNumber;
-
-      // If command post is already chosen, use it as default
       if (commandPost != -1) {
-        defaultRangeNumber = commandPost;
-      } else if (hydroIndex >= 0 && hydroIndex < parcelData.size()) {
-        // Else use the range number corresponding to the hydroIndex in parcelData
-        defaultRangeNumber = static_cast<int>(parcelData[hydroIndex][0]);
+        defaultIndex = commandPost;
       }
-
-      // Find the index of this range number in the comboBox
-      defaultIndex = rangeNumberComboBox->findText(QString::number(defaultRangeNumber));
 
       if (defaultIndex != -1) {
-        rangeNumberComboBox->setCurrentIndex(defaultIndex);
+        rangeIndexComboBox->setCurrentIndex(rangeIndexComboBox->findText(QString::number(defaultIndex)));
       }
 
-
       // Ajouter la combobox au layout du QDialog
-      dialogLayout.addWidget(rangeNumberComboBox);
+      dialogLayout.addWidget(rangeIndexComboBox);
 
       // Ajouter la combobox et la parcelle correspondante à la QMap
-      comboBoxToParcelMap.insert(rangeNumberComboBox, &parcel);
+      comboBoxToParcelMap.insert(rangeIndexComboBox, &parcel);
     }
   }
 
@@ -748,10 +748,10 @@ void etude::chooseCommandPost() {
     // Pour chaque combobox dans la QMap
     for (auto comboBox : comboBoxToParcelMap.keys()) {
       // Mettre à jour le poste de commande avec la valeur sélectionnée dans la combobox
-      int rangeNumber = comboBox->currentText().toInt();
+      int rangeIndex = comboBox->currentText().toInt();
       parcelle* selectedParcel = comboBoxToParcelMap.value(comboBox);
       if (selectedParcel) {
-        selectedParcel->setPosteDeCommande(rangeNumber);
+        selectedParcel->setPosteDeCommande(rangeIndex);
       }
     }
 
@@ -764,6 +764,8 @@ void etude::chooseCommandPost() {
   dialog.setLayout(&dialogLayout);
   dialog.exec();
 }
+
+
 
 
 void etude::appelSetDiametreDialog() {
@@ -823,7 +825,10 @@ bool etude::eventFilter(QObject *obj, QEvent *event) {
       changerDiametreDialog();
       return true;
     }
-
+    if (keyEvent->key() == Qt::Key_S) {
+      savePdf();
+      return true;
+    }
     // Handle KeyPress event as before
     if (keyEvent->key() == Qt::Key_Tab) {
       QLineEdit *lineEdit = qobject_cast<QLineEdit*>(obj);
@@ -904,7 +909,7 @@ void etude::changerDiametreDialog() {
 
   // Create and setup the line edits
   std::string d = std::to_string(_Donnees.size()) ;
-  QLineEdit indiceDebutLineEdit(QString::fromStdString("0"));
+  QLineEdit indiceDebutLineEdit(QString::fromStdString("1"));
   QLineEdit indiceFinLineEdit(QString::fromStdString(d));
   QLineEdit diametreLineEdit;
 
@@ -922,8 +927,8 @@ void etude::changerDiametreDialog() {
 
   // When the button is clicked, get the data and call modifierdiametre
   QObject::connect(&button, &QPushButton::clicked, [&]() {
-    int debut = indiceDebutLineEdit.text().toInt();
-    int fin = indiceFinLineEdit.text().toInt();
+    int debut = indiceDebutLineEdit.text().toInt()-1;
+    int fin = indiceFinLineEdit.text().toInt()-1;
     float diametre = diametreLineEdit.text().toFloat();
     modifierdiametre(debut, fin, diametre);
     dialog.close();
@@ -941,6 +946,302 @@ void etude::refresh(){
   poste = true;
 }
 
+
+#include <QPdfWriter>
+#include <QPainter>
+#include <QTextDocument>
+#include <QTextTable>
+#include <QTextCursor>
+
+
+
+void etude::exportPdf(const QString& fileName) {
+  QPdfWriter writer(fileName);
+
+  // Configure the page layout to landscape
+  QPageLayout layout;
+  layout.setOrientation(QPageLayout::Landscape);
+  writer.setPageLayout(layout);
+
+  QPainter painter(&writer);
+
+
+  QTextDocument doc;
+  QTextCursor cursor(&doc);
+  QTextTableFormat tableFormat;
+
+  tableFormat.setHeaderRowCount(1);
+  tableFormat.setAlignment(Qt::AlignCenter);
+  tableFormat.setCellPadding(10);
+
+
+  int totalRows = 0;
+  std::vector<ParcelInfo> parcelInfos;
+  for (auto& parcel : _parcelles) {
+    ParcelInfo info;
+    totalRows += parcel.getDonnees().size();
+    const std::vector<std::vector<float>>& parcelData = parcel.getDonnees();
+    info.milieuHydro = parcel.getMilieuhydro()+parcel.getIndexdebut()+1;
+    info.limiteParcelle = totalRows;
+    info.commandPost = parcel.getPosteDeCommande();
+    info.nom = parcel.getNom();
+    info.longueur = parcel.getLongueur();
+    info.debit = parcel.getDebit();
+
+
+    parcelInfos.push_back(info);
+  }
+
+  // Initialize headers
+  QStringList headers = {"Num", "Long","NbAsp", "Zamont", "Zaval", "InterD", "InterF","DebitG","Esp","DebitC","DebitL","PeigneZAm","PeigneZAv","DRAm","DRAv","Diametre", "Nom", "Perte/Vitesse", "Denivele", "Piezo"};
+
+  QTextTable *table = cursor.insertTable(_Donnees.size() + 1, headers.size(), tableFormat);
+
+  // Set header
+  for (int i = 0; i < headers.size(); ++i) {
+    table->cellAt(0, i).firstCursorPosition().insertText(headers[i]);
+  }
+
+  // Set table data
+  for (int i = 0; i < _Donnees.size(); ++i) {
+    for (int j = 0; j < _Donnees[i].size(); ++j) {
+      QTextTableCell cell = table->cellAt(i + 1, j);
+
+      QTextCharFormat format = cell.format();
+
+      // Set cell background color based on data
+      QString textColor = "white";
+      int distanceToNearestCommandPost = std::numeric_limits<int>::max();
+
+      // Find which parcel this row belongs to
+      auto parcelInfoIt = std::find_if(parcelInfos.begin(), parcelInfos.end(),
+                                       [i](const ParcelInfo& info) { return i <= info.limiteParcelle; });
+
+      if (parcelInfoIt != parcelInfos.end()) {
+        const ParcelInfo& info = *parcelInfoIt;
+        if (i == info.commandPost && poste) {
+          textColor = "red"; // Command post
+        } else if (i == info.milieuHydro && milieu) {
+          textColor = "orange"; // Hydro milieux
+        } else if (i == info.limiteParcelle && limitations) {
+          textColor = "blue"; // Parcel limits
+        }
+        distanceToNearestCommandPost = std::abs(i - info.commandPost);
+      }
+
+      if (textColor == "red") {
+        format.setBackground(Qt::red);
+      } else if (textColor == "orange") {
+        format.setBackground(Qt::yellow);
+      } else if (textColor == "blue") {
+        format.setBackground(Qt::blue);
+      }
+
+      cell.setFormat(format);
+
+      cell.firstCursorPosition().insertText(QString::number(_Donnees[i][j]));
+    }
+  }
+
+  doc.drawContents(&painter);
+}
+
+#include <QFileDialog>
+
+void etude::savePdf() {
+  QString fileName = QFileDialog::getSaveFileName(this,
+                                                  tr("Save PDF"),
+                                                  QDir::homePath(),
+                                                  tr("PDF Files (*.pdf)"));
+
+  if (!fileName.isEmpty()) {
+    if (QFileInfo(fileName).suffix().isEmpty()) { // If user didn't specify .pdf, add it
+      fileName.append(".pdf");
+    }
+    exportPdf(fileName);
+  }
+}
+
+
+void etude::init2()
+{
+  bool amont = true;
+  _Donnees.clear();
+  _parcelles.clear();
+
+
+    QDialog dialog(this);
+    dialog.setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
+
+    dialog.setWindowTitle("Importer les données");
+
+    QVBoxLayout *mainLayout = new QVBoxLayout(&dialog);
+
+    QLabel *dataLabel = new QLabel("Collez vos données:");
+    mainLayout->addWidget(dataLabel);
+
+    QPlainTextEdit *dataEdit = new QPlainTextEdit();
+    mainLayout->addWidget(dataEdit);
+
+    QRadioButton *amontButton = new QRadioButton("Amont", &dialog);
+    amontButton->setChecked(true);
+    QRadioButton *avalButton = new QRadioButton("Aval", &dialog);
+
+    mainLayout->addWidget(amontButton);
+    mainLayout->addWidget(avalButton);
+
+
+    QHBoxLayout *buttonLayout = new QHBoxLayout();
+    QPushButton *okButton = new QPushButton("OK");
+    QPushButton *cancelButton = new QPushButton("Annuler");
+    buttonLayout->addWidget(okButton);
+    buttonLayout->addWidget(cancelButton);
+    mainLayout->addLayout(buttonLayout);
+
+    connect(okButton, &QPushButton::clicked, &dialog, &QDialog::accept);
+    connect(cancelButton, &QPushButton::clicked, &dialog, &QDialog::reject);
+
+    if (dialog.exec() == QDialog::Accepted) {
+      QString data = dataEdit->toPlainText();
+      traitements(data);
+      amont = amontButton->isChecked();
+    }
+
+
+  // Ajouter une parcelle avec toutes les données
+  if (!_Donnees.empty()) {
+    QString nomParcelle = "parcelle 1";
+    initCalcul();
+    _parcelles.push_back(parcelle(_Donnees, 0, _Donnees.size(),database, nomParcelle, amont));
+    rafraichirTableau();
+  }
+}
+
+
+
+// Enregistrement des données de l'étude dans un fichier
+void etude::saveToFile(const std::string& filename) const {
+  std::ofstream file(filename);
+  if (!file.is_open()) {
+    std::cerr << "Erreur lors de l'ouverture du fichier." << std::endl;
+    return;
+  }
+
+  for (parcelle p : _parcelles) {
+    // Write the basic parcelle data
+    file << p.getNom().toStdString() << ',';
+    file << p.getMilieuhydro() << ',';
+    file << p.getPosteDeCommande() << ',';
+    file << p.getIndexdebut() << ',';
+    file << p.getIndexfin() << ',';
+    file << p.getLongueur() << ',';
+    file << p.getMatiere() << ',';
+    file << p.isAmont() << ',';
+    file << p.getDebit() << ',';
+    file << p.isCalcul() << ',';
+
+    // Write _Donnees
+    auto& donnees = p.getDonnees();
+    for (size_t i = 0; i < donnees.size(); ++i) {
+      for (auto& d : donnees[i]) {
+        file << d << ';';
+      }
+      if (i < donnees.size() - 1) {
+        file << ',';
+      }
+    }
+    file << ',';
+
+    // Write _diameters
+    const auto& diameters = p.getDiameters();
+    for (size_t i = 0; i < diameters.size(); ++i) {
+      file << diameters[i];
+      if (i < diameters.size() - 1) {
+        file << ';';
+      }
+    }
+    file << '\n';
+  }
+
+  file.close();
+}
+
+// Load from file
+void etude::loadFromFile(const std::string& filename) {
+  std::ifstream file(filename);
+  if (!file.is_open()) {
+    std::cerr << "Erreur lors de l'ouverture du fichier." << std::endl;
+    return;
+  }
+
+  std::string line;
+  while (std::getline(file, line)) {
+    std::istringstream iss(line);
+
+    parcelle p;
+
+    // Read the basic parcelle data
+    std::string item;
+    std::getline(iss, item, ',');
+    p.setNom(QString::fromStdString(item));
+
+    std::getline(iss, item, ',');
+    p.setMilieuhydro(std::stoi(item));
+
+    std::getline(iss, item, ',');
+    p.setPosteDeCommande(std::stoi(item));
+
+    std::getline(iss, item, ',');
+    p.setIndexdebut(std::stoi(item));
+
+    std::getline(iss, item, ',');
+    p.setIndexfin(std::stoi(item));
+
+    std::getline(iss, item, ',');
+    p.setLongueur(std::stof(item));
+
+    std::getline(iss, item, ',');
+    p.setMatiere(item);
+
+    std::getline(iss, item, ',');
+    p.setAmont(std::stoi(item));
+
+    std::getline(iss, item, ',');
+    p.setDebit(std::stof(item));
+
+    std::getline(iss, item, ',');
+    p.setCalcul(std::stoi(item));
+
+    // Read _Donnees
+    std::getline(iss, item, ',');
+    std::istringstream issDonnees(item);
+    std::vector<std::vector<float>> donnees; // Vector of vectors to hold the read data
+    std::string donneeRow;
+    while (std::getline(issDonnees, donneeRow, ';')) {
+      std::vector<float> donneesCol; // Vector to hold each row of data
+      std::istringstream issDonneesRow(donneeRow);
+      std::string donnee;
+      while (std::getline(issDonneesRow, donnee, ',')) {
+        donneesCol.push_back(std::stof(donnee));
+      }
+      donnees.push_back(donneesCol);
+    }
+    p.setDonnees(donnees);
+
+    // Read _diameters
+    // This part remains same as previous response
+    std::getline(iss, item, ',');
+    std::istringstream issDiameters(item);
+    std::string dia;
+    while (std::getline(issDiameters, dia, ';')) {
+      p.addDiameter(std::stof(dia));
+    }
+    // Add the constructed parcelle to the list
+    _parcelles.push_back(p);
+  }
+
+  file.close();
+}
 
 
 

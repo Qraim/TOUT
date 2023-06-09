@@ -16,6 +16,8 @@ class parcelle {
 
 public:
 
+    parcelle()=default;
+
     parcelle(std::vector<std::vector<float>> &data, int indexdebut, int indexfin, std::shared_ptr<bdd> db, QString nom, bool amont2 = true);
 
     ///
@@ -26,7 +28,7 @@ public:
     ///
     /// @brief Récupère les données associées.
     ///
-    std::vector<std::vector<float>> &getDonnees() ;
+    std::vector<std::vector<float>> &getDonnees();
 
     ///
     /// @brief Récupère le poste de commande.
@@ -97,7 +99,42 @@ public:
     ///
     float getDebit() const;
 
-private:
+    /// @brief renvoie si le calcul à été effectué ou non
+    /// @return
+    bool isCalcul() const;
+
+    /// @brief fixe le diametre des différents tuyaux
+    /// @param matiere
+    void setDiametreDialog(std::string matiere);
+
+    /// @brief calcul la perte du cote droitedu poste de commande
+    /// @param a coefficient A de la matiere choisis
+    /// @param b coefficient B de la matiere choisis
+    /// @param k coefficient K de la matiere choisis
+    void calcul_droit(float a, float b, double k);
+
+    /// @brief
+    /// @param a coefficient A de la matiere choisis
+    /// @param b coefficient B de la matiere choisis
+    /// @param k coefficient K de la matiere choisis
+    void calcul_gauche(float a, float b, double k);
+
+    const std::vector<float> &getDiameters() const;
+    const std::string &getMatiere() const;
+    void setDonnees(const std::vector<std::vector<float>> &donnees);
+    void setMilieuhydro(int milieuhydro);
+    void setIndexdebut(int indexdebut);
+    void setIndexfin(int indexfin);
+    void setLongueur(float longueur);
+    void setMatiere(const std::string &matiere);
+    void setAmont(bool amont);
+    void setDebit(float debit);
+    void setCalcul(bool calcul);
+    void calculaspersseurs(std::vector<int> &indice, float a, float b, double k);
+    std::vector<int> trouveaspersseurs();
+    void addDiameter(float a);
+
+  private:
 
     std::shared_ptr<bdd> database;
     std::vector<std::vector<float>> _Donnees;
@@ -112,14 +149,11 @@ private:
     bool amont;
     float _debit;
     bool _calcul;
+    std::vector<std::vector<float>> _tableValues;
 
-  public:
-    bool isCalcul() const;
-    void setDiametreDialog(std::string matiere);
-    void checkAndAdjustCommandPost();
-    void calcul_droit();
-    void calcul_droit(float a, float b, double k);
-    void calcul_gauche(float a, float b, double k);
+    std::vector<std::vector<float>> getTableValues();
+    void onLineEditChanged(const QString &text, int row, int col);
+    void showDialogWithTable();
 };
 
 #endif // TOUT_PARCELLE_H
