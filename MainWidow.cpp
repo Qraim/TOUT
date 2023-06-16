@@ -215,7 +215,6 @@ float MainWindow::calcullongueurdeniv() {
 
     float debits = (debitValue * 1000) / 3600;
 
-
     QString espacementText = longueur.text();
     espacementText.replace(',', '.');
     float deniveles = espacementText.toFloat();

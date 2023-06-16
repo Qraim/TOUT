@@ -35,8 +35,6 @@ struct ParcelInfo {
   QString nom;
   float longueur;
   float debit;
-
-
 };
 
 
@@ -60,6 +58,7 @@ private :
     bool limitations;
     bool poste;
     bool premier;
+    bool asp;
     QScrollArea *scrollArea;
     QWidget *scrollAreaWidgetContents;
     QGridLayout *gridLayout;
@@ -144,16 +143,24 @@ private :
     QLineEdit *createLineEdit(const QString &text, const QString &style,
                               QWidget *parent, bool readOnly = true);
 
+    /// @brief permet de pouvoir utiliser Tab pour se mouvoir entre les diametres
+    void setTabOrderForLineEdits();
+
+    /// @brief permet d'atualiser l'intervalle  ciblé
+    /// @param row ligne
+    /// @param ligne colonne
+    /// @param newDiameter nouveelle intervalle
+    void updateinterval(int row, int ligne, const QString &newDiameter);
+
+
     void exportPdf(const QString &fileName);
 
     void savePdf();
 
-    void init2();
-
-    void saveToFile(const std::string& filename);
 
     void loadFromFile(const std::string& filename);
     void saveToFile(const std::string &filename) const;
+
 };
 
 #endif // ETUDE_H

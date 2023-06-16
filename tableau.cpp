@@ -788,7 +788,7 @@ void pertechargeherse::calcul() {
     }
 
     // Calcule l'aire du tuyau.
-    aireTuyau = (PI * pow((diametre/1000) / 2, 2));
+    aireTuyau = PI * pow((diametre/1000) / 2, 2);
 
     // Calcule la vitesse.
     vitesse = debitM3 / aireTuyau;
@@ -1526,9 +1526,18 @@ void pertechargeherse::editDiameter() {
   connect(cancelButton, &QPushButton::clicked, &dialog, &QDialog::reject);
 
   if (dialog.exec() == QDialog::Accepted) {
-    double diameter = diameterEdit->text().toDouble();
-    int startLine = startLineEdit->text().toInt();
-    int endLine = endLineEdit->text().toInt();
+    QString diameterText = diameterEdit->text();
+    diameterText.replace(',', '.');
+    double diameter = diameterText.toDouble();
+
+    QString startLineText = startLineEdit->text();
+    startLineText.replace(',', '.');
+    int startLine = startLineText.toInt();
+
+    QString endLineText = endLineEdit->text();
+    endLineText.replace(',', '.');
+    int endLine = endLineText.toInt();
+
 
     for (int i = startLine - 1; i < endLine && i < _Donnees.size(); i++) {
       _Donnees[i][3] = diameter;
@@ -1537,21 +1546,25 @@ void pertechargeherse::editDiameter() {
   calcul();
 }
 
-// fonctionnalité abandonné
+
+
+//
+// fonctionnalité abandonnée car inutile
+//
 void pertechargeherse::importData() {
   QDialog dialog(this);
-  dialog.setWindowTitle("Import Data");
+  dialog.setWindowTitle("Importer Données");
 
   QVBoxLayout *mainLayout = new QVBoxLayout(&dialog);
 
-  QLabel *dataLabel = new QLabel("Paste your data:");
+  QLabel *dataLabel = new QLabel("Données :");
   mainLayout->addWidget(dataLabel);
 
   QPlainTextEdit *dataEdit = new QPlainTextEdit();
   mainLayout->addWidget(dataEdit);
 
   QHBoxLayout *diameterLayout = new QHBoxLayout();
-  QLabel *diameterLabel = new QLabel("Diameter:");
+  QLabel *diameterLabel = new QLabel("Diametre :");
   QLineEdit *diameterEdit = new QLineEdit();
   diameterEdit->setValidator(new QDoubleValidator());
   diameterLayout->addWidget(diameterLabel);
@@ -1560,7 +1573,7 @@ void pertechargeherse::importData() {
 
   QHBoxLayout *buttonLayout = new QHBoxLayout();
   QPushButton *okButton = new QPushButton("OK");
-  QPushButton *cancelButton = new QPushButton("Cancel");
+  QPushButton *cancelButton = new QPushButton("Annulé");
   buttonLayout->addWidget(okButton);
   buttonLayout->addWidget(cancelButton);
   mainLayout->addLayout(buttonLayout);

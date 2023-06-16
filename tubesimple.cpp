@@ -54,6 +54,9 @@ tubesimple::tubesimple(std::shared_ptr<bdd> db, QWidget *parent)
     denivele.setFixedWidth(110);
     gridLayout->addWidget(&denivele, 2, 5);
 
+    QPushButton *dia = new QPushButton("Diametre");
+    gridLayout->addWidget(dia, 0, 5);
+
     // La derniere ligne pour les résultats
     QHBoxLayout *resultLabelsLayout = new QHBoxLayout;
     QLabel *perteLabel = new QLabel("Pertes de charge (m)", this);
@@ -104,6 +107,7 @@ tubesimple::tubesimple(std::shared_ptr<bdd> db, QWidget *parent)
     connect(&longueur, &QLineEdit::textChanged, this, &tubesimple::checkInputs);
     connect(&denivele, &QLineEdit::textChanged, this, &tubesimple::checkInputs);
     connect(&materiau, &QComboBox::currentTextChanged, this, &tubesimple::checkInputs);
+    connect(dia, &QPushButton::clicked, this, &tubesimple::showdia);
 
 
     QDoubleValidator *debitValidator = new QDoubleValidator(0.01, 1000000, 2, this);
@@ -327,3 +331,6 @@ void tubesimple::clearresult(){
 }
 
 
+void tubesimple::showdia(){
+    database->afficher_tableaux();
+}

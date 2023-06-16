@@ -148,6 +148,7 @@ bdd::bdd(QWidget *parent)
     QPushButton *button6 = new QPushButton("Coefficient", this);
     QPushButton *button7 = new QPushButton("Trouver", this);
     QPushButton *button8 = new QPushButton("Formule", this);
+    QPushButton *button9 = new QPushButton("Actualiser", this);
 
 
 
@@ -161,8 +162,7 @@ bdd::bdd(QWidget *parent)
     connect(button6, &QPushButton::clicked, this, &::bdd::montre_coef);
     connect(button7, &QPushButton::clicked, this, &::bdd::trouver_tuyau);
     connect(button8, &QPushButton::clicked, this, &::bdd::on_show_formula_button_clicked);
-
-
+    connect(button9, &QPushButton::clicked, this, &::bdd::rafraichir);
 
 
     mainLayout->addWidget(button1);
@@ -173,11 +173,14 @@ bdd::bdd(QWidget *parent)
     mainLayout->addWidget(button6);
     mainLayout->addWidget(button7);
     mainLayout->addWidget(button8);
+    mainLayout->addWidget(button9);
 
     setLayout(mainLayout);
 }
 
-
+void bdd::rafraichir(){
+    materials = read_materials_from_csv("./BDD.csv");
+}
 
 
 std::tuple<float, float, double> bdd::get_material_coefficients( const std::string& material_name) {
@@ -584,6 +587,8 @@ void bdd::ajouter_tableaux() {
     coeffALineEdit->setEnabled(false);
     coeffBLineEdit->setEnabled(false);
     coeffKLineEdit->setEnabled(false);
+
+    write_materials_to_csv(materials,"./BDD.csv");
 
     dialog->exec();
 }
@@ -1050,7 +1055,7 @@ std::vector<float> bdd::getInnerDiametersForMatiereAndPressure(const std::string
                     if (pressure_obj.bar == pressure) {
                         // Extract the inner diameters from the matching tuyaux
                         for (const auto &inner_outer_diameters_pair : pressure_obj.diametre) {
-                            innerDiameters.push_back(inner_outer_diameters_pair.first);
+                            innerDiameters.push_back(inner_outer_diameters_pair.second);
                         }
                         break;
                     }

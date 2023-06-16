@@ -119,8 +119,43 @@ public:
     /// @param k coefficient K de la matiere choisis
     void calcul_gauche(float a, float b, double k);
 
-    const std::vector<float> &getDiameters() const;
-    const std::string &getMatiere() const;
+
+
+    /// @brief calcul les pertes de charges pour chaque ligne ou l'indice est contenu dans le vecteur indice
+    /// @param indice vecteur des indices des lignes à calculer
+    /// @param a coefficient A de la matiere choisis
+    /// @param b coefficient B de la matiere choisis
+    /// @param k coefficient K de la matiere choisis
+    void calculaspersseurs(std::vector<int> &indice, float a, float b, double k);
+
+
+    /// @brief trouve les lignes ou il y a un aspersseurs et renvoie les indices de celles ci dans un vecteur trié
+    /// @return vector of int
+    std::vector<int> trouveaspersseurs();
+
+    /// @brief ajoute un diametre dans le vecteur _Donnees et diameter
+    /// @param a diametre à ajouter
+    void addDiameter(float a);
+
+    /// @brief Foction permettant de changer la valeurs d'une ligne et d'une colonne spécifique
+    /// @param text valeurs à changer
+    /// @param row numero de ligne
+    /// @param col numero de colonne
+    void onLineEditChanged(const QString &text, int row, int col);
+
+    /// @brief permet de choisir pour chaque ligne contennant un aspersseurs et pour chaque aspersseurs un diametre
+    void showDialogWithTable();
+
+    /// @brief permet de changer l'interval ciblé
+    /// @param index
+    /// @param colonne
+    /// @param diameters
+    void modifieinter(int index, int colonne, float diameters);
+
+
+    /// @brief Liste des Setters
+    /// @param amont
+    void SetAmont(bool amont);
     void setDonnees(const std::vector<std::vector<float>> &donnees);
     void setMilieuhydro(int milieuhydro);
     void setIndexdebut(int indexdebut);
@@ -130,9 +165,22 @@ public:
     void setAmont(bool amont);
     void setDebit(float debit);
     void setCalcul(bool calcul);
-    void calculaspersseurs(std::vector<int> &indice, float a, float b, double k);
-    std::vector<int> trouveaspersseurs();
-    void addDiameter(float a);
+
+    /// @brief Liste des Getters
+    /// @return
+    std::vector<std::vector<float>> getTableValues();
+    const std::vector<float> &getDiameters() const;
+    const std::string &getMatiere() const;
+
+
+    /// @brief calcul du peigne en asperssions
+    /// @param a coefficient A de la matiere choisis
+    /// @param b coefficient B de la matiere choisis
+    /// @param k coefficient K de la matiere choisis
+    /// @param debitgoutteur
+    void calculpeigne(float a, float b, double k, float debitgoutteur);
+
+    void inverser();
 
   private:
 
@@ -151,9 +199,7 @@ public:
     bool _calcul;
     std::vector<std::vector<float>> _tableValues;
 
-    std::vector<std::vector<float>> getTableValues();
-    void onLineEditChanged(const QString &text, int row, int col);
-    void showDialogWithTable();
+    void calculdiametre(float a, float b, double k);
 };
 
 #endif // TOUT_PARCELLE_H

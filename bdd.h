@@ -171,8 +171,11 @@ public:
     ///
     void on_show_formula_button_clicked();
 
+
     QString getFormulaText(int index);
 
+    /// @brief permet de réactualiser la base de données
+    void rafraichir();
 };
 
 

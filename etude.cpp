@@ -9,6 +9,7 @@ etude::etude(std::shared_ptr<bdd> db,QWidget *parent)
   limitations = true;
   poste = true;
   premier = true;
+  asp = false;
   // MainLayout
   mainLayout = new QVBoxLayout();
 
@@ -19,9 +20,9 @@ etude::etude(std::shared_ptr<bdd> db,QWidget *parent)
   QPushButton *initButton = new QPushButton("Init", this);
   QPushButton *divideButton = new QPushButton("Diviser", this);
   QPushButton *postebutton = new QPushButton("Poste", this);
-  QPushButton *calcul = new QPushButton("calcul", this);
+  QPushButton *calcul = new QPushButton("Calcul", this);
 
-  connect(initButton, &QPushButton::clicked, this, &etude::init2);
+  connect(initButton, &QPushButton::clicked, this, &etude::init);
   connect(divideButton, &QPushButton::clicked, this, &etude::divideData);
   connect(postebutton, &QPushButton::clicked, this, &etude::chooseCommandPost);
   connect(calcul, &QPushButton::clicked, this, &etude::appelSetDiametreDialog);
@@ -66,13 +67,22 @@ void etude::showOptionsDialog() {
 
   QCheckBox *milieuHydroCheckBox = new QCheckBox("Milieu Hydro", this);
   milieuHydroCheckBox->setChecked(milieu);
+  milieuHydroCheckBox->setStyleSheet("QCheckBox { color: orange; }");
+
   QCheckBox *limitationParcelleCheckBox = new QCheckBox("Limitation parcelle", this);
   limitationParcelleCheckBox->setChecked(limitations);
+  limitationParcelleCheckBox->setStyleSheet("QCheckBox { color: blue; }");
+
   QCheckBox *postecheckbox = new QCheckBox("Poste", this);
   postecheckbox->setChecked(poste);
+  postecheckbox->setStyleSheet("QCheckBox { color: red; }");
 
   QCheckBox *premiere = new QCheckBox("Premier rang", this);
   premiere->setChecked(poste);
+  premiere->setStyleSheet("QCheckBox { color : pink}");
+
+  QCheckBox *asper = new QCheckBox("Aspersions", this);
+  asper->setChecked(asp);
 
   // Créer un layout pour le QDialog
   QVBoxLayout dialogLayout(&optionsDialog);
@@ -80,6 +90,7 @@ void etude::showOptionsDialog() {
   dialogLayout.addWidget(limitationParcelleCheckBox);
   dialogLayout.addWidget(postecheckbox);
   dialogLayout.addWidget(premiere);
+  dialogLayout.addWidget(asper);
 
   // Ajouter un bouton OK
   QPushButton okButton("OK");
@@ -98,10 +109,12 @@ void etude::showOptionsDialog() {
   limitations = limitationParcelleCheckBox->isChecked();
   poste = postecheckbox->isChecked();
   premier = premiere->isChecked();
+  asp = asper->isChecked();
 
   // Rafraichir le tableau pour prendre en compte les nouvelles options d'affichage
   rafraichirTableau();
 }
+
 
 
 void etude::init()
@@ -110,71 +123,44 @@ void etude::init()
   _Donnees.clear();
   _parcelles.clear();
 
-  QClipboard *clipboard = QApplication::clipboard();
-  QString originalText = clipboard->text();
 
-  if(!originalText.isEmpty()){
-    traitements(originalText);
-    QDialog dialog(this);
-    dialog.setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
+  QDialog dialog(this);
+  dialog.setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
 
-    dialog.setWindowTitle("Amont/Aval");
+  dialog.setWindowTitle("Importer les données");
 
-    QVBoxLayout *mainLayout = new QVBoxLayout(&dialog);
+  QVBoxLayout *mainLayout = new QVBoxLayout(&dialog);
 
-    QRadioButton *amontButton = new QRadioButton("Amont", &dialog);
-    amontButton->setChecked(true);
-    QRadioButton *avalButton = new QRadioButton("Aval", &dialog);
+  QLabel *dataLabel = new QLabel("Collez vos données:");
+  mainLayout->addWidget(dataLabel);
 
-    mainLayout->addWidget(amontButton);
-    mainLayout->addWidget(avalButton);
+  QPlainTextEdit *dataEdit = new QPlainTextEdit();
+  mainLayout->addWidget(dataEdit);
 
-    QHBoxLayout *buttonLayout = new QHBoxLayout();
-    QPushButton *okButton = new QPushButton("OK", &dialog);
-    QPushButton *cancelButton = new QPushButton("Annuler", &dialog);
+  QRadioButton *amontButton = new QRadioButton("Amont", &dialog);
+  amontButton->setChecked(true);
+  QRadioButton *avalButton = new QRadioButton("Aval", &dialog);
 
-    buttonLayout->addWidget(okButton);
-    buttonLayout->addWidget(cancelButton);
-
-    mainLayout->addLayout(buttonLayout);
-
-    connect(okButton, &QPushButton::clicked, &dialog, &QDialog::accept);
-    connect(cancelButton, &QPushButton::clicked, &dialog, &QDialog::reject);
-
-    if (dialog.exec() == QDialog::Accepted) {
-        amont = amontButton->isChecked();
-    }
+  mainLayout->addWidget(amontButton);
+  mainLayout->addWidget(avalButton);
 
 
-  } else {
-    QDialog dialog(this);
-    dialog.setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
+  QHBoxLayout *buttonLayout = new QHBoxLayout();
+  QPushButton *okButton = new QPushButton("OK");
+  QPushButton *cancelButton = new QPushButton("Annuler");
+  buttonLayout->addWidget(okButton);
+  buttonLayout->addWidget(cancelButton);
+  mainLayout->addLayout(buttonLayout);
 
-    dialog.setWindowTitle("Importer les données");
+  connect(okButton, &QPushButton::clicked, &dialog, &QDialog::accept);
+  connect(cancelButton, &QPushButton::clicked, &dialog, &QDialog::reject);
 
-    QVBoxLayout *mainLayout = new QVBoxLayout(&dialog);
-
-    QLabel *dataLabel = new QLabel("Collez vos données:");
-    mainLayout->addWidget(dataLabel);
-
-    QPlainTextEdit *dataEdit = new QPlainTextEdit();
-    mainLayout->addWidget(dataEdit);
-
-    QHBoxLayout *buttonLayout = new QHBoxLayout();
-    QPushButton *okButton = new QPushButton("OK");
-    QPushButton *cancelButton = new QPushButton("Annuler");
-    buttonLayout->addWidget(okButton);
-    buttonLayout->addWidget(cancelButton);
-    mainLayout->addLayout(buttonLayout);
-
-    connect(okButton, &QPushButton::clicked, &dialog, &QDialog::accept);
-    connect(cancelButton, &QPushButton::clicked, &dialog, &QDialog::reject);
-
-    if (dialog.exec() == QDialog::Accepted) {
-      QString data = dataEdit->toPlainText();
-      traitements(data);
-    }
+  if (dialog.exec() == QDialog::Accepted) {
+    QString data = dataEdit->toPlainText();
+    traitements(data);
+    amont = amontButton->isChecked();
   }
+
 
   // Ajouter une parcelle avec toutes les données
   if (!_Donnees.empty()) {
@@ -184,6 +170,7 @@ void etude::init()
     rafraichirTableau();
   }
 }
+
 
 
 void etude::traitements(QString data){
@@ -206,7 +193,7 @@ void etude::traitements(QString data){
       continue;
     }
 
-    std::vector<float> rowData(20);
+    std::vector<float> rowData(27);
     rowData[0] = cols[2].toInt(); // numero du rang
     rowData[1] = cols[3].toFloat(); // Longueur du rang
     rowData[2] = cols[4].toFloat(); // Nombre d'asperseurs
@@ -216,12 +203,13 @@ void etude::traitements(QString data){
       rowData[5] = 0;// Intervale rang début
       rowData[6] = 0; // Intervale rang fin
     } else {
-      rowData[5] = cols[7].toFloat(); // Intervale rang début
-      rowData[6] = cols[8].toFloat(); // Intervale rang fin
+      if (cols.size() > 7) rowData[5] = cols[7].toFloat(); // Intervale rang début
+      if (cols.size() > 8) rowData[6] = cols[8].toFloat(); // Intervale rang fin
     }
     _Donnees.push_back(rowData);
   }
 }
+
 
 
 void etude::clearchild() {
@@ -240,6 +228,10 @@ void etude::rafraichirTableau() {
     updateDonnees(); // Met à jour les données
   }
 
+  if(_Donnees.size()==0){
+    return;
+  }
+
   // Sauvegarder la position actuelle des barres de défilement
   int scrollPosVertical = scrollArea->verticalScrollBar()->value();
   int scrollPosHorizontal = scrollArea->horizontalScrollBar()->value();
@@ -248,9 +240,28 @@ void etude::rafraichirTableau() {
 
   bool amont = _parcelles[0].isAmont();
 
+  int column = 2;  // The column you want
+  std::vector<int> result;  // The vector to hold the column
+
+  result.reserve(_Donnees[column].size());  // Reserve the space beforehand
+
+  for (int i = 0; i < _Donnees.size(); ++i) {
+    if(_Donnees[i].size() > column)  // Checking if the column index is within the range of inner vector
+      result.push_back(_Donnees[i][column]);
+  }
+
+  bool tout0 = std::all_of(result.begin(), result.end(), [](int i) { return i == 0; });
+
 
   // Initialize headers
-  QStringList headers = {"Num", "Long","NbAsp", "Zamont", "Zaval", "InterD", "InterF","DebitG","Esp","DebitC","DebitL","PeigneZAm","PeigneZAv","DRAm","DRAv","Diametre", "Nom", "Perte/Vitesse", "Denivele", "Piezo"};
+  QStringList headers;
+  // Initialize headers
+  if(tout0) {
+    headers << "Num" << "Long" << "NbAsp" << "Zamont" << "Zaval" << "InterD" << "InterF" << "DebitG" << "Espacement" << "Debit Ligne" << "Debit Cumul" << "PeigneZAm" << "PeigneZAv" << "DeltaLigneAm" << "DeltaLigneAv" << "Diametre" << "Nom" << "DenivelePeigne" << "Vitesse" << "Perte" << "Piezo" << "Cumul Perte" << "Cumul Piezo"<<"Ø16/14"<<"Piezo Ø16"<<"Ø20/17.6"<<"Piezo Ø20";
+  } else {
+    headers << "Num" << "Long" << "NbAsp" << "Zamont" << "Zaval" << "InterD" << "InterF" << "DebitG" << "Esp" << "DebitL" << "DebitC" << "PeigneZAm" << "PeigneZAv" << "DRAm" << "DRAv" << "Diametre" << "Nom" << "Denivele" << "Vitesse" << "Perte" << "Piezo" << "Cumul Perte" << "Cumul Piezo";
+  }
+
 
   for (int i = 0; i < headers.size(); ++i) {
     QLabel *headerLabel = new QLabel(headers[i], this);
@@ -261,7 +272,6 @@ void etude::rafraichirTableau() {
     headerLabel->setFixedWidth(largueur);
     gridLayout->addWidget(headerLabel, 0, i);
   }
-
 
   // Initialise le numéro de ligne.
   int ligne = 1;
@@ -283,8 +293,15 @@ void etude::rafraichirTableau() {
 
   int parcelIndex = 0;  // Ajoutez ceci avant la boucle sur _parcelles
 
+
+
   // Ajoute les données au tableau.
   for (const std::vector<float> &donneesLigne : _Donnees) {
+
+    if( donneesLigne[2]==0 && asp ){
+      ligne++;
+      continue;
+    }
 
     // Détermine la couleur du texte.
     QString textColor = WHITE_TEXT;
@@ -310,6 +327,11 @@ void etude::rafraichirTableau() {
 
 
     for (int i = 0; i < donneesLigne.size(); ++i) {
+
+      if(i==2 && tout0){
+        continue;
+      }
+
       if(i==16){
         QLabel *lineEdit = new QLabel(this);
         lineEdit->setStyleSheet(textColor);
@@ -331,38 +353,37 @@ void etude::rafraichirTableau() {
         QString formattedText;
         if (i == 0) {
           formattedText = QString::number(static_cast<int>(donneesLigne[i]));
-        } else if (i == 17) {
-          QString suffix;
-          if (distanceToNearestCommandPost == 1) {
-            suffix = "m";
-          } else if (distanceToNearestCommandPost == 2) {
-            suffix = "m/s";
-          }
-          formattedText = (donneesLigne[i] == 0.0f) ? "" : QString::number(donneesLigne[i], 'f', 2) + suffix;
-        }
-        else if(i>15 && i != 18 && i != 19){
-          formattedText = (donneesLigne[i] == 0.0f) ? "" : QString::number(donneesLigne[i], 'f', 2);
-        } else if (i == 18 || i == 19) { // Pour les colonnes 18 et 19
-          formattedText = (donneesLigne[i] == 0.0f) ? "" : QString::number(donneesLigne[i], 'f', 2) + "m"; // Ajoutez "m" si la valeur n'est pas vide
-        }
-
-        else {
+        } else if (donneesLigne[i] == 0) {
+          formattedText = " ";
+        } else if(i ==17 || i == 19 || i == 20 || i == 21 || i == 22 ){
+          formattedText = QString::number(donneesLigne[i], 'f', 2) + "m";
+        } else if(i ==18 ){
+          formattedText = QString::number(donneesLigne[i], 'f', 2) + "m/s";
+        }else {
           formattedText = QString::number(donneesLigne[i], 'f', 2);
         }
+
 
 
         lineEdit->setText(formattedText);
         gridLayout->setVerticalSpacing(0);
         gridLayout->addWidget(lineEdit, ligne, i);
-        // Ajoute un signal pour la 16ème colonne
-        if (i == 15) {
+        // Ajoute un signal pour la 16ème/5éme/6éme colonne
+        if (i == 15 || i ==5 || i==6) {
           lineEdit->installEventFilter(this);
           lineEdit->setStyleSheet("QLineEdit { color: yellow; }");
           lineEdit->setReadOnly(false);
           // Connecte textEdited signal comme avant
-          connect(lineEdit, &QLineEdit::textEdited, [this, ligne](const QString& newDiameter) {
-            this->updateDiameter(ligne-1, newDiameter);
-          });
+          if(i==16){
+            connect(lineEdit, &QLineEdit::textEdited, [this, ligne](const QString& newDiameter) {
+              this->updateDiameter(ligne-1, newDiameter);
+            });
+          } else {
+            int colonne = i;
+            connect(lineEdit, &QLineEdit::textEdited, [this, ligne, colonne](const QString& newDiameter) {
+              this->updateinterval(ligne-1,colonne, newDiameter);
+            });
+          }
 
           if(!parcelInfos.empty()){
             // Trouvez la dernière ligne de la parcelle actuelle
@@ -393,7 +414,7 @@ void etude::rafraichirTableau() {
 
       // Crée un QLineEdit pour la longueur de la parcelle
       QLineEdit *parcelLengthLineEdit = createLineEdit(QString::number(info.longueur, 'f', 2) + " m", textColor, this);
-      gridLayout->addWidget(parcelLengthLineEdit, ligne, 17);  // Ajoute le QLineEdit à la 17e colonne
+      gridLayout->addWidget(parcelLengthLineEdit, ligne - 1, 16);  // Ajoute le QLineEdit à la 17e colonne
 
       // Crée un QLineEdit pour le debit de la parcelle
       QString text;
@@ -403,9 +424,38 @@ void etude::rafraichirTableau() {
         text = QString::number(info.debit, 'f', 2) + " L/h";
       }
       QLineEdit *parcelDebitLineEdit = createLineEdit(text, textColor, this);
-      gridLayout->addWidget(parcelDebitLineEdit, ligne, 18);  // Ajoute le QLineEdit à la 18e colonne
-    }
+      gridLayout->addWidget(parcelDebitLineEdit, ligne - 2, 16);  // Ajoute le QLineEdit à la 18e colonne
 
+
+      QComboBox *setamont = new QComboBox();
+      setamont->addItem("  Amont");
+      setamont->addItem("  Aval");
+      setamont->setStyleSheet("QComboBox { background-color: blue; color: white; }");
+
+      if(this->_parcelles[parcelIndex].isAmont()) {
+        setamont->setCurrentIndex(0);  // Index 0 corresponds à "Amont"
+      } else {
+        setamont->setCurrentIndex(1);  // Index 1 corresponds à "Aval"
+      }
+
+      connect(setamont, QOverload<int>::of(&QComboBox::currentIndexChanged), [this, parcelIndex](int index) {
+        bool isAmont = (index == 0);
+        this->_parcelles[parcelIndex].SetAmont(isAmont);
+      });
+
+      gridLayout->addWidget(setamont, ligne-3, 16);  // Ajoute le QLineEdit à la 16e colonne
+
+      QPushButton *inverse = new QPushButton("Inverser");
+      inverse->setStyleSheet("QPushButton { background-color: blue; color: white; }");
+      connect(inverse, &QPushButton::clicked, [this, parcelIndex]() {
+        this->_parcelles[parcelIndex].inverser();
+        rafraichirTableau();
+      });
+
+      gridLayout->addWidget(inverse, ligne-4, 16);  // Ajoute le QLineEdit à la 16e colonne
+
+
+    }
 
     // Incrémente le numéro de ligne.
     ligne++;
@@ -414,7 +464,7 @@ void etude::rafraichirTableau() {
   // Contrôle de visibilité des colonnes après avoir rempli la grille
   if (amont) {
     for (int i = 0; i < gridLayout->columnCount(); ++i) {
-      if (i == 4 || i == 6) {
+      if (i == 4 || i == 6 || i ==12 || i==13) {
         for (int j = 0; j < gridLayout->rowCount(); ++j) {
           if (gridLayout->itemAtPosition(j, i) && gridLayout->itemAtPosition(j, i)->widget()) {
             gridLayout->itemAtPosition(j, i)->widget()->setVisible(false);
@@ -424,7 +474,7 @@ void etude::rafraichirTableau() {
     }
   } else {
     for (int i = 0; i < gridLayout->columnCount(); ++i) {
-      if (i == 3 || i == 5) {
+      if (i == 3 || i == 5  || i ==11 || i ==14) {
         for (int j = 0; j < gridLayout->rowCount(); ++j) {
           if (gridLayout->itemAtPosition(j, i) && gridLayout->itemAtPosition(j, i)->widget()) {
             gridLayout->itemAtPosition(j, i)->widget()->setVisible(false);
@@ -433,6 +483,18 @@ void etude::rafraichirTableau() {
       }
     }
   }
+
+  // Contrôle de visibilité des colonnes après avoir rempli la grille
+  if (tout0) {
+    int i=2;
+    for (int j = 0; j < gridLayout->rowCount(); ++j) {
+      if (gridLayout->itemAtPosition(j, i) && gridLayout->itemAtPosition(j, i)->widget()) {
+        gridLayout->itemAtPosition(j, i)->widget()->setVisible(false);
+      }
+    }
+
+  }
+
 
   // Calcule la hauteur du widget de défilement et ajuste sa hauteur minimum et
   // maximum en conséquence.
@@ -450,6 +512,8 @@ void etude::rafraichirTableau() {
   // Restaurer les positions des barres de défilement après le rafraîchissement
   scrollArea->verticalScrollBar()->setValue(scrollPosVertical);
   scrollArea->horizontalScrollBar()->setValue(scrollPosHorizontal);
+
+  setTabOrderForLineEdits();
 }
 
 QLineEdit* etude::createLineEdit(const QString& text, const QString& style, QWidget* parent, bool readOnly) {
@@ -479,9 +543,18 @@ void etude::initCalcul() {
   QRadioButton default1Button("2.2L / 0.6m");
   default1Button.setChecked(true);
   QRadioButton default2Button("1.6L / 0.5m");
+
   QComboBox matierebox(this);
 
-  matierebox.setFixedSize(100, 40);
+  QLineEdit *litre = new QLineEdit();
+  litre->setFixedSize(60, 20);  // Ajoute une taille fixe au QLineEdit
+  QLineEdit *espacement = new QLineEdit();
+  espacement->setFixedSize(60, 20);  // Ajoute une taille fixe au QLineEdit
+
+  QLabel *labellitre = new QLabel("Debit");
+  QLabel *labelespacement = new QLabel("Espacement");
+
+  matierebox.setFixedSize(60, 20);
 
   std::vector<std::string> matiere_names = database->getAllMatiereNames();
   for (const auto &matiere_name : matiere_names) {
@@ -492,6 +565,18 @@ void etude::initCalcul() {
   QFormLayout formLayout(&dialog);
   formLayout.addRow(&default1Button);
   formLayout.addRow(&default2Button);
+
+  // Ajoute les QLineEdit et les labels au layout
+  QHBoxLayout *litreLayout = new QHBoxLayout;
+  litreLayout->addWidget(labellitre);
+  litreLayout->addWidget(litre);
+  formLayout.addRow(litreLayout);
+
+  QHBoxLayout *espacementLayout = new QHBoxLayout;
+  espacementLayout->addWidget(labelespacement);
+  espacementLayout->addWidget(espacement);
+  formLayout.addRow(espacementLayout);
+
   formLayout.addWidget(&okButton);
 
   // Connecte le signal du bouton OK pour appeler la fonction 'calcul' lorsque le bouton est cliqué.
@@ -500,11 +585,13 @@ void etude::initCalcul() {
     float debitGoutteur = 0.0f;
     float espacementGoutteur = 0.0f;
 
-    if (default1Button.isChecked()) {
+    if(!litre->text().isEmpty() && !espacement->text().isEmpty()){
+      debitGoutteur = litre->text().replace(",",".").toFloat();
+      espacementGoutteur = espacement->text().replace(",",".").toFloat();
+    } else if (default1Button.isChecked()) {
       debitGoutteur = 2.2f;
       espacementGoutteur = 0.6f;
-    }
-    else if (default2Button.isChecked()) {
+    } else if (default2Button.isChecked()) {
       debitGoutteur = 1.6f;
       espacementGoutteur = 0.5f;
     }
@@ -520,6 +607,7 @@ void etude::initCalcul() {
   // Affiche le QDialog.
   dialog.exec();
 }
+
 
 
 void etude::calcul(){
@@ -567,6 +655,9 @@ void etude::divideData() {
         row[17] = 0.0;
         row[18] = 0.0;
         row[19] = 0.0;
+        row[20] = 0.0;
+        row[21] = 0.0;
+        row[22] = 0.0;
       }
     }
     _Donnees.insert(_Donnees.end(), parcelData.begin(), parcelData.end());
@@ -590,7 +681,7 @@ void etude::divideData() {
 
   formLayout.addRow("Nombre de parcelles:", &nombreparcelleLineEdit);
   formLayout.addRow("Index de début:", &startIndexLineEdit);
-      formLayout.addRow("Index de fin:", &endIndexLineEdit);
+  formLayout.addRow("Index de fin:", &endIndexLineEdit);
   formLayout.addRow("Lignes restantes:", &remainingLinesLabel);
 
   autoButton.setChecked(true);
@@ -598,15 +689,15 @@ void etude::divideData() {
   endIndexLineEdit.setEnabled(false);
 
   connect(&autoButton, &QRadioButton::clicked, [&]() {
-      startIndexLineEdit.setEnabled(false);
-      endIndexLineEdit.setEnabled(false);
-      nombreparcelleLineEdit.setEnabled(true);
+    startIndexLineEdit.setEnabled(false);
+    endIndexLineEdit.setEnabled(false);
+    nombreparcelleLineEdit.setEnabled(true);
   });
 
   connect(&manualButton, &QRadioButton::clicked, [&]() {
-      startIndexLineEdit.setEnabled(true);
-      endIndexLineEdit.setEnabled(true);
-      nombreparcelleLineEdit.setEnabled(false);
+    startIndexLineEdit.setEnabled(true);
+    endIndexLineEdit.setEnabled(true);
+    nombreparcelleLineEdit.setEnabled(false);
 
   });
 
@@ -677,6 +768,29 @@ void etude::divideData() {
   rafraichirTableau();
 }
 
+void etude::setTabOrderForLineEdits() {
+  QLineEdit* previousLineEdit = nullptr;
+  QLineEdit* firstLineEdit = qobject_cast<QLineEdit*> (gridLayout->itemAtPosition(0, 15)->widget());
+
+  // Iterate only through the 16th column
+  for (int i = 0; i < gridLayout->rowCount(); ++i) {
+    QLayoutItem* item = gridLayout->itemAtPosition(i, 15); // 16 is the column index
+    if (item) {
+      QLineEdit* lineEdit = qobject_cast<QLineEdit*>(item->widget());
+      // Check if the item is a QLineEdit and is editable
+      if (lineEdit && !lineEdit->isReadOnly()) {
+        // If this is not the first QLineEdit found
+        if (previousLineEdit) {
+          QWidget::setTabOrder(previousLineEdit, lineEdit);
+        }
+        previousLineEdit = lineEdit;
+      }
+    }
+  }
+  if(previousLineEdit) {
+    QWidget::setTabOrder(previousLineEdit, firstLineEdit);
+  }
+}
 
 
 
@@ -809,6 +923,17 @@ void etude::updateDiameter(int row, const QString& newDiameter) {
   }
 }
 
+void etude::updateinterval(int row, int ligne,const QString& newDiameter) {
+  float diameter = newDiameter.toFloat();
+  for (auto& parcel : _parcelles) {
+    if(row < parcel.getDonnees().size()) {
+      parcel.modifieinter(row,ligne,newDiameter.toFloat());
+      return;
+    }
+    row -= parcel.getDonnees().size();
+  }
+}
+
 #include <QTimer>
 
 bool etude::eventFilter(QObject *obj, QEvent *event) {
@@ -829,7 +954,7 @@ bool etude::eventFilter(QObject *obj, QEvent *event) {
       savePdf();
       return true;
     }
-    // Handle KeyPress event as before
+    /*// Handle KeyPress event as before
     if (keyEvent->key() == Qt::Key_Tab) {
       QLineEdit *lineEdit = qobject_cast<QLineEdit*>(obj);
       if (lineEdit) {
@@ -843,7 +968,7 @@ bool etude::eventFilter(QObject *obj, QEvent *event) {
           return true; // Add condition for the last QLineEdit
         }
       }
-    }
+    }*/
   }
   // Standard event processing
   return QObject::eventFilter(obj, event);
@@ -851,40 +976,37 @@ bool etude::eventFilter(QObject *obj, QEvent *event) {
 
 
 
-QLineEdit* etude::findNextDiameterLineEdit(int startRow)
-{
-  int totalRows = gridLayout->rowCount();
+QLineEdit* etude::findNextDiameterLineEdit(int currentRow) {
+  int nextRow = currentRow ;
 
-  // Commence la recherche
-  for (int row = startRow; row < totalRows; ++row)
-  {
-    // Prend les widgets de la 15eme colonne
-    QWidget* widget = gridLayout->itemAtPosition(row, 15)->widget();
+  if (nextRow >= gridLayout->rowCount()) {
+    return nullptr;  // If there is no next row
+  }
 
-    // SI c'est un QLineEdit
-    QLineEdit* lineEdit = qobject_cast<QLineEdit*>(widget);
-    if (lineEdit)
-    {
-      // Trouvé donc retourné
+  QLayoutItem* item = gridLayout->itemAtPosition(nextRow, 15);  // 15 is the column index
+  if (item) {
+    QLineEdit* lineEdit = qobject_cast<QLineEdit*>(item->widget());
+    if (lineEdit && !lineEdit->isReadOnly()) {  // Make sure it's an editable QLineEdit
       return lineEdit;
     }
   }
 
-  // Pas trouvé
-  return nullptr;
+  return nullptr;  // If no next editable QLineEdit is found
 }
+
+
 
 void etude::modifierdiametre(int debut, int fin, float dia){
   if(debut > fin){
-    std::swap(debut, fin); // Swap if the indices are not in ascending order
+    std::swap(debut, fin);
   }
   int i = 0 ;
   for(auto & parcelle : _parcelles){
     auto & datas = parcelle.getDonnees();
     for(int j = 0; j < datas.size();j++){
       if(i>=debut && i<=fin){
-        //datas[j][15] = dia;
         parcelle.modifiedia(j,dia);
+        datas[j][15] = dia;
       }
       i++;
     }
@@ -1026,7 +1148,6 @@ void etude::exportPdf(const QString& fileName) {
         } else if (i == info.limiteParcelle && limitations) {
           textColor = "blue"; // Parcel limits
         }
-        distanceToNearestCommandPost = std::abs(i - info.commandPost);
       }
 
       if (textColor == "red") {
@@ -1061,62 +1182,6 @@ void etude::savePdf() {
     exportPdf(fileName);
   }
 }
-
-
-void etude::init2()
-{
-  bool amont = true;
-  _Donnees.clear();
-  _parcelles.clear();
-
-
-    QDialog dialog(this);
-    dialog.setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
-
-    dialog.setWindowTitle("Importer les données");
-
-    QVBoxLayout *mainLayout = new QVBoxLayout(&dialog);
-
-    QLabel *dataLabel = new QLabel("Collez vos données:");
-    mainLayout->addWidget(dataLabel);
-
-    QPlainTextEdit *dataEdit = new QPlainTextEdit();
-    mainLayout->addWidget(dataEdit);
-
-    QRadioButton *amontButton = new QRadioButton("Amont", &dialog);
-    amontButton->setChecked(true);
-    QRadioButton *avalButton = new QRadioButton("Aval", &dialog);
-
-    mainLayout->addWidget(amontButton);
-    mainLayout->addWidget(avalButton);
-
-
-    QHBoxLayout *buttonLayout = new QHBoxLayout();
-    QPushButton *okButton = new QPushButton("OK");
-    QPushButton *cancelButton = new QPushButton("Annuler");
-    buttonLayout->addWidget(okButton);
-    buttonLayout->addWidget(cancelButton);
-    mainLayout->addLayout(buttonLayout);
-
-    connect(okButton, &QPushButton::clicked, &dialog, &QDialog::accept);
-    connect(cancelButton, &QPushButton::clicked, &dialog, &QDialog::reject);
-
-    if (dialog.exec() == QDialog::Accepted) {
-      QString data = dataEdit->toPlainText();
-      traitements(data);
-      amont = amontButton->isChecked();
-    }
-
-
-  // Ajouter une parcelle avec toutes les données
-  if (!_Donnees.empty()) {
-    QString nomParcelle = "parcelle 1";
-    initCalcul();
-    _parcelles.push_back(parcelle(_Donnees, 0, _Donnees.size(),database, nomParcelle, amont));
-    rafraichirTableau();
-  }
-}
-
 
 
 // Enregistrement des données de l'étude dans un fichier
@@ -1166,7 +1231,7 @@ void etude::saveToFile(const std::string& filename) const {
   file.close();
 }
 
-// Load from file
+
 void etude::loadFromFile(const std::string& filename) {
   std::ifstream file(filename);
   if (!file.is_open()) {
@@ -1227,7 +1292,6 @@ void etude::loadFromFile(const std::string& filename) {
       donnees.push_back(donneesCol);
     }
     p.setDonnees(donnees);
-
     // Read _diameters
     // This part remains same as previous response
     std::getline(iss, item, ',');
@@ -1239,7 +1303,6 @@ void etude::loadFromFile(const std::string& filename) {
     // Add the constructed parcelle to the list
     _parcelles.push_back(p);
   }
-
   file.close();
 }
 
