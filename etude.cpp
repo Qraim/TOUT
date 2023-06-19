@@ -215,10 +215,16 @@ void etude::traitements(QString data){
 void etude::clearchild() {
   QLayoutItem *item;
   while ((item = gridLayout->takeAt(0)) != nullptr) {
-    delete item->widget();
+    if (QWidget *widget = item->widget()) {
+      widget->setParent(nullptr); // Disown the widget
+      delete widget;  // Now it's safe to delete it
+    }
     delete item;
   }
 }
+
+
+
 
 #include <QScrollBar>
 
@@ -243,8 +249,6 @@ void etude::rafraichirTableau() {
   int column = 2;  // The column you want
   std::vector<int> result;  // The vector to hold the column
 
-  result.reserve(_Donnees[column].size());  // Reserve the space beforehand
-
   for (int i = 0; i < _Donnees.size(); ++i) {
     if(_Donnees[i].size() > column)  // Checking if the column index is within the range of inner vector
       result.push_back(_Donnees[i][column]);
@@ -257,9 +261,12 @@ void etude::rafraichirTableau() {
   QStringList headers;
   // Initialize headers
   if(tout0) {
-    headers << "Num" << "Long" << "NbAsp" << "Zamont" << "Zaval" << "InterD" << "InterF" << "DebitG" << "Espacement" << "Debit Ligne" << "Debit Cumul" << "PeigneZAm" << "PeigneZAv" << "DeltaLigneAm" << "DeltaLigneAv" << "Diametre" << "Nom" << "DenivelePeigne" << "Vitesse" << "Perte" << "Piezo" << "Cumul Perte" << "Cumul Piezo"<<"Ø16/14"<<"Piezo Ø16"<<"Ø20/17.6"<<"Piezo Ø20";
+    headers << "Num" << "Long" << "NbAsp" << "Zamont" << "Zaval" << "InterD" << "InterF" << "DebitG" << "Espacement" << "Debit Ligne" << "Debit Cumul" << "PeigneZAm" << "PeigneZAv" << "DeltaLigneAm" << "DeltaLigneAv" << "Diametre" << "Nom" << "DenivelePeigne" << "Vitesse" << "Perte J" << "Piezo P" << "Cumul Perte" << "Cumul Piezo"<<"Ø16/14"<<"Piezo Ø16"<<"Ø20/17.6"<<"Piezo Ø20";
   } else {
-    headers << "Num" << "Long" << "NbAsp" << "Zamont" << "Zaval" << "InterD" << "InterF" << "DebitG" << "Esp" << "DebitL" << "DebitC" << "PeigneZAm" << "PeigneZAv" << "DRAm" << "DRAv" << "Diametre" << "Nom" << "Denivele" << "Vitesse" << "Perte" << "Piezo" << "Cumul Perte" << "Cumul Piezo";
+    for(int i = 0; i <_Donnees.size();i++) {
+      _Donnees[i].resize(31);
+    }
+    headers << "Num" << "Long" << "NbAsp" << "Zamont" << "Zaval" << "InterD" << "InterF" << "DebitG" << "Espacement" << "Debit Ligne" << "Debit Cumul" << "PeigneZAm" << "PeigneZAv" << "DeltaLigneAm" << "DeltaLigneAv" << "Diametre" << "Nom" << "DenivelePeigne" << "Vitesse" <<"Perte J" << "Piezo P" << "Cumul Perte" << "Cumul Piezo"<<"1er Inter"<<"Ø75"<<"Ø63"<<"Ø50"<<"Ø40"<<"Ø32"<<"Perte J"<< "Piezo P";
   }
 
 
@@ -358,6 +365,7 @@ void etude::rafraichirTableau() {
         } else if(i ==17 || i == 19 || i == 20 || i == 21 || i == 22 ){
           formattedText = QString::number(donneesLigne[i], 'f', 2) + "m";
         } else if(i ==18 ){
+
           formattedText = QString::number(donneesLigne[i], 'f', 2) + "m/s";
         }else {
           formattedText = QString::number(donneesLigne[i], 'f', 2);
@@ -369,15 +377,29 @@ void etude::rafraichirTableau() {
         gridLayout->setVerticalSpacing(0);
         gridLayout->addWidget(lineEdit, ligne, i);
         // Ajoute un signal pour la 16ème/5éme/6éme colonne
-        if (i == 15 || i ==5 || i==6) {
+        if ((i == 15 || i ==5 || i==6 || i ==9) || (i==24 || i==25 || i==26 || i ==27 || i==23 || i==28 && !tout0)) {
           lineEdit->installEventFilter(this);
           lineEdit->setStyleSheet("QLineEdit { color: yellow; }");
           lineEdit->setReadOnly(false);
           // Connecte textEdited signal comme avant
-          if(i==16){
+          if(i==15){
             connect(lineEdit, &QLineEdit::textEdited, [this, ligne](const QString& newDiameter) {
               this->updateDiameter(ligne-1, newDiameter);
             });
+          } else if (i==9){
+            connect(lineEdit, &QLineEdit::textEdited, [this, ligne, i](const QString& newDiameter) {
+              this->updateDebit(ligne-1, newDiameter);
+            });
+          } if(i==24 || i==25 || i==26 || i ==27 || i==23 || i==28 && !tout0){
+            if(_Donnees[ligne-1][2]!=0){
+              connect(lineEdit, &QLineEdit::textEdited, [this, ligne, i](const QString& newDiameter) {
+                this->updateinterval(ligne-1,i, newDiameter);
+              });
+            } else {
+              lineEdit->setStyleSheet(textColor);
+              lineEdit->setReadOnly(true);
+            }
+
           } else {
             int colonne = i;
             connect(lineEdit, &QLineEdit::textEdited, [this, ligne, colonne](const QString& newDiameter) {
@@ -396,63 +418,70 @@ void etude::rafraichirTableau() {
               });
             }
           }
+        } else if(i==18){
+          if(donneesLigne[i] > 2){
+            lineEdit->setStyleSheet("QLineEdit { color: red; }");
+          }
         }
       }
     }
+
 
     // Vérifie si cette ligne est une limite de parcelle
     if (parcelInfoIt != parcelInfos.end() && ligne == parcelInfoIt->limiteParcelle) {
       ParcelInfo& info = *parcelInfoIt;
       int parcelIndex = std::distance(parcelInfos.begin(), parcelInfoIt);
 
-      QLineEdit *parcelNameLineEdit = createLineEdit(info.nom, textColor, this, false);
-      // Connecte le signal textChanged au slot setNom
-      connect(parcelNameLineEdit, &QLineEdit::textChanged, [this, parcelIndex](const QString& newName) {
-        this->_parcelles[parcelIndex].setNom(newName);
-      });
-      gridLayout->addWidget(parcelNameLineEdit, ligne, 16);  // Ajoute le QLineEdit à la 16e colonne
+      if(ligne >=5){
+        QLineEdit *parcelNameLineEdit = createLineEdit(info.nom, textColor, this, false);
+        // Connecte le signal textChanged au slot setNom
+        connect(parcelNameLineEdit, &QLineEdit::textChanged, [this, parcelIndex](const QString& newName) {
+          this->_parcelles[parcelIndex].setNom(newName);
+        });
+        gridLayout->addWidget(parcelNameLineEdit, ligne, 16);  // Ajoute le QLineEdit à la 16e colonne
 
-      // Crée un QLineEdit pour la longueur de la parcelle
-      QLineEdit *parcelLengthLineEdit = createLineEdit(QString::number(info.longueur, 'f', 2) + " m", textColor, this);
-      gridLayout->addWidget(parcelLengthLineEdit, ligne - 1, 16);  // Ajoute le QLineEdit à la 17e colonne
+        // Crée un QLineEdit pour la longueur de la parcelle
+        QLineEdit *parcelLengthLineEdit = createLineEdit(QString::number(info.longueur, 'f', 2) + " m", textColor, this);
+        gridLayout->addWidget(parcelLengthLineEdit, ligne - 1, 16);  // Ajoute le QLineEdit à la 17e colonne
 
-      // Crée un QLineEdit pour le debit de la parcelle
-      QString text;
-      if(info.debit > 1000) {
-        text = QString::number(info.debit / 1000, 'f', 2) + " m3/h";
-      } else {
-        text = QString::number(info.debit, 'f', 2) + " L/h";
+        // Crée un QLineEdit pour le debit de la parcelle
+        QString text;
+        if(info.debit > 1000) {
+          text = QString::number(info.debit / 1000, 'f', 2) + " m3/h";
+        } else {
+          text = QString::number(info.debit, 'f', 2) + " L/h";
+        }
+        QLineEdit *parcelDebitLineEdit = createLineEdit(text, textColor, this);
+        gridLayout->addWidget(parcelDebitLineEdit, ligne - 2, 16);  // Ajoute le QLineEdit à la 18e colonne
+
+
+        QComboBox *setamont = new QComboBox();
+        setamont->addItem("  Amont");
+        setamont->addItem("  Aval");
+        setamont->setStyleSheet("QComboBox { background-color: blue; color: white; }");
+
+        if(this->_parcelles[parcelIndex].isAmont()) {
+          setamont->setCurrentIndex(0);  // Index 0 corresponds à "Amont"
+        } else {
+          setamont->setCurrentIndex(1);  // Index 1 corresponds à "Aval"
+        }
+
+        connect(setamont, QOverload<int>::of(&QComboBox::currentIndexChanged), [this, parcelIndex](int index) {
+          bool isAmont = (index == 0);
+          this->_parcelles[parcelIndex].SetAmont(isAmont);
+        });
+
+        gridLayout->addWidget(setamont, ligne-3, 16);  // Ajoute le QLineEdit à la 16e colonne
+
+        QPushButton *inverse = new QPushButton("Inverser");
+        inverse->setStyleSheet("QPushButton { background-color: blue; color: white; }");
+        connect(inverse, &QPushButton::clicked, [this, parcelIndex]() {
+          this->_parcelles[parcelIndex].inverser();
+          rafraichirTableau();
+        });
+
+        gridLayout->addWidget(inverse, ligne-4, 16);  // Ajoute le QLineEdit à la 16e colonne
       }
-      QLineEdit *parcelDebitLineEdit = createLineEdit(text, textColor, this);
-      gridLayout->addWidget(parcelDebitLineEdit, ligne - 2, 16);  // Ajoute le QLineEdit à la 18e colonne
-
-
-      QComboBox *setamont = new QComboBox();
-      setamont->addItem("  Amont");
-      setamont->addItem("  Aval");
-      setamont->setStyleSheet("QComboBox { background-color: blue; color: white; }");
-
-      if(this->_parcelles[parcelIndex].isAmont()) {
-        setamont->setCurrentIndex(0);  // Index 0 corresponds à "Amont"
-      } else {
-        setamont->setCurrentIndex(1);  // Index 1 corresponds à "Aval"
-      }
-
-      connect(setamont, QOverload<int>::of(&QComboBox::currentIndexChanged), [this, parcelIndex](int index) {
-        bool isAmont = (index == 0);
-        this->_parcelles[parcelIndex].SetAmont(isAmont);
-      });
-
-      gridLayout->addWidget(setamont, ligne-3, 16);  // Ajoute le QLineEdit à la 16e colonne
-
-      QPushButton *inverse = new QPushButton("Inverser");
-      inverse->setStyleSheet("QPushButton { background-color: blue; color: white; }");
-      connect(inverse, &QPushButton::clicked, [this, parcelIndex]() {
-        this->_parcelles[parcelIndex].inverser();
-        rafraichirTableau();
-      });
-
-      gridLayout->addWidget(inverse, ligne-4, 16);  // Ajoute le QLineEdit à la 16e colonne
 
 
     }
@@ -640,7 +669,17 @@ void etude::calcul(){
   }
 }
 
+#include <QMessageBox>
+
 void etude::divideData() {
+
+  QMessageBox::StandardButton reply;
+  if(_parcelles.size()>1){
+    reply = QMessageBox::question(this, "Alert", "Êtes vous sûr de vouloir séparer les parcelles", QMessageBox::Yes|QMessageBox::No);
+    if (reply == QMessageBox::No)
+      return;
+  }
+
   if(!_parcelles.empty()){
     updateDonnees();
     _parcelles.clear();
@@ -658,6 +697,11 @@ void etude::divideData() {
         row[20] = 0.0;
         row[21] = 0.0;
         row[22] = 0.0;
+        row[23] = 0.0;
+        row[24] = 0.0;
+        row[25] = 0.0;
+        row[26] = 0.0;
+
       }
     }
     _Donnees.insert(_Donnees.end(), parcelData.begin(), parcelData.end());
@@ -738,7 +782,7 @@ void etude::divideData() {
           if((currentLength >= longueurcible && i != startIndex) || i == _Donnees.size() - 1){
             endIndex = i;
             QString nomParcelle = QString("parcelle %1").arg(_parcelles.size() + 1);
-            _parcelles.push_back(parcelle(_Donnees, startIndex, endIndex + 1,database, nomParcelle));
+            _parcelles.push_back(parcelle(_Donnees, startIndex, endIndex + 1,database, nomParcelle, _parcelles[0].isAmont()));
             startIndex = i + 1;
             currentLength = 0;
           }
@@ -768,7 +812,7 @@ void etude::divideData() {
   rafraichirTableau();
 }
 
-void etude::setTabOrderForLineEdits() {
+void etude::setTabOrderForLineEdits(){
   QLineEdit* previousLineEdit = nullptr;
   QLineEdit* firstLineEdit = qobject_cast<QLineEdit*> (gridLayout->itemAtPosition(0, 15)->widget());
 
@@ -819,8 +863,9 @@ void etude::chooseCommandPost() {
   // Créer un layout pour le QDialog
   QVBoxLayout dialogLayout(&dialog);
 
-  // Créer une QMap pour mapper le numéro de rang à l'index dans le vecteur de données
+  // Créer deux QMap pour mapper les QComboBox aux parcelles correspondantes
   QMap<QComboBox*, parcelle*> comboBoxToParcelMap;
+  QMap<QComboBox*, parcelle*> sideComboBoxToParcelMap;
 
   int globalIndex = 0;
 
@@ -828,6 +873,11 @@ void etude::chooseCommandPost() {
     const std::vector<std::vector<float>>& parcelData = parcel.getDonnees();
     if (!parcelData.empty() && !parcelData[0].empty()) {
       QComboBox* rangeIndexComboBox = new QComboBox(&dialog);
+      QComboBox* sideComboBox = new QComboBox(&dialog);
+
+      // Ajouter les options pour choisir le côté
+      sideComboBox->addItem("Au dessus");
+      sideComboBox->addItem("En dessous");
 
       int defaultIndex = -1;
       int commandPost = parcel.getPosteDeCommande() + parcel.getIndexdebut();
@@ -845,11 +895,15 @@ void etude::chooseCommandPost() {
         rangeIndexComboBox->setCurrentIndex(rangeIndexComboBox->findText(QString::number(defaultIndex)));
       }
 
-      // Ajouter la combobox au layout du QDialog
-      dialogLayout.addWidget(rangeIndexComboBox);
+      // Ajouter les comboboxes au layout du QDialog
+      QHBoxLayout* parcelLayout = new QHBoxLayout();
+      parcelLayout->addWidget(rangeIndexComboBox);
+      parcelLayout->addWidget(sideComboBox);
+      dialogLayout.addLayout(parcelLayout);
 
-      // Ajouter la combobox et la parcelle correspondante à la QMap
+      // Ajouter les comboboxes et la parcelle correspondante à la QMap
       comboBoxToParcelMap.insert(rangeIndexComboBox, &parcel);
+      sideComboBoxToParcelMap.insert(sideComboBox, &parcel);
     }
   }
 
@@ -868,6 +922,17 @@ void etude::chooseCommandPost() {
         selectedParcel->setPosteDeCommande(rangeIndex);
       }
     }
+
+    // Pour chaque combobox dans la QMap
+    for (auto comboBox : sideComboBoxToParcelMap.keys()) {
+      // Mettre à jour le côté avec la valeur sélectionnée dans la combobox
+      QString side = comboBox->currentText();
+      parcelle* selectedParcel = sideComboBoxToParcelMap.value(comboBox);
+      if (selectedParcel) {
+        selectedParcel->choisirCote(side == "Au dessus" ? 0 : 1);
+      }
+    }
+
 
     updateDonnees();
     rafraichirTableau();
@@ -923,10 +988,22 @@ void etude::updateDiameter(int row, const QString& newDiameter) {
   }
 }
 
+void etude::updateDebit(int row, const QString& newDiameter) {
+  float diameter = newDiameter.toFloat();
+  for (auto& parcel : _parcelles) {
+    if(row < parcel.getDonnees().size()) {
+      parcel.modifiedebit(row, diameter);
+      return;
+    }
+    row -= parcel.getDonnees().size();
+  }
+}
+
 void etude::updateinterval(int row, int ligne,const QString& newDiameter) {
   float diameter = newDiameter.toFloat();
   for (auto& parcel : _parcelles) {
     if(row < parcel.getDonnees().size()) {
+
       parcel.modifieinter(row,ligne,newDiameter.toFloat());
       return;
     }
@@ -952,6 +1029,11 @@ bool etude::eventFilter(QObject *obj, QEvent *event) {
     }
     if (keyEvent->key() == Qt::Key_S) {
       savePdf();
+      return true;
+    }
+    if (keyEvent->key() == Qt::Key_O) {
+      changerDebitDialog();
+      rafraichirTableau();
       return true;
     }
     /*// Handle KeyPress event as before
@@ -1014,6 +1096,29 @@ void etude::modifierdiametre(int debut, int fin, float dia){
   rafraichirTableau();
 }
 
+
+void etude::modifierdebit(int debut, int fin, float dia){
+  if(debut > fin){
+    std::swap(debut, fin);
+  }
+  int i = 0 ;
+  for(auto & parcelle : _parcelles){
+    auto & datas = parcelle.getDonnees();
+    for(int j = 0; j < datas.size();j++){
+      if(i>=debut && i<=fin){
+        parcelle.modifiedebit(j,dia);
+        datas[j][9] = dia;
+        //
+        //  PENSER A RECALCULER
+        //
+        //
+      }
+      i++;
+    }
+  }
+  rafraichirTableau();
+}
+
 #include <QDialog>
 #include <QLineEdit>
 #include <QPushButton>
@@ -1058,6 +1163,44 @@ void etude::changerDiametreDialog() {
 
   dialog.exec();
 }
+
+void etude::changerDebitDialog() {
+  QDialog dialog(nullptr);
+  dialog.setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
+
+  dialog.setWindowTitle("Changer debit");
+
+
+  // Create and setup the line edits
+  std::string d = std::to_string(_Donnees.size()) ;
+  QLineEdit indiceDebutLineEdit(QString::fromStdString("1"));
+  QLineEdit indiceFinLineEdit(QString::fromStdString(d));
+  QLineEdit diametreLineEdit;
+
+  QPushButton button("Appliquer");
+
+  QVBoxLayout layout;
+  layout.addWidget(new QLabel("Indice de début:"));
+  layout.addWidget(&indiceDebutLineEdit);
+  layout.addWidget(new QLabel("Indice de fin:"));
+  layout.addWidget(&indiceFinLineEdit);
+  layout.addWidget(new QLabel("Nouveau débit:"));
+  layout.addWidget(&diametreLineEdit);
+  layout.addWidget(&button);
+  dialog.setLayout(&layout);
+
+  // When the button is clicked, get the data and call modifierdiametre
+  QObject::connect(&button, &QPushButton::clicked, [&]() {
+    int debut = indiceDebutLineEdit.text().toInt()-1;
+    int fin = indiceFinLineEdit.text().toInt()-1;
+    float diametre = diametreLineEdit.text().toFloat();
+    modifierdebit(debut, fin, diametre);
+    dialog.close();
+  });
+
+  dialog.exec();
+}
+
 
 void etude::refresh(){
   clearchild();

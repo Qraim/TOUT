@@ -22,8 +22,8 @@
 #include "parcelle.h"
 
 const QString WHITE_TEXT = "QLineEdit { color: white; border: 1px solid gray; border-radius: 4px;padding: 2px 4px; }";
-const QString RED_TEXT = "QLineEdit { color: white; background-color : red;border: 1px solid gray; border-radius: 4px;padding: 2px 4px; }";
-const QString ORANGE_TEXT = "QLineEdit { color: white; background-color : orange; border: 1px solid gray; border-radius: 4px;padding: 2px 4px;}";
+const QString RED_TEXT = "QLineEdit { color: black; background-color : #e6ffff;border: 1px solid gray; border-radius: 4px;padding: 2px 4px; }";
+const QString ORANGE_TEXT = "QLineEdit { color: white; background-color : green; border: 1px solid gray; border-radius: 4px;padding: 2px 4px;}";
 const QString BLUE_TEXT = "QLineEdit { color: white; background-color : blue;border: 1px solid gray; border-radius: 4px;padding: 2px 4px; }";
 const QString PINK_TEXT = "QLineEdit { color: white; background-color : pink;border: 1px solid gray; border-radius: 4px;padding: 2px 4px; }";
 
@@ -161,6 +161,9 @@ private :
     void loadFromFile(const std::string& filename);
     void saveToFile(const std::string &filename) const;
 
+    void updateDebit(int row, const QString &newDiameter);
+    void modifierdebit(int debut, int fin, float dia);
+    void changerDebitDialog();
 };
 
 #endif // ETUDE_H

@@ -10,8 +10,8 @@
 #include <QSpinBox>
 #include <QDialog>
 #include <QRadioButton>
-
 #include "bdd.h"
+
 class parcelle {
 
 public:
@@ -182,6 +182,12 @@ public:
 
     void inverser();
 
+    void choisirCote(int a);
+
+    void calculdiametre(float a, float b, double k);
+
+    void modifiedebit(int index, float diameters);
+
   private:
 
     std::shared_ptr<bdd> database;
@@ -198,8 +204,18 @@ public:
     float _debit;
     bool _calcul;
     std::vector<std::vector<float>> _tableValues;
-
-    void calculdiametre(float a, float b, double k);
+    int _decalage;
+    void recalcul();
+    void updatediaasp(int ligne, int colonne, float val);
+    void calcul_gauche_aspersseurs(float a, float b, double k);
+    void calcul_gauche_aspersseurs(std::vector<int> &indices, float a, float b,
+                                   double k);
+    void calcul_droit_aspersseurs(std::vector<int> &indices, float a, float b,
+                                  double k);
+    void calculperteherseasp(std::vector<int> &indice, float a, float b,
+                             double k);
+    void calculperteherseasp(std::vector<int> &indice, float debit,
+                             float distasp, float a, float b, double k);
 };
 
 #endif // TOUT_PARCELLE_H
