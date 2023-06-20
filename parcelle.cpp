@@ -1085,10 +1085,14 @@ void parcelle::calculperteherseasp(std::vector<int> &indices, float debit, float
       std::cout << "j = " << a << ", diametre = " << diametre << ", debit converti = " << newDebitConverti << ", perte asperseur = " << perteAsperseur << std::endl;
     }
 
+    std::cout<<"TAILLE DE TA RACE LE NAIN : "<< _Donnees[index].size()<<std::endl;
+
     _Donnees[index][29] = pertes;
     _Donnees[index][30] = amont ? pertes + _Donnees[index][14] : pertes + _Donnees[index][13];
 
-    std::cout << "Cumul perte i = " << index << ": " << pertes << std::endl;
-    std::cout << "====================================" << std::endl;
+    std::cout<<pertes<<std::endl;
+
+
+
   }
 }

@@ -560,6 +560,26 @@ QLineEdit* etude::createLineEdit(const QString& text, const QString& style, QWid
 
 void etude::initCalcul() {
 
+  int column = 2;  // The column you want
+  std::vector<int> result;  // The vector to hold the column
+
+  for (int i = 0; i < _Donnees.size(); ++i) {
+    if(_Donnees[i].size() > column)  // Checking if the column index is within the range of inner vector
+      result.push_back(_Donnees[i][column]);
+  }
+
+  bool tout0 = std::all_of(result.begin(), result.end(), [](int i) { return i == 0; });
+
+  if(!tout0){
+    for(int i=0;i<_Donnees.size();i++){
+      _Donnees[i].resize(31);
+    }
+  } else {
+    for(int i=0;i<_Donnees.size();i++){
+      _Donnees[i].resize(27);
+    }
+  }
+
   // Crée un QDialog pour recueillir les valeurs.
   QDialog dialog(this);
   dialog.setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
