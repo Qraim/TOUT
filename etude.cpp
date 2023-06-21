@@ -67,7 +67,7 @@ void etude::showOptionsDialog() {
 
   QCheckBox *milieuHydroCheckBox = new QCheckBox("Milieu Hydro", this);
   milieuHydroCheckBox->setChecked(milieu);
-  milieuHydroCheckBox->setStyleSheet("QCheckBox { color: orange; }");
+  milieuHydroCheckBox->setStyleSheet("QCheckBox { color: green; }");
 
   QCheckBox *limitationParcelleCheckBox = new QCheckBox("Limitation parcelle", this);
   limitationParcelleCheckBox->setChecked(limitations);
@@ -75,7 +75,7 @@ void etude::showOptionsDialog() {
 
   QCheckBox *postecheckbox = new QCheckBox("Poste", this);
   postecheckbox->setChecked(poste);
-  postecheckbox->setStyleSheet("QCheckBox { color: red; }");
+  postecheckbox->setStyleSheet("QCheckBox { color:rgb(230, 255, 255) ; }");
 
   QCheckBox *premiere = new QCheckBox("Premier rang", this);
   premiere->setChecked(poste);
@@ -182,7 +182,7 @@ void etude::traitements(QString data){
 
     // Ignore lines that start with "Parcelle", "Intervalle", or "Nombre"
     if (lines[i].startsWith("Parcelle") || lines[i].startsWith("Intervalle") || lines[i].startsWith("Nombre")) {
-      std::cout<<lines[i].toStdString()<<std::endl;
+//      std::cout<<lines[i].toStdString()<<std::endl;
       continue;
     }
 
@@ -225,7 +225,6 @@ void etude::clearchild() {
 
 
 
-
 #include <QScrollBar>
 
 void etude::rafraichirTableau() {
@@ -264,9 +263,9 @@ void etude::rafraichirTableau() {
     headers << "Num" << "Long" << "NbAsp" << "Zamont" << "Zaval" << "InterD" << "InterF" << "DebitG" << "Espacement" << "Debit Ligne" << "Debit Cumul" << "PeigneZAm" << "PeigneZAv" << "DeltaLigneAm" << "DeltaLigneAv" << "Diametre" << "Nom" << "DenivelePeigne" << "Vitesse" << "Perte J" << "Piezo P" << "Cumul Perte" << "Cumul Piezo"<<"Ø16/14"<<"Piezo Ø16"<<"Ø20/17.6"<<"Piezo Ø20";
   } else {
     for(int i = 0; i <_Donnees.size();i++) {
-      _Donnees[i].resize(31);
+      _Donnees[i].resize(24);
     }
-    headers << "Num" << "Long" << "NbAsp" << "Zamont" << "Zaval" << "InterD" << "InterF" << "DebitG" << "Espacement" << "Debit Ligne" << "Debit Cumul" << "PeigneZAm" << "PeigneZAv" << "DeltaLigneAm" << "DeltaLigneAv" << "Diametre" << "Nom" << "DenivelePeigne" << "Vitesse" <<"Perte J" << "Piezo P" << "Cumul Perte" << "Cumul Piezo"<<"1er Inter"<<"Ø75"<<"Ø63"<<"Ø50"<<"Ø40"<<"Ø32"<<"Perte J"<< "Piezo P";
+    headers << "Num" << "Long" << "NbAsp" << "Zamont" << "Zaval" << "InterD" << "InterF" << "DebitG" << "Espacement" << "Debit Ligne" << "Debit Cumul" << "PeigneZAm" << "PeigneZAv" << "DeltaLigneAm" << "DeltaLigneAv" << "Diametre" << "Nom" << "DenivelePeigne" << "Vitesse" <<"Perte J" << "Piezo P" << "Cumul Perte" << "Cumul Piezo"<<"Afficher";
   }
 
 
@@ -335,7 +334,7 @@ void etude::rafraichirTableau() {
 
     for (int i = 0; i < donneesLigne.size(); ++i) {
 
-      if(i==2 && tout0){
+      if( i==2 && tout0){
         continue;
       }
 
@@ -377,12 +376,15 @@ void etude::rafraichirTableau() {
         gridLayout->setVerticalSpacing(0);
         gridLayout->addWidget(lineEdit, ligne, i);
         // Ajoute un signal pour la 16ème/5éme/6éme colonne
-        if ((i == 15 || i ==5 || i==6 || i ==9) || (i==24 || i==25 || i==26 || i ==27 || i==23 || i==28 && !tout0)) {
+        if ((i == 15 || i ==5 || i==6 || i ==9) || (i==23  && !tout0)) {
           lineEdit->installEventFilter(this);
           lineEdit->setStyleSheet("QLineEdit { color: yellow; }");
           lineEdit->setReadOnly(false);
           // Connecte textEdited signal comme avant
           if(i==15){
+            if(_Donnees[ligne-1][2] <=0 && !tout0){
+              lineEdit->setVisible(false);
+            }
             connect(lineEdit, &QLineEdit::textEdited, [this, ligne](const QString& newDiameter) {
               this->updateDiameter(ligne-1, newDiameter);
             });
@@ -390,11 +392,16 @@ void etude::rafraichirTableau() {
             connect(lineEdit, &QLineEdit::textEdited, [this, ligne, i](const QString& newDiameter) {
               this->updateDebit(ligne-1, newDiameter);
             });
-          } if(i==24 || i==25 || i==26 || i ==27 || i==23 || i==28 && !tout0){
+          } if((i==23) && !tout0){
             if(_Donnees[ligne-1][2]!=0){
-              connect(lineEdit, &QLineEdit::textEdited, [this, ligne, i](const QString& newDiameter) {
-                this->updateinterval(ligne-1,i, newDiameter);
+              int parcelIndex = std::distance(parcelInfos.begin(), parcelInfoIt);
+              QPushButton* afficher = new QPushButton("Afficher");
+              afficher->setStyleSheet("border: 1px solid white;");
+              gridLayout->addWidget(afficher,ligne,i);
+              connect(afficher, &QPushButton::clicked, [this, ligne, parcelIndex]() {
+                this->_parcelles[parcelIndex].herse(ligne-1);
               });
+
             } else {
               lineEdit->setStyleSheet(textColor);
               lineEdit->setReadOnly(true);
@@ -480,10 +487,14 @@ void etude::rafraichirTableau() {
           rafraichirTableau();
         });
 
+        if(ligne == info.commandPost && poste){
+          inverse->setStyleSheet("QPushButton { background-color: #e6ffff; color: black; }");
+          setamont->setStyleSheet("QComboBox { background-color: #e6ffff; color: black; }");
+
+        }
+
         gridLayout->addWidget(inverse, ligne-4, 16);  // Ajoute le QLineEdit à la 16e colonne
       }
-
-
     }
 
     // Incrémente le numéro de ligne.
@@ -522,8 +533,34 @@ void etude::rafraichirTableau() {
       }
     }
 
+  } else {
+    // Nous définissons un ensemble de colonnes que nous voulons cacher.
+    // Cela facilite l'ajout ou la suppression de colonnes à l'avenir.
+    std::set<int> colonnesACacher = {7, 8, 9, 10, 23};
+    // Nous parcourons chaque colonne, de 0 à 10 (inclus).
+    for(int i = 7; i < 24; i++) {
+      // Si notre colonne actuelle est dans l'ensemble des colonnes à cacher...
+      if (colonnesACacher.count(i) > 0) {
+        // Nous parcourons chaque ligne de la grille
+        for (int j = 0; j < gridLayout->rowCount(); ++j) {
+          // Nous vérifions que l'élément à cette position existe et est un widget
+          if (gridLayout->itemAtPosition(j, i) && gridLayout->itemAtPosition(j, i)->widget()) {
+            // Si la colonne est 23, nous vérifions que le widget est un QLineEdit
+            if (i == 23) {
+              QLineEdit *le = qobject_cast<QLineEdit*>(gridLayout->itemAtPosition(j, i)->widget());
+              // Si le widget est un QLineEdit, nous le rendons invisible
+              if (le) {
+                le->setVisible(false);
+              }
+            } else {
+              // Nous rendons le widget invisible
+              gridLayout->itemAtPosition(j, i)->widget()->setVisible(false);
+            }
+          }
+        }
+      }
+    }
   }
-
 
   // Calcule la hauteur du widget de défilement et ajuste sa hauteur minimum et
   // maximum en conséquence.
@@ -572,8 +609,9 @@ void etude::initCalcul() {
 
   if(!tout0){
     for(int i=0;i<_Donnees.size();i++){
-      _Donnees[i].resize(31);
+      _Donnees[i].resize(24);
     }
+    return;
   } else {
     for(int i=0;i<_Donnees.size();i++){
       _Donnees[i].resize(27);
@@ -706,6 +744,16 @@ void etude::divideData() {
   }
 
   for (auto& parcel : _parcelles) {
+
+    bool tout0 = true;
+    for(int i = 0; i <_Donnees.size(); i++) {
+      for(int j = 0; j < _Donnees[i].size(); j++) {
+        if(!_Donnees[i][j]!=0){
+          tout0 = false;
+        }
+      }
+    }
+
     std::vector<std::vector<float>> parcelData = parcel.getDonnees();
     for (auto& row : parcelData) {
       if (row.size() > 19) {
@@ -717,11 +765,10 @@ void etude::divideData() {
         row[20] = 0.0;
         row[21] = 0.0;
         row[22] = 0.0;
-        row[23] = 0.0;
-        row[24] = 0.0;
-        row[25] = 0.0;
-        row[26] = 0.0;
+        if(!tout0){
+          row[23] = 0.0;
 
+        }
       }
     }
     _Donnees.insert(_Donnees.end(), parcelData.begin(), parcelData.end());
@@ -887,7 +934,7 @@ void etude::chooseCommandPost() {
   QMap<QComboBox*, parcelle*> comboBoxToParcelMap;
   QMap<QComboBox*, parcelle*> sideComboBoxToParcelMap;
 
-  int globalIndex = 0;
+  int globalIndex = 1; // L'index commence à 1
 
   for (auto& parcel : _parcelles) {
     const std::vector<std::vector<float>>& parcelData = parcel.getDonnees();
@@ -902,7 +949,7 @@ void etude::chooseCommandPost() {
       int defaultIndex = -1;
       int commandPost = parcel.getPosteDeCommande() + parcel.getIndexdebut();
 
-      for (size_t i = 0; i < parcelData.size(); ++i) {
+      for (size_t i = 1; i < parcelData.size() + 1; ++i) { // On ajoute 1 à la taille de parcelData
         rangeIndexComboBox->addItem(QString::number(globalIndex));
         ++globalIndex;
       }
@@ -936,7 +983,7 @@ void etude::chooseCommandPost() {
     // Pour chaque combobox dans la QMap
     for (auto comboBox : comboBoxToParcelMap.keys()) {
       // Mettre à jour le poste de commande avec la valeur sélectionnée dans la combobox
-      int rangeIndex = comboBox->currentText().toInt();
+      int rangeIndex = comboBox->currentText().toInt(); // Soustraire 1 pour obtenir l'index d'origine
       parcelle* selectedParcel = comboBoxToParcelMap.value(comboBox);
       if (selectedParcel) {
         selectedParcel->setPosteDeCommande(rangeIndex);
@@ -953,7 +1000,6 @@ void etude::chooseCommandPost() {
       }
     }
 
-
     updateDonnees();
     rafraichirTableau();
     dialog.accept();
@@ -963,6 +1009,7 @@ void etude::chooseCommandPost() {
   dialog.setLayout(&dialogLayout);
   dialog.exec();
 }
+
 
 
 
@@ -1019,12 +1066,15 @@ void etude::updateDebit(int row, const QString& newDiameter) {
   }
 }
 
-void etude::updateinterval(int row, int ligne,const QString& newDiameter) {
-  float diameter = newDiameter.toFloat();
+void etude::updateinterval(int row, int ligne, const QString& newDiameter) {
+
+  QString temp = newDiameter;
+  float diameter = temp.replace(",",".").toFloat();
+
   for (auto& parcel : _parcelles) {
     if(row < parcel.getDonnees().size()) {
-
-      parcel.modifieinter(row,ligne,newDiameter.toFloat());
+      std::cout<<row<<" "<<ligne<<std::endl;
+      parcel.modifieinter(row,ligne,diameter);
       return;
     }
     row -= parcel.getDonnees().size();
@@ -1347,6 +1397,7 @@ void etude::savePdf() {
 }
 
 
+/*
 // Enregistrement des données de l'étude dans un fichier
 void etude::saveToFile(const std::string& filename) const {
   std::ofstream file(filename);
@@ -1468,6 +1519,7 @@ void etude::loadFromFile(const std::string& filename) {
   }
   file.close();
 }
+*/
 
 
 

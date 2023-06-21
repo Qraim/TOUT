@@ -22,7 +22,7 @@
 #include "parcelle.h"
 
 const QString WHITE_TEXT = "QLineEdit { color: white; border: 1px solid gray; border-radius: 4px;padding: 2px 4px; }";
-const QString RED_TEXT = "QLineEdit { color: black; background-color : #e6ffff;border: 1px solid gray; border-radius: 4px;padding: 2px 4px; }";
+const QString RED_TEXT = "QLineEdit { color: black; background-color : #e6ffff ;border: 1px solid gray; border-radius: 4px;padding: 2px 4px; }";
 const QString ORANGE_TEXT = "QLineEdit { color: white; background-color : green; border: 1px solid gray; border-radius: 4px;padding: 2px 4px;}";
 const QString BLUE_TEXT = "QLineEdit { color: white; background-color : blue;border: 1px solid gray; border-radius: 4px;padding: 2px 4px; }";
 const QString PINK_TEXT = "QLineEdit { color: white; background-color : pink;border: 1px solid gray; border-radius: 4px;padding: 2px 4px; }";

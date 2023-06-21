@@ -52,6 +52,10 @@ public:
         inputQ->setFocus();
 
     }
+
+    void importdonees(float debitLH, float diametre, float interval,
+                      std::vector<float> &data, float hauteurligne);
+
 private:
 
     std::shared_ptr<bdd> database;
@@ -180,6 +184,6 @@ protected :
 
     /// @brief Fonction enveloppe pour enregistrer les données.
     void saveDataWrapper();
-};
+   };
 
 #endif //PERTEDECHARGEHERSE_TABLEAU_H

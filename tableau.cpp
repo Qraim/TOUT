@@ -320,9 +320,27 @@ void pertechargeherse::AjoutDonne() {
   AjoutLigne();
 }
 
+void pertechargeherse::importdonees(float debitLH, float diametre,float interval, std::vector<float> &data, float hauteurligne){
+  unite->setCurrentIndex(2);
+  std::vector<float> temp(11, 0.0f); // variable temporaire
+
+  for(int i=0; i<data[2]; i++){
+    temp[0] = i+1;
+    temp[1] = debitLH;
+    temp[3] = diametre;
+    temp[4] = interval;
+    temp[5] = 0;
+    _Donnees.push_back(temp); // mise dans le set des données
+  }
+  calcul();
+  float piezo = sigmapertecase->text().toFloat() + hauteurligne;
+  sigmapiezocase->setText(QString::number(piezo));
+}
+
 bool pertechargeherse::focusNextPrevChild(bool next) {
   return false;
 }
+
 
 
 void pertechargeherse::AjoutLigne() {
