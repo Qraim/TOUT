@@ -611,6 +611,7 @@ void etude::initCalcul() {
     for(int i=0;i<_Donnees.size();i++){
       _Donnees[i].resize(24);
     }
+    milieu = false;
     return;
   } else {
     for(int i=0;i<_Donnees.size();i++){
@@ -738,8 +739,11 @@ void etude::divideData() {
       return;
   }
 
+  std::string matiere = "";
+
   if(!_parcelles.empty()){
     updateDonnees();
+    matiere = _parcelles[0].getMatiere();
     _parcelles.clear();
   }
 
@@ -849,7 +853,7 @@ void etude::divideData() {
           if((currentLength >= longueurcible && i != startIndex) || i == _Donnees.size() - 1){
             endIndex = i;
             QString nomParcelle = QString("parcelle %1").arg(_parcelles.size() + 1);
-            _parcelles.push_back(parcelle(_Donnees, startIndex, endIndex + 1,database, nomParcelle, _parcelles[0].isAmont()));
+            _parcelles.push_back(parcelle(_Donnees, startIndex, endIndex + 1,database, nomParcelle, _parcelles[0].isAmont(), matiere));
             startIndex = i + 1;
             currentLength = 0;
           }
@@ -1073,7 +1077,7 @@ void etude::updateinterval(int row, int ligne, const QString& newDiameter) {
 
   for (auto& parcel : _parcelles) {
     if(row < parcel.getDonnees().size()) {
-      std::cout<<row<<" "<<ligne<<std::endl;
+      //std::cout<<row<<" "<<ligne<<std::endl;
       parcel.modifieinter(row,ligne,diameter);
       return;
     }

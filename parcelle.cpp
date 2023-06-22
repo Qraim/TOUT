@@ -5,8 +5,8 @@
 #include "parcelle.h"
 
 
-parcelle::parcelle(std::vector<std::vector<float>> &data, int indexdebut, int indexfin, std::shared_ptr<bdd> db, QString nom, bool amont2)
-    : database(db), _nom(nom), amont(amont2), _indexdebut(indexdebut), _indexfin(indexfin), _calcul(false) {
+parcelle::parcelle(std::vector<std::vector<float>> &data, int indexdebut, int indexfin, std::shared_ptr<bdd> db, QString nom, bool amont2, std::string mat)
+    : database(db), _nom(nom), amont(amont2), _indexdebut(indexdebut), _indexfin(indexfin), _calcul(false), _matiere(mat) {
 
   int range_size = indexfin - indexdebut;
   aspdebit = 0;
@@ -648,7 +648,7 @@ std::vector<int> parcelle::trouveaspersseurs() {
 // Créez une fonction pour calculer la perte
 float calculPerte(float debit, float Dia, float intervale, float a, float b, float k) {
   float perte = k * std::pow((debit), a) * std::pow(Dia, b) * intervale;
-  std::cout<<perte<<std::endl;
+  //std::cout<<perte<<std::endl;
   return perte;
 }
 
@@ -751,13 +751,15 @@ void parcelle::calculaspersseurs(std::vector<int> &indices, float a, float b, do
     aspinter = distRangs;
     aspinterdebut = distAsperseurs;
 
-/*    for(auto it : indices){
+    for(auto it : indices){
       _debit += aspdebit * _Donnees[it][2];
     }
 
-    _debit = (_debit)*1000;*/
+    _debit = (_debit)*1000;
 
     float debitConverti = (debit * 1000) / 3600;
+
+    milieuhydro = trouvemilieuhydroasp();
 
     std::sort(indices.begin(), indices.end());
     std::ostringstream debugOutput;
@@ -862,6 +864,32 @@ void parcelle::recalcul(){
     _Donnees[i][14] = zaval - zamont;
 
   }
+}
+
+int parcelle::trouvemilieuhydroasp(){
+  // Vérifiez que _Donnees n'est pas vide
+  if (_Donnees.empty()) {
+    return 0;
+  }
+
+  // Diviser le débit total par deux en avance
+  float debitMoitie = _debit / 2;
+
+  // Chercher l'indice où le débit cumulé dépasse la moitié du débit cumulé total
+  float cumulatedDebit = 0;
+  for(int i = 0; i < _Donnees.size(); ++i){
+    const auto& donnee = _Donnees[i];
+    if (donnee.size() < 11) {
+      continue;
+    }
+    cumulatedDebit += donnee[2] * (aspdebit*1000);
+    if(cumulatedDebit >= debitMoitie){
+      return i;
+    }
+  }
+
+  return 0;
+
 }
 
 
@@ -975,9 +1003,19 @@ void parcelle::herse(int ligne){
     return;
   }
 
-  hersealim->importdonees(aspdebit, 55.4, aspinterdebut, _Donnees[index], _Donnees[index][4]-_Donnees[index][3]);
+  float denivele = 0;
+
+  if(amont){
+    denivele = _Donnees[index][4]-_Donnees[index][3];
+  } else {
+    denivele = _Donnees[index][3]-_Donnees[index][4];
+  }
+
+  hersealim->importdonees(aspdebit, 55.4, aspinterdebut, _Donnees[index], denivele);
   hersealim->show();
 }
+
+
 
 
 void parcelle::calcul_droit_aspersseurs(std::vector<int> &indices, float debit,float a, float b, double k) {
@@ -1018,14 +1056,6 @@ void parcelle::calcul_droit_aspersseurs(std::vector<int> &indices, float debit,f
       sigmadebit += _Donnees[i][2]*debit; // Débit en l/s
       float L = intervalles[compteur--]; // Longueur de la conduite en mètre
 
-/*      // Affichage des valeurs
-      std::cout << "Diamètre (mm) : " << Dia <<" ";
-      std::cout << "Sigma Débit (l/h) : " << sigmadebit << " ";
-      std::cout << "a "<<a <<"b "<<b <<"k "<< k << " ";
-      std::cout << "Longueur (m) : " << L << std::endl;
-      std::cout<<"-------------------------" << std::endl;*/
-
-
       // Calcul de la perte de charge
       float perte = k * std::pow(sigmadebit, a) * std::pow(Dia, b) * L;
 
@@ -1037,6 +1067,15 @@ void parcelle::calcul_droit_aspersseurs(std::vector<int> &indices, float debit,f
 
       float vitesse = debitM3S / aire;
 
+      // Affichage des valeurs
+      std::cout << "Diamètre (mm) : " << Dia <<" ";
+      std::cout << "Sigma Débit (l/h) : " << sigmadebit << " ";
+      std::cout << "a "<<a <<" b "<<b <<" k "<< k << " ";
+      std::cout << "Longueur (m) : " << L << " ";
+      std::cout << "perte (m) : " << perte << " ";
+      std::cout << "vitesse (m/s) : " << vitesse << std::endl;
+      std::cout<<"-------------------------" << std::endl;
+
       auto nextIndexIter = std::find_if(indices.rbegin(), indices.rend(), [&](int index) { return index < i; });
       int nextIndex = (nextIndexIter != indices.rend() && *nextIndexIter > debut) ? *nextIndexIter : debut;
 
@@ -1047,7 +1086,7 @@ void parcelle::calcul_droit_aspersseurs(std::vector<int> &indices, float debit,f
       cumulperte += perte; // Cumul de la perte de charge
       cumulpiezo += piezo;
 
-      _Donnees[i][17] = denivele;
+      _Donnees[i][17] = -denivele;
       _Donnees[i][18] = vitesse;
       _Donnees[i][19] = perte;
       _Donnees[i][20] = piezo;

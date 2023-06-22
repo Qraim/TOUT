@@ -19,7 +19,7 @@ public:
 
   parcelle()=default;
 
-  parcelle(std::vector<std::vector<float>> &data, int indexdebut, int indexfin, std::shared_ptr<bdd> db, QString nom, bool amont2 = true);
+  parcelle(std::vector<std::vector<float>> &data, int indexdebut, int indexfin, std::shared_ptr<bdd> db, QString nom, bool amont2 = true, std::string mat="PEHD");
 
   ///
   /// @brief Récupère le milieu hydrologique.
@@ -260,6 +260,7 @@ private:
   /// @param k coefficient K de la matiere
   void calculperteherseasp(std::vector<int> &indice, float debit,
                            float distasp, float a, float b, double k);
+  int trouvemilieuhydroasp();
 };
 
 #endif // TOUT_PARCELLE_H

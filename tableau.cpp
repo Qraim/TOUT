@@ -1613,10 +1613,10 @@ void pertechargeherse::importData() {
 
       QStringList cols = lines[i].split(QRegExp("\\s+"));
       if (cols.size() >= 11) {
-        for(int j=0;j<cols.size();j++){
+/*        for(int j=0;j<cols.size();j++){
             std::cout<<cols[j].toStdString()<<" ";
         }
-        std::cout<<" "<<std::endl;
+        std::cout<<" "<<std::endl;*/
 
         float col6 = cols[7].toFloat();
         float col11 = cols[11].toFloat();
