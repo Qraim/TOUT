@@ -201,9 +201,28 @@ public:
   void modifiedebit(int index, float diameters);
 
   void herse(int ligne);
-private:
+  void fromString(const std::string &s, std::shared_ptr<bdd> db);
+  std::string toString() const;
 
-  std::shared_ptr<bdd> database;
+public:
+    int getDecalage() const;
+
+    void setDecalage(int decalage);
+
+    float getAspdebit() const;
+
+    void setAspdebit(float aspdebit);
+
+    float getAspinter() const;
+
+    void setAspinter(float aspinter);
+
+    float getAspinterdebut() const;
+
+    void setAspinterdebut(float aspinterdebut);
+
+private:
+    std::shared_ptr<bdd> database;
   std::unique_ptr<pertechargeherse> hersealim;
   std::vector<std::vector<float>> _Donnees;
   std::vector<float> _diameters;
@@ -217,7 +236,6 @@ private:
   bool amont;
   float _debit;
   bool _calcul;
-  std::vector<std::vector<float>> _tableValues;
   int _decalage;
 
   float aspdebit;

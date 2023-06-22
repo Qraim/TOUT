@@ -129,7 +129,7 @@ private :
 
     QLineEdit* findNextDiameterLineEdit(int startRow);
 
-    bool eventFilter(QObject *obj, QEvent *event);
+    bool eventFilter(QObject *obj, QEvent *event) override;
 
     /// @brief permet de changer le diametre entre les indexes spécifié
     /// @param debut : index de debut
@@ -164,6 +164,14 @@ private :
     void updateDebit(int row, const QString &newDiameter);
     void modifierdebit(int debut, int fin, float dia);
     void changerDebitDialog();
+
+    void saveDataWrapper();
+
+    void loadDataWrapper();
+
+    void readFromFile(const std::string &filename);
+
+    void keyPressEvent(QKeyEvent *event) override;
 };
 
 #endif // ETUDE_H

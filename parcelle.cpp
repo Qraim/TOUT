@@ -164,11 +164,12 @@ void parcelle::setDiametreDialog(std::string matiere) {
 
   bool toutlestuyaux = true;
 
-  for(int i=0; i<_diameters.size(); i++) {
-    if(_diameters[i] == 0) {
-      toutlestuyaux = false;
-      break;
-    }
+
+  for(auto &i : _Donnees){
+      if(i[15]==0){
+          toutlestuyaux =false;
+          break;
+      }
   }
 
   std::vector<int> temp = trouveaspersseurs();
@@ -404,10 +405,13 @@ void parcelle::setPosteDeCommande(int posteDeCommande) {
     }
   }
 
-  if(posteDeCommande==_indexdebut)
-    poste_de_commande=milieuhydro+_indexdebut+1;
-  else
-    poste_de_commande=posteDeCommande-_indexdebut;
+  if(posteDeCommande==_indexdebut){
+      std::cout<<"Poste de"<<std::endl;
+      poste_de_commande=milieuhydro+_indexdebut+1;
+  } else if(posteDeCommande<_indexdebut){
+        poste_de_commande=posteDeCommande;
+  }else
+      poste_de_commande=posteDeCommande-_indexdebut;
 
   int debut = poste_de_commande;
   int fin_droit = _Donnees.size() - 1;
@@ -670,7 +674,7 @@ void parcelle::calculpeigne(float a, float b, double k, float debitasp){
     float debit = _Donnees[i][2] * debitasp;
 
     if(_Donnees[i][2] != 0){
-      float Dia = _diameters[i]; // Diamètre en mm
+      float Dia = _Donnees[i][15]; // Diamètre en mm
       sigmadebitg += debit; // Débit en M3/h
       float perte = k * std::pow(sigmadebitg * debit_scale, a) * std::pow(Dia, b) * interval;
       perteg += perte;
@@ -683,7 +687,7 @@ void parcelle::calculpeigne(float a, float b, double k, float debitasp){
     float debit = _Donnees[i][2] * debitasp;
 
     if(_Donnees[i][2] != 0){
-      float Dia = _diameters[i];    // Diamètre en mm
+      float Dia = _Donnees[i][15];    // Diamètre en mm
       sigmadebitd += debit; // Débit en l/h
 
       // Calcul de la perte de charge
@@ -782,18 +786,6 @@ void parcelle::calculaspersseurs(std::vector<int> &indices, float a, float b, do
 }
 
 
-
-void parcelle::onLineEditChanged(const QString &text, int row, int col) {
-  bool ok;
-  float value = text.toFloat(&ok);
-  if (ok) { // Si la conversion est accepté
-    _tableValues[row][col] = value;
-  }
-}
-
-std::vector<std::vector<float>> parcelle::getTableValues() {
-  return _tableValues;
-}
 
 void parcelle::SetAmont(bool tamont){
   amont = tamont;
@@ -944,7 +936,7 @@ void parcelle::calcul_gauche_aspersseurs(std::vector<int> &indices,float debit, 
   for (int i = 0; i < poste_de_commande - _decalage; ++i) {
     if (indicesSet.count(i)) {
 
-      float Dia = _diameters[i]; // Diamètre en mm
+      float Dia = _Donnees[i][15]; // Diamètre en mm
       sigmadebit += _Donnees[i][2]*debit; // Débit en l/s
       float L = intervalles[compteur--]; // Longueur de la conduite en mètre
       // Calcul de la perte de charge
@@ -1052,7 +1044,7 @@ void parcelle::calcul_droit_aspersseurs(std::vector<int> &indices, float debit,f
   // Calcul de la perte de charge, de la vitesse et du dénivelé du côté gauche du poste de commande
   for (int i = fin_droit; i >= debut; --i) {
     if (indicesSet.count(i)) {
-      float Dia = _diameters[i]; // Diamètre en mm
+      float Dia = _Donnees[i][15]; // Diamètre en mm
       sigmadebit += _Donnees[i][2]*debit; // Débit en l/s
       float L = intervalles[compteur--]; // Longueur de la conduite en mètre
 
@@ -1098,3 +1090,128 @@ void parcelle::calcul_droit_aspersseurs(std::vector<int> &indices, float debit,f
 
 
 
+std::string parcelle::toString() const {
+  std::string s;
+
+  // Save _Donnees to string
+  for (const auto &row : _Donnees) {
+    for (const auto &value : row) {
+      s += std::to_string(value) + ",";
+    }
+    s.back() = ';'; // replace last comma with semicolon to denote end of a row
+  }
+
+  // Save _diameters to string
+  for (const auto &value : _diameters) {
+    s += std::to_string(value) + ",";
+  }
+  s.back() = ';';
+
+  // Save other data to string
+  s += _nom.toStdString() + ";";
+  s += std::to_string(milieuhydro) + ";";
+  s += std::to_string(poste_de_commande) + ";";
+  s += std::to_string(_indexdebut) + ";";
+  s += std::to_string(_indexfin) + ";";
+  s += std::to_string(_longueur) + ";";
+  s += _matiere + ";";
+  s += std::to_string(amont) + ";";
+  s += std::to_string(_debit) + ";";
+  s += std::to_string(_calcul) + ";";
+  s += std::to_string(_decalage);
+
+  return s;
+}
+
+void parcelle::fromString(const std::string& s,std::shared_ptr<bdd> db) {
+  database = db;
+  std::istringstream ss(s);
+  std::string item;
+
+  // Load _Donnees from string
+  _Donnees.clear();
+  while (std::getline(ss, item, ';')) {
+    std::istringstream iss(item);
+    std::string value;
+    std::vector<float> row;
+    while (std::getline(iss, value, ',')) {
+      row.push_back(std::stof(value));
+    }
+    _Donnees.push_back(row);
+  }
+
+  // Load _diameters from string
+  _diameters.clear();
+  std::getline(ss, item, ';');
+  std::istringstream iss(item);
+  std::string value;
+  while (std::getline(iss, value, ',')) {
+    _diameters.push_back(std::stof(value));
+  }
+
+  // Load other data from string
+  std::getline(ss, item, ';');
+  _nom = QString::fromStdString(item);
+
+  std::getline(ss, item, ';');
+  milieuhydro = std::stoi(item);
+
+  std::getline(ss, item, ';');
+  poste_de_commande = std::stoi(item);
+
+  std::getline(ss, item, ';');
+  _indexdebut = std::stoi(item);
+
+  std::getline(ss, item, ';');
+  _indexfin = std::stoi(item);
+
+  std::getline(ss, item, ';');
+  _longueur = std::stof(item);
+
+  std::getline(ss, item, ';');
+  _matiere = item;
+
+  std::getline(ss, item, ';');
+  amont = std::stoi(item);
+
+  std::getline(ss, item, ';');
+  _debit = std::stof(item);
+
+  std::getline(ss, item, ';');
+  _calcul = std::stoi(item);
+
+  std::getline(ss, item);
+  _decalage = std::stoi(item);
+}
+
+int parcelle::getDecalage() const {
+    return _decalage;
+}
+
+void parcelle::setDecalage(int decalage) {
+    _decalage = decalage;
+}
+
+float parcelle::getAspdebit() const {
+    return aspdebit;
+}
+
+void parcelle::setAspdebit(float aspdebit) {
+    parcelle::aspdebit = aspdebit;
+}
+
+float parcelle::getAspinter() const {
+    return aspinter;
+}
+
+void parcelle::setAspinter(float aspinter) {
+    parcelle::aspinter = aspinter;
+}
+
+float parcelle::getAspinterdebut() const {
+    return aspinterdebut;
+}
+
+void parcelle::setAspinterdebut(float aspinterdebut) {
+    parcelle::aspinterdebut = aspinterdebut;
+}

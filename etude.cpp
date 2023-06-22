@@ -243,7 +243,9 @@ void etude::rafraichirTableau() {
   // Supprime toutes les cases du tableau.
   clearchild();
 
-  bool amont = _parcelles[0].isAmont();
+  bool amont = true;
+  if(_parcelles.size()>0)
+     amont = _parcelles[0].isAmont();
 
   int column = 2;  // The column you want
   std::vector<int> result;  // The vector to hold the column
@@ -752,7 +754,7 @@ void etude::divideData() {
     bool tout0 = true;
     for(int i = 0; i <_Donnees.size(); i++) {
       for(int j = 0; j < _Donnees[i].size(); j++) {
-        if(!_Donnees[i][j]!=0){
+        if(_Donnees[i][j]==0){
           tout0 = false;
         }
       }
@@ -1086,6 +1088,27 @@ void etude::updateinterval(int row, int ligne, const QString& newDiameter) {
 }
 
 #include <QTimer>
+#include <QFileDialog>
+#include <QDir>
+
+
+void etude::saveDataWrapper() {
+    QString fileName = QFileDialog::getSaveFileName(
+            this, "Save Data", QDir::homePath(), "Data Files (*.dat)");
+
+    if (!fileName.isEmpty()) {
+        saveToFile(fileName.toStdString());
+    }
+}
+
+void etude::loadDataWrapper() {
+    QString fileName = QFileDialog::getOpenFileName(
+            this, "Load Data", QDir::homePath(), "Data Files (*.dat)");
+
+    if (!fileName.isEmpty()) {
+        readFromFile(fileName.toStdString());
+    }
+}
 
 bool etude::eventFilter(QObject *obj, QEvent *event) {
   if (event->type() == QEvent::FocusIn) {
@@ -1102,7 +1125,7 @@ bool etude::eventFilter(QObject *obj, QEvent *event) {
       return true;
     }
     if (keyEvent->key() == Qt::Key_S) {
-      savePdf();
+      saveDataWrapper();
       return true;
     }
     if (keyEvent->key() == Qt::Key_O) {
@@ -1110,26 +1133,34 @@ bool etude::eventFilter(QObject *obj, QEvent *event) {
       rafraichirTableau();
       return true;
     }
-    /*// Handle KeyPress event as before
-    if (keyEvent->key() == Qt::Key_Tab) {
-      QLineEdit *lineEdit = qobject_cast<QLineEdit*>(obj);
-      if (lineEdit) {
-        int currentRow = gridLayout->indexOf(lineEdit) / gridLayout->columnCount();
-        QLineEdit* nextLineEdit = findNextDiameterLineEdit(currentRow + 1);
-        if (nextLineEdit) {
-          nextLineEdit->setFocus();
-          nextLineEdit->selectAll();
-          return true;  // Mark event as handled
-        } else {
-          return true; // Add condition for the last QLineEdit
-        }
-      }
-    }*/
+    if (keyEvent->key() == Qt::Key_L) {
+        loadDataWrapper();
+        return true;
+    }
   }
   // Standard event processing
   return QObject::eventFilter(obj, event);
 }
 
+void etude::keyPressEvent(QKeyEvent *event) {
+    switch (event->key()) {
+        case Qt::Key_D:
+            changerDiametreDialog();
+            break;
+        case Qt::Key_S:
+            saveDataWrapper();
+            break;
+        case Qt::Key_O:
+            changerDebitDialog();
+            rafraichirTableau();
+            break;
+        case Qt::Key_L:
+            loadDataWrapper();
+            break;
+        default:
+            QWidget::keyPressEvent(event);  // Pass on to the base class, in case it's a standard key
+    }
+}
 
 
 QLineEdit* etude::findNextDiameterLineEdit(int currentRow) {
@@ -1286,103 +1317,196 @@ void etude::refresh(){
 }
 
 
-#include <QPdfWriter>
 #include <QPainter>
-#include <QTextDocument>
-#include <QTextTable>
-#include <QTextCursor>
-
+#include <QPdfWriter>
+#include <QDateEdit>
+#include <QDialogButtonBox>
+#include <QFormLayout>
 
 
 void etude::exportPdf(const QString& fileName) {
-  QPdfWriter writer(fileName);
+    // Créez QDialog pour la saisie de l'utilisateur
+    QDialog inputDialog;
+    inputDialog.setWindowTitle("Entrez les informations");
 
-  // Configure the page layout to landscape
-  QPageLayout layout;
-  layout.setOrientation(QPageLayout::Landscape);
-  writer.setPageLayout(layout);
+    QLabel *nomLabel = new QLabel("Nom:");
+    QLabel *prenomLabel = new QLabel("Prénom:");
+    QLabel *referenceLabel = new QLabel("Référence:");
+    QLabel *dateLabel = new QLabel("Date:");
 
-  QPainter painter(&writer);
+    QLineEdit *nomLineEdit = new QLineEdit;
+    QLineEdit *prenomLineEdit = new QLineEdit;
+    QLineEdit *referenceLineEdit = new QLineEdit;
+    QDateEdit *dateEdit = new QDateEdit(QDate::currentDate());
 
+    QDialogButtonBox *buttonBox =
+            new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    connect(buttonBox, &QDialogButtonBox::accepted, &inputDialog,
+            &QDialog::accept);
+    connect(buttonBox, &QDialogButtonBox::rejected, &inputDialog,
+            &QDialog::reject);
 
-  QTextDocument doc;
-  QTextCursor cursor(&doc);
-  QTextTableFormat tableFormat;
+    QFormLayout *layout = new QFormLayout;
+    layout->addRow(nomLabel, nomLineEdit);
+    layout->addRow(prenomLabel, prenomLineEdit);
+    layout->addRow(referenceLabel, referenceLineEdit);
+    layout->addRow(dateLabel, dateEdit);
+    layout->addWidget(buttonBox);
 
-  tableFormat.setHeaderRowCount(1);
-  tableFormat.setAlignment(Qt::AlignCenter);
-  tableFormat.setCellPadding(10);
+    inputDialog.setLayout(layout);
 
-
-  int totalRows = 0;
-  std::vector<ParcelInfo> parcelInfos;
-  for (auto& parcel : _parcelles) {
-    ParcelInfo info;
-    totalRows += parcel.getDonnees().size();
-    const std::vector<std::vector<float>>& parcelData = parcel.getDonnees();
-    info.milieuHydro = parcel.getMilieuhydro()+parcel.getIndexdebut()+1;
-    info.limiteParcelle = totalRows;
-    info.commandPost = parcel.getPosteDeCommande();
-    info.nom = parcel.getNom();
-    info.longueur = parcel.getLongueur();
-    info.debit = parcel.getDebit();
-
-
-    parcelInfos.push_back(info);
-  }
-
-  // Initialize headers
-  QStringList headers = {"Num", "Long","NbAsp", "Zamont", "Zaval", "InterD", "InterF","DebitG","Esp","DebitC","DebitL","PeigneZAm","PeigneZAv","DRAm","DRAv","Diametre", "Nom", "Perte/Vitesse", "Denivele", "Piezo"};
-
-  QTextTable *table = cursor.insertTable(_Donnees.size() + 1, headers.size(), tableFormat);
-
-  // Set header
-  for (int i = 0; i < headers.size(); ++i) {
-    table->cellAt(0, i).firstCursorPosition().insertText(headers[i]);
-  }
-
-  // Set table data
-  for (int i = 0; i < _Donnees.size(); ++i) {
-    for (int j = 0; j < _Donnees[i].size(); ++j) {
-      QTextTableCell cell = table->cellAt(i + 1, j);
-
-      QTextCharFormat format = cell.format();
-
-      // Set cell background color based on data
-      QString textColor = "white";
-      int distanceToNearestCommandPost = std::numeric_limits<int>::max();
-
-      // Find which parcel this row belongs to
-      auto parcelInfoIt = std::find_if(parcelInfos.begin(), parcelInfos.end(),
-                                       [i](const ParcelInfo& info) { return i <= info.limiteParcelle; });
-
-      if (parcelInfoIt != parcelInfos.end()) {
-        const ParcelInfo& info = *parcelInfoIt;
-        if (i == info.commandPost && poste) {
-          textColor = "red"; // Command post
-        } else if (i == info.milieuHydro && milieu) {
-          textColor = "orange"; // Hydro milieux
-        } else if (i == info.limiteParcelle && limitations) {
-          textColor = "blue"; // Parcel limits
-        }
-      }
-
-      if (textColor == "red") {
-        format.setBackground(Qt::red);
-      } else if (textColor == "orange") {
-        format.setBackground(Qt::yellow);
-      } else if (textColor == "blue") {
-        format.setBackground(Qt::blue);
-      }
-
-      cell.setFormat(format);
-
-      cell.firstCursorPosition().insertText(QString::number(_Donnees[i][j]));
+    if (inputDialog.exec() == QDialog::Rejected) {
+        return;
     }
-  }
 
-  doc.drawContents(&painter);
+    QString nom = nomLineEdit->text();
+    QString prenom = prenomLineEdit->text();
+    QString reference = referenceLineEdit->text();
+    QString date = QLocale().toString(dateEdit->date(), QLocale::ShortFormat);
+
+    QPdfWriter pdfWriter(fileName);
+    pdfWriter.setPageMargins(QMarginsF(20, 20, 20, 20));
+
+    QPainter painter(&pdfWriter);
+    QFont font = painter.font();
+    font.setPointSize(10);
+    painter.setFont(font);
+
+    const int lineHeight = 300;
+
+    painter.drawText(0, lineHeight, QString("Nom: %1").arg(nom));
+    painter.drawText(0, lineHeight * 2, QString("Prénom: %1").arg(prenom));
+    painter.drawText(0, lineHeight * 3, QString("Référence: %1").arg(reference));
+    painter.drawText(pdfWriter.width() - 1000, lineHeight - 200,
+                     QString("Date: %1").arg(date));
+
+    int column = 2;  // The column you want
+    std::vector<int> result;  // The vector to hold the column
+
+    for (int i = 0; i < _Donnees.size(); ++i) {
+        if(_Donnees[i].size() > column)  // Checking if the column index is within the range of inner vector
+            result.push_back(_Donnees[i][column]);
+    }
+
+    bool tout0 = std::all_of(result.begin(), result.end(), [](int i) { return i == 0; });
+    QStringList headers;
+    if(tout0) {
+        headers << "Num" << "Long" << "NbAsp" << "Zamont" << "Zaval" << "InterD" << "InterF" << "DebitG" << "Espacement" << "Debit Ligne" << "Debit Cumul" << "PeigneZAm" << "PeigneZAv" << "DeltaLigneAm" << "DeltaLigneAv" << "Diametre" << "Nom" << "DenivelePeigne" << "Vitesse" << "Perte J" << "Piezo P" << "Cumul Perte" << "Cumul Piezo"<<"Ø16/14"<<"Piezo Ø16"<<"Ø20/17.6"<<"Piezo Ø20";
+    } else {
+        for(int i = 0; i <_Donnees.size();i++) {
+            _Donnees[i].resize(24);
+        }
+        headers << "Num" << "Long" << "NbAsp" << "Zamont" << "Zaval" << "InterD" << "InterF" << "DebitG" << "Espacement" << "Debit Ligne" << "Debit Cumul" << "PeigneZAm" << "PeigneZAv" << "DeltaLigneAm" << "DeltaLigneAv" << "Diametre" << "Nom" << "DenivelePeigne" << "Vitesse" <<"Perte J" << "Piezo P" << "Cumul Perte" << "Cumul Piezo"<<"Afficher";
+    }
+
+    QVector<int> columnWidths;
+    for (int i = 0; i < headers.size(); ++i) {
+        columnWidths.push_back(1000); // Arbitrairement défini comme 1000 pour l'instant
+    }
+    int tableWidth = 0;
+    for (int width : columnWidths) {
+        tableWidth += width;
+    }
+
+    // Définir la taille de police pour l'en-tête
+    QFont headerFont = painter.font();
+    headerFont.setPointSize(10);
+    painter.setFont(headerFont);
+
+    int yOffset = lineHeight * 5;
+    int currentPage = 1;
+
+    // Définir une fonction pour dessiner l'en-tête et les lignes.
+    auto drawHeaderAndLines = [&](int yOffset) {
+        int xPos = 0;
+        for (int i = 0; i < headers.size(); ++i) {
+            QRect headerRect(xPos, yOffset - lineHeight, columnWidths[i], lineHeight);
+            painter.drawText(headerRect, Qt::AlignCenter, headers[i]);
+            xPos += columnWidths[i];
+        }
+
+        yOffset += lineHeight;
+
+        // Dessiner une ligne horizontale pour séparer l'en-tête et les nombres
+        painter.setPen(QPen(Qt::black, 1));
+        painter.drawLine(0, yOffset - lineHeight, tableWidth, yOffset - lineHeight);
+
+        // Détermine le nombre de ligne par page
+        int maxRowsPerPage = (pdfWriter.height() - yOffset - 150) / lineHeight;
+
+        // Calculez le nombre de lignes restantes pour déterminer si vous êtes sur
+        // la dernière page
+        int remainingRows = _Donnees.size() - (currentPage - 1) * maxRowsPerPage;
+        bool isLastPage = (remainingRows <= maxRowsPerPage);
+
+        // Ajustez la hauteur des lignes verticales pour la dernière page en
+        // fonction du nombre de lignes restantes
+        int verticalLinesHeight = isLastPage ? (lineHeight * (remainingRows - 1))
+                                             : (lineHeight * (maxRowsPerPage - 1));
+
+        // Dessinez des lignes verticales pour séparer les colonnes
+        xPos = 0;
+        for (int i = 0; i < columnWidths.size(); ++i) {
+            painter.drawLine(xPos, yOffset - lineHeight, xPos,
+                             yOffset + verticalLinesHeight);
+            xPos += columnWidths[i];
+        }
+        painter.drawLine(xPos, yOffset - lineHeight, xPos,
+                         yOffset + verticalLinesHeight);
+
+        // Réinitialiser la taille de police pour le reste du contenu
+        painter.setFont(font);
+
+        return yOffset;
+    };
+
+    yOffset = drawHeaderAndLines(yOffset);
+
+    for (const std::vector<float>& donneesLigne : _Donnees) {
+        int xPos = 0;
+
+        for (int i = 0; i < donneesLigne.size(); ++i) {
+            QString cellText = QString::number(donneesLigne[i], 'f', 2);
+            QRect cellRect(xPos, yOffset - lineHeight, columnWidths[i], lineHeight);
+            painter.drawText(cellRect, Qt::AlignCenter, cellText);
+            xPos += columnWidths[i];
+        }
+
+        yOffset += lineHeight;
+
+        if (yOffset > pdfWriter.height() - 2 * lineHeight) {
+            // Dessinez le pied de page
+            QString footerText = QString("Page %1").arg(currentPage);
+            QRect footerRect(0, pdfWriter.height() - lineHeight, pdfWriter.width(),
+                             lineHeight);
+            painter.drawText(footerRect, Qt::AlignCenter, footerText);
+            QString referenceText = QString("Reference: %1").arg(reference);
+            QRect referenceRect(pdfWriter.width() - 1500,
+                                pdfWriter.height() - lineHeight, 1500, lineHeight);
+            painter.drawText(referenceRect, Qt::AlignCenter, referenceText);
+
+            // Créer une nouvelle page
+            pdfWriter.newPage();
+            yOffset = lineHeight * 2;
+            yOffset = drawHeaderAndLines(yOffset);
+            currentPage++;
+        }
+    }
+
+// Ajouter un pied de page sur la dernière page
+    QString footerText = QString("Page %1").arg(currentPage);
+    painter.drawText(
+            QRect(0, pdfWriter.height() - lineHeight, pdfWriter.width(), lineHeight),
+            Qt::AlignCenter, footerText);
+    painter.drawText(QRect(0, pdfWriter.height() - lineHeight,
+                           pdfWriter.width() - 20, lineHeight),
+                     Qt::AlignRight, QString("Référence: %1").arg(reference));
+
+
+    painter.end();
 }
+
+
 
 #include <QFileDialog>
 
@@ -1401,129 +1525,97 @@ void etude::savePdf() {
 }
 
 
-/*
-// Enregistrement des données de l'étude dans un fichier
+
 void etude::saveToFile(const std::string& filename) const {
-  std::ofstream file(filename);
-  if (!file.is_open()) {
-    std::cerr << "Erreur lors de l'ouverture du fichier." << std::endl;
-    return;
-  }
-
-  for (parcelle p : _parcelles) {
-    // Write the basic parcelle data
-    file << p.getNom().toStdString() << ',';
-    file << p.getMilieuhydro() << ',';
-    file << p.getPosteDeCommande() << ',';
-    file << p.getIndexdebut() << ',';
-    file << p.getIndexfin() << ',';
-    file << p.getLongueur() << ',';
-    file << p.getMatiere() << ',';
-    file << p.isAmont() << ',';
-    file << p.getDebit() << ',';
-    file << p.isCalcul() << ',';
-
-    // Write _Donnees
-    auto& donnees = p.getDonnees();
-    for (size_t i = 0; i < donnees.size(); ++i) {
-      for (auto& d : donnees[i]) {
-        file << d << ';';
-      }
-      if (i < donnees.size() - 1) {
-        file << ',';
-      }
+    std::ofstream outFile(filename);
+    if (!outFile) {
+        return;
     }
-    file << ',';
 
-    // Write _diameters
-    const auto& diameters = p.getDiameters();
-    for (size_t i = 0; i < diameters.size(); ++i) {
-      file << diameters[i];
-      if (i < diameters.size() - 1) {
-        file << ';';
-      }
+    // Write _Donnees to file
+    for (const auto& row : _Donnees) {
+        for (float value : row) {
+            outFile << value << " ";
+        }
+        outFile << "\n";
     }
-    file << '\n';
-  }
 
-  file.close();
+    // Write a delimiter
+    outFile << "---\n";
+
+    // Write certain attributes of _parcelles to file
+    for (const auto& p : _parcelles) {
+        outFile << p.getNom().toStdString() << " "
+                << p.getPosteDeCommande() << " "
+                << p.getIndexdebut() << " "
+                << p.getIndexfin() << " "
+                << p.getDecalage() << " "
+                << p.getAspdebit() << " "
+                << p.getAspinter() << " "
+                << p.isAmont() << " "
+                << p.getAspinterdebut()<< "\n";
+    }
+    outFile.close();
 }
 
 
-void etude::loadFromFile(const std::string& filename) {
-  std::ifstream file(filename);
-  if (!file.is_open()) {
-    std::cerr << "Erreur lors de l'ouverture du fichier." << std::endl;
-    return;
-  }
+void etude::readFromFile(const std::string& filename) {
 
-  std::string line;
-  while (std::getline(file, line)) {
-    std::istringstream iss(line);
+    refresh();
 
-    parcelle p;
-
-    // Read the basic parcelle data
-    std::string item;
-    std::getline(iss, item, ',');
-    p.setNom(QString::fromStdString(item));
-
-    std::getline(iss, item, ',');
-    p.setMilieuhydro(std::stoi(item));
-
-    std::getline(iss, item, ',');
-    p.setPosteDeCommande(std::stoi(item));
-
-    std::getline(iss, item, ',');
-    p.setIndexdebut(std::stoi(item));
-
-    std::getline(iss, item, ',');
-    p.setIndexfin(std::stoi(item));
-
-    std::getline(iss, item, ',');
-    p.setLongueur(std::stof(item));
-
-    std::getline(iss, item, ',');
-    p.setMatiere(item);
-
-    std::getline(iss, item, ',');
-    p.setAmont(std::stoi(item));
-
-    std::getline(iss, item, ',');
-    p.setDebit(std::stof(item));
-
-    std::getline(iss, item, ',');
-    p.setCalcul(std::stoi(item));
-
-    // Read _Donnees
-    std::getline(iss, item, ',');
-    std::istringstream issDonnees(item);
-    std::vector<std::vector<float>> donnees; // Vector of vectors to hold the read data
-    std::string donneeRow;
-    while (std::getline(issDonnees, donneeRow, ';')) {
-      std::vector<float> donneesCol; // Vector to hold each row of data
-      std::istringstream issDonneesRow(donneeRow);
-      std::string donnee;
-      while (std::getline(issDonneesRow, donnee, ',')) {
-        donneesCol.push_back(std::stof(donnee));
-      }
-      donnees.push_back(donneesCol);
+    std::ifstream inFile(filename);
+    if (!inFile) {
+        return;
     }
-    p.setDonnees(donnees);
-    // Read _diameters
-    // This part remains same as previous response
-    std::getline(iss, item, ',');
-    std::istringstream issDiameters(item);
-    std::string dia;
-    while (std::getline(issDiameters, dia, ';')) {
-      p.addDiameter(std::stof(dia));
+
+    // Read _Donnees from file
+    std::vector<std::vector<float>> data;
+    std::string line;
+    while (std::getline(inFile, line) && line != "---") {
+        std::istringstream iss(line);
+        std::vector<float> row;
+        float value;
+        while (iss >> value) {
+            row.push_back(value);
+        }
+        data.push_back(row);
     }
-    // Add the constructed parcelle to the list
-    _parcelles.push_back(p);
-  }
-  file.close();
+
+    _Donnees = data;
+
+    // Read parcelle data from file
+    std::getline(inFile, line);
+    while(!line.empty()) {
+
+        // replace space with underscore for the parcelle name
+        std::replace(line.begin(), line.begin()+10, ' ', '_');
+
+        std::istringstream iss(line);
+        std::string nom;
+        int poste_de_commande, indexdebut, indexfin, decalage;
+        bool amont;
+        float aspdebit, aspinter, aspinterdebut;
+
+        if (!(iss >> nom >> poste_de_commande >> indexdebut >> indexfin >> decalage >> aspdebit >> aspinter >>amont >>aspinterdebut)) {
+            std::cout<<"break"<<std::endl;
+            break; // Error in parsing
+        }
+        parcelle p = parcelle(_Donnees, indexdebut, indexfin, database,QString::fromStdString(nom), amont);
+
+        p.setPosteDeCommande(poste_de_commande);
+        p.setAspdebit(aspdebit);
+        p.setAspinter(aspinter);
+        p.setAspinterdebut(aspinterdebut);
+
+        p.calcul();
+
+        _parcelles.push_back(std::move(p));
+        std::getline(inFile, line);
+    }
+
+    inFile.close();
+
+    rafraichirTableau();
 }
-*/
-
 
 
