@@ -1,0 +1,7 @@
+./cmake-build-debug-docker
+./cmake-build-debug
+./cmake-build-default
+build
+.vscode
+.idea
+cmake*

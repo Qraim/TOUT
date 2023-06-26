@@ -63,6 +63,7 @@ private :
     QWidget *scrollAreaWidgetContents;
     QGridLayout *gridLayout;
     QVBoxLayout *mainLayout;
+    QGridLayout *bottomlayout;
 
     ///
     /// @brief Initialise les données ou les paramètres nécessaires.

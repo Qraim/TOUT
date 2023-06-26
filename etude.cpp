@@ -55,6 +55,18 @@ etude::etude(std::shared_ptr<bdd> db,QWidget *parent)
     gridLayout->setColumnStretch(i, 1);
   }
 
+  bottomlayout = new QGridLayout();
+
+  QPushButton *save = new QPushButton("Sauvegarder", this);
+  QPushButton *pdfbutton = new QPushButton("Export PDF", this);
+  save->setFixedSize(140,40);
+  pdfbutton->setFixedSize(140,40);
+  bottomlayout->addWidget(save,0,1);
+  bottomlayout->addWidget(pdfbutton,0,2);
+
+  mainLayout->addLayout(bottomlayout);
+
+
   setLayout(mainLayout);
 }
 
