@@ -136,21 +136,18 @@ bdd::bdd(QWidget *parent)
     this->setMaximumSize(QSize(width, height));
     setWindowTitle(QString::fromStdString("Base de données"));
 
-
     materials = read_materials_from_csv("./BDD.csv");
 
     // Création des boutons
     QPushButton *button1 = new QPushButton("Afficher", this);
     QPushButton *button2 = new QPushButton("Modifier", this);
     QPushButton *button3 = new QPushButton("Ajouter", this);
-    QPushButton *button4 = new QPushButton("Supprimmr", this);
+    QPushButton *button4 = new QPushButton("Supprimer", this);
     QPushButton *button5 = new QPushButton("Liste tuyaux", this);
     QPushButton *button6 = new QPushButton("Coefficient", this);
     QPushButton *button7 = new QPushButton("Trouver", this);
     QPushButton *button8 = new QPushButton("Formule", this);
     QPushButton *button9 = new QPushButton("Actualiser", this);
-
-
 
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
 
@@ -163,7 +160,6 @@ bdd::bdd(QWidget *parent)
     connect(button7, &QPushButton::clicked, this, &::bdd::trouver_tuyau);
     connect(button8, &QPushButton::clicked, this, &::bdd::on_show_formula_button_clicked);
     connect(button9, &QPushButton::clicked, this, &::bdd::rafraichir);
-
 
     mainLayout->addWidget(button1);
     mainLayout->addWidget(button2);

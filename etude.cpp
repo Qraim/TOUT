@@ -123,44 +123,70 @@ void etude::init()
   _Donnees.clear();
   _parcelles.clear();
 
+  QDialog choiceDialog(this);
+  choiceDialog.setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
+  choiceDialog.setWindowTitle("Choisir la méthode d'importation");
 
-  QDialog dialog(this);
-  dialog.setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
+  QVBoxLayout *choiceLayout = new QVBoxLayout(&choiceDialog);
 
-  dialog.setWindowTitle("Importer les données");
+  QRadioButton *pasteDataButton = new QRadioButton("Coller les données", &choiceDialog);
+  QRadioButton *importFromFileButton = new QRadioButton("Importer depuis un fichier", &choiceDialog);
 
-  QVBoxLayout *mainLayout = new QVBoxLayout(&dialog);
+  choiceLayout->addWidget(pasteDataButton);
+  choiceLayout->addWidget(importFromFileButton);
 
-  QLabel *dataLabel = new QLabel("Collez vos données:");
-  mainLayout->addWidget(dataLabel);
+  QHBoxLayout *choiceButtonLayout = new QHBoxLayout();
+  QPushButton *choiceOkButton = new QPushButton("OK");
+  QPushButton *choiceCancelButton = new QPushButton("Annuler");
+  choiceButtonLayout->addWidget(choiceOkButton);
+  choiceButtonLayout->addWidget(choiceCancelButton);
+  choiceLayout->addLayout(choiceButtonLayout);
 
-  QPlainTextEdit *dataEdit = new QPlainTextEdit();
-  mainLayout->addWidget(dataEdit);
+  connect(choiceOkButton, &QPushButton::clicked, &choiceDialog, &QDialog::accept);
+  connect(choiceCancelButton, &QPushButton::clicked, &choiceDialog, &QDialog::reject);
 
-  QRadioButton *amontButton = new QRadioButton("Amont", &dialog);
-  amontButton->setChecked(true);
-  QRadioButton *avalButton = new QRadioButton("Aval", &dialog);
+  if (choiceDialog.exec() == QDialog::Accepted) {
+    if(importFromFileButton->isChecked()) {
+      loadDataWrapper();
+      return;
+    } else if (pasteDataButton->isChecked()) {
+      QDialog dialog(this);
+      dialog.setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
+      dialog.setWindowTitle("Importer les données");
 
-  mainLayout->addWidget(amontButton);
-  mainLayout->addWidget(avalButton);
+      QVBoxLayout *mainLayout = new QVBoxLayout(&dialog);
+
+      QLabel *dataLabel = new QLabel("Collez vos données:");
+      mainLayout->addWidget(dataLabel);
+
+      QPlainTextEdit *dataEdit = new QPlainTextEdit();
+      mainLayout->addWidget(dataEdit);
+
+      QRadioButton *amontButton = new QRadioButton("Amont", &dialog);
+      amontButton->setChecked(true);
+      QRadioButton *avalButton = new QRadioButton("Aval", &dialog);
+
+      mainLayout->addWidget(amontButton);
+      mainLayout->addWidget(avalButton);
 
 
-  QHBoxLayout *buttonLayout = new QHBoxLayout();
-  QPushButton *okButton = new QPushButton("OK");
-  QPushButton *cancelButton = new QPushButton("Annuler");
-  buttonLayout->addWidget(okButton);
-  buttonLayout->addWidget(cancelButton);
-  mainLayout->addLayout(buttonLayout);
+      QHBoxLayout *buttonLayout = new QHBoxLayout();
+      QPushButton *okButton = new QPushButton("OK");
+      QPushButton *cancelButton = new QPushButton("Annuler");
+      buttonLayout->addWidget(okButton);
+      buttonLayout->addWidget(cancelButton);
+      mainLayout->addLayout(buttonLayout);
 
-  connect(okButton, &QPushButton::clicked, &dialog, &QDialog::accept);
-  connect(cancelButton, &QPushButton::clicked, &dialog, &QDialog::reject);
+      connect(okButton, &QPushButton::clicked, &dialog, &QDialog::accept);
+      connect(cancelButton, &QPushButton::clicked, &dialog, &QDialog::reject);
 
-  if (dialog.exec() == QDialog::Accepted) {
-    QString data = dataEdit->toPlainText();
-    traitements(data);
-    amont = amontButton->isChecked();
+      if (dialog.exec() == QDialog::Accepted) {
+        QString data = dataEdit->toPlainText();
+        traitements(data);
+        amont = amontButton->isChecked();
+      }
+    }
   }
-
 
   // Ajouter une parcelle avec toutes les données
   if (!_Donnees.empty()) {
@@ -170,6 +196,7 @@ void etude::init()
     rafraichirTableau();
   }
 }
+
 
 
 
@@ -216,8 +243,8 @@ void etude::clearchild() {
   QLayoutItem *item;
   while ((item = gridLayout->takeAt(0)) != nullptr) {
     if (QWidget *widget = item->widget()) {
-      widget->setParent(nullptr); // Disown the widget
-      delete widget;  // Now it's safe to delete it
+      widget->setParent(nullptr);
+      delete widget;
     }
     delete item;
   }
@@ -225,7 +252,6 @@ void etude::clearchild() {
 
 
 
-#include <QScrollBar>
 
 void etude::rafraichirTableau() {
 
@@ -247,29 +273,27 @@ void etude::rafraichirTableau() {
   if(_parcelles.size()>0)
      amont = _parcelles[0].isAmont();
 
-  int column = 2;  // The column you want
-  std::vector<int> result;  // The vector to hold the column
+  int column = 2;
+  std::vector<int> result;
 
   for (int i = 0; i < _Donnees.size(); ++i) {
-    if(_Donnees[i].size() > column)  // Checking if the column index is within the range of inner vector
+    if(_Donnees[i].size() > column)
       result.push_back(_Donnees[i][column]);
   }
 
   bool tout0 = std::all_of(result.begin(), result.end(), [](int i) { return i == 0; });
 
-
   // Initialize headers
   QStringList headers;
   // Initialize headers
   if(tout0) {
-    headers << "Num" << "Long" << "NbAsp" << "Zamont" << "Zaval" << "InterD" << "InterF" << "DebitG" << "Espacement" << "Debit Ligne" << "Debit Cumul" << "PeigneZAm" << "PeigneZAv" << "DeltaLigneAm" << "DeltaLigneAv" << "Diametre" << "Nom" << "DenivelePeigne" << "Vitesse" << "Perte J" << "Piezo P" << "Cumul Perte" << "Cumul Piezo"<<"Ø16/14"<<"Piezo Ø16"<<"Ø20/17.6"<<"Piezo Ø20";
+    headers << "No rang" << "Long" << "NbAsp" << "Zamont" << "Zaval" << "InterRangD" << "InterRangF" << "DebitG" << "Espacement" << "Q Ligne" << "Σ Q Ligne" << "PeigneZAm" << "PeigneZAv" << "DeltaLigneAm" << "DeltaLigneAv" << "Diametre" << "Nom" << "DenivelePeigne" << "Vitesse" << "Perte J" << "Piezo P" << "Σ Perte J" << "Σ Piezo P"<<"J Ø16/14"<<"Piezo Ø16"<<"J Ø20/17.6"<<"Piezo Ø20";
   } else {
     for(int i = 0; i <_Donnees.size();i++) {
       _Donnees[i].resize(24);
     }
-    headers << "Num" << "Long" << "NbAsp" << "Zamont" << "Zaval" << "InterD" << "InterF" << "DebitG" << "Espacement" << "Debit Ligne" << "Debit Cumul" << "PeigneZAm" << "PeigneZAv" << "DeltaLigneAm" << "DeltaLigneAv" << "Diametre" << "Nom" << "DenivelePeigne" << "Vitesse" <<"Perte J" << "Piezo P" << "Cumul Perte" << "Cumul Piezo"<<"Afficher";
+    headers << "No rang" << "Long" << "NbAsp" << "Zamont" << "Zaval" << "InterRangD" << "InterRangF" << "DebitG" << "Espacement" << "Q Ligne" << "Σ Q Ligne" << "PeigneZAm" << "PeigneZAv" << "DeltaLigneAm" << "DeltaLigneAv" << "Diametre" << "Nom" << "DenivelePeigne" << "Vitesse" <<"Perte J" << "Piezo P" << "Σ Perte J" << "Σ Piezo P"<<"Afficher";
   }
-
 
   for (int i = 0; i < headers.size(); ++i) {
     QLabel *headerLabel = new QLabel(headers[i], this);
@@ -599,11 +623,11 @@ QLineEdit* etude::createLineEdit(const QString& text, const QString& style, QWid
 
 void etude::initCalcul() {
 
-  int column = 2;  // The column you want
-  std::vector<int> result;  // The vector to hold the column
+  int column = 2;  // colonnes des aspersseurs
+  std::vector<int> result;  // vecteur des résultats
 
   for (int i = 0; i < _Donnees.size(); ++i) {
-    if(_Donnees[i].size() > column)  // Checking if the column index is within the range of inner vector
+    if(_Donnees[i].size() > column)
       result.push_back(_Donnees[i][column]);
   }
 
@@ -771,9 +795,11 @@ void etude::divideData() {
         row[20] = 0.0;
         row[21] = 0.0;
         row[22] = 0.0;
-        if(!tout0){
-          row[23] = 0.0;
-
+        row[23] = 0.0;
+        if(tout0){
+          row[24] = 0.0;
+          row[25] = 0.0;
+          row[26] = 0.0;
         }
       }
     }
@@ -889,14 +915,14 @@ void etude::setTabOrderForLineEdits(){
   QLineEdit* previousLineEdit = nullptr;
   QLineEdit* firstLineEdit = qobject_cast<QLineEdit*> (gridLayout->itemAtPosition(0, 15)->widget());
 
-  // Iterate only through the 16th column
+
   for (int i = 0; i < gridLayout->rowCount(); ++i) {
-    QLayoutItem* item = gridLayout->itemAtPosition(i, 15); // 16 is the column index
+    QLayoutItem* item = gridLayout->itemAtPosition(i, 15);
     if (item) {
       QLineEdit* lineEdit = qobject_cast<QLineEdit*>(item->widget());
-      // Check if the item is a QLineEdit and is editable
+      // regarde si il est éditable
       if (lineEdit && !lineEdit->isReadOnly()) {
-        // If this is not the first QLineEdit found
+        // Si ce n'est pas le premier trouvé
         if (previousLineEdit) {
           QWidget::setTabOrder(previousLineEdit, lineEdit);
         }
@@ -1037,7 +1063,6 @@ void etude::appelSetDiametreDialog() {
   layout.addWidget(&launchButton);
   dialog.setLayout(&layout);
 
-  // Connect the launchButton signal to the setDiametreDialog function of the selected Parcelle
   QObject::connect(&launchButton, &QPushButton::clicked,
                    [this, &comboBox]() {
                      int index = comboBox.currentIndex();
@@ -1114,7 +1139,6 @@ bool etude::eventFilter(QObject *obj, QEvent *event) {
   if (event->type() == QEvent::FocusIn) {
     QLineEdit *lineEdit = qobject_cast<QLineEdit*>(obj);
     if (lineEdit) {
-      // Use a singleShot QTimer to delay the selectAll() call
       QTimer::singleShot(0, lineEdit, SLOT(selectAll()));
     }
   } else if (event->type() == QEvent::KeyPress) {
@@ -1137,8 +1161,8 @@ bool etude::eventFilter(QObject *obj, QEvent *event) {
         loadDataWrapper();
         return true;
     }
+
   }
-  // Standard event processing
   return QObject::eventFilter(obj, event);
 }
 
@@ -1157,29 +1181,16 @@ void etude::keyPressEvent(QKeyEvent *event) {
         case Qt::Key_L:
             loadDataWrapper();
             break;
+        case Qt::Key_P:
+            savePdf();
+            break;
         default:
-            QWidget::keyPressEvent(event);  // Pass on to the base class, in case it's a standard key
+            QWidget::keyPressEvent(event);
     }
 }
 
 
-QLineEdit* etude::findNextDiameterLineEdit(int currentRow) {
-  int nextRow = currentRow ;
 
-  if (nextRow >= gridLayout->rowCount()) {
-    return nullptr;  // If there is no next row
-  }
-
-  QLayoutItem* item = gridLayout->itemAtPosition(nextRow, 15);  // 15 is the column index
-  if (item) {
-    QLineEdit* lineEdit = qobject_cast<QLineEdit*>(item->widget());
-    if (lineEdit && !lineEdit->isReadOnly()) {  // Make sure it's an editable QLineEdit
-      return lineEdit;
-    }
-  }
-
-  return nullptr;  // If no next editable QLineEdit is found
-}
 
 
 
@@ -1213,10 +1224,7 @@ void etude::modifierdebit(int debut, int fin, float dia){
       if(i>=debut && i<=fin){
         parcelle.modifiedebit(j,dia);
         datas[j][9] = dia;
-        //
-        //  PENSER A RECALCULER
-        //
-        //
+
       }
       i++;
     }
@@ -1238,8 +1246,6 @@ void etude::changerDiametreDialog() {
 
   dialog.setWindowTitle("Changer diametre");
 
-
-  // Create and setup the line edits
   std::string d = std::to_string(_Donnees.size()) ;
   QLineEdit indiceDebutLineEdit(QString::fromStdString("1"));
   QLineEdit indiceFinLineEdit(QString::fromStdString(d));
@@ -1257,7 +1263,6 @@ void etude::changerDiametreDialog() {
   layout.addWidget(&button);
   dialog.setLayout(&layout);
 
-  // When the button is clicked, get the data and call modifierdiametre
   QObject::connect(&button, &QPushButton::clicked, [&]() {
     int debut = indiceDebutLineEdit.text().toInt()-1;
     int fin = indiceFinLineEdit.text().toInt()-1;
@@ -1276,7 +1281,7 @@ void etude::changerDebitDialog() {
   dialog.setWindowTitle("Changer debit");
 
 
-  // Create and setup the line edits
+  // Créer les QLineEdit
   std::string d = std::to_string(_Donnees.size()) ;
   QLineEdit indiceDebutLineEdit(QString::fromStdString("1"));
   QLineEdit indiceFinLineEdit(QString::fromStdString(d));
@@ -1294,7 +1299,7 @@ void etude::changerDebitDialog() {
   layout.addWidget(&button);
   dialog.setLayout(&layout);
 
-  // When the button is clicked, get the data and call modifierdiametre
+  // Quand le boutton est clické appelle la fonction avec les parametres
   QObject::connect(&button, &QPushButton::clicked, [&]() {
     int debut = indiceDebutLineEdit.text().toInt()-1;
     int fin = indiceFinLineEdit.text().toInt()-1;
@@ -1325,190 +1330,220 @@ void etude::refresh(){
 
 
 void etude::exportPdf(const QString& fileName) {
-    // Créez QDialog pour la saisie de l'utilisateur
-    QDialog inputDialog;
-    inputDialog.setWindowTitle("Entrez les informations");
 
-    QLabel *nomLabel = new QLabel("Nom:");
-    QLabel *prenomLabel = new QLabel("Prénom:");
-    QLabel *referenceLabel = new QLabel("Référence:");
-    QLabel *dateLabel = new QLabel("Date:");
 
-    QLineEdit *nomLineEdit = new QLineEdit;
-    QLineEdit *prenomLineEdit = new QLineEdit;
-    QLineEdit *referenceLineEdit = new QLineEdit;
-    QDateEdit *dateEdit = new QDateEdit(QDate::currentDate());
+  std::vector<int> postes;
 
-    QDialogButtonBox *buttonBox =
-            new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-    connect(buttonBox, &QDialogButtonBox::accepted, &inputDialog,
-            &QDialog::accept);
-    connect(buttonBox, &QDialogButtonBox::rejected, &inputDialog,
-            &QDialog::reject);
+  for(auto &i : _parcelles){
+    postes.push_back(i.getvraiindiceposte());
+  }
 
-    QFormLayout *layout = new QFormLayout;
-    layout->addRow(nomLabel, nomLineEdit);
-    layout->addRow(prenomLabel, prenomLineEdit);
-    layout->addRow(referenceLabel, referenceLineEdit);
-    layout->addRow(dateLabel, dateEdit);
-    layout->addWidget(buttonBox);
+  QDialog inputDialog;
+  inputDialog.setWindowTitle("Entrez les informations");
 
-    inputDialog.setLayout(layout);
+  QLabel *nomLabel = new QLabel("Nom:");
+  QLabel *prenomLabel = new QLabel("Prénom:");
+  QLabel *referenceLabel = new QLabel("Référence:");
+  QLabel *dateLabel = new QLabel("Date:");
 
-    if (inputDialog.exec() == QDialog::Rejected) {
-        return;
+  QLineEdit *nomLineEdit = new QLineEdit;
+  QLineEdit *prenomLineEdit = new QLineEdit;
+  QLineEdit *referenceLineEdit = new QLineEdit;
+  QDateEdit *dateEdit = new QDateEdit(QDate::currentDate());
+
+  QDialogButtonBox *buttonBox =
+      new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+  connect(buttonBox, &QDialogButtonBox::accepted, &inputDialog, &QDialog::accept);
+  connect(buttonBox, &QDialogButtonBox::rejected, &inputDialog, &QDialog::reject);
+
+  QFormLayout *layout = new QFormLayout;
+  layout->addRow(nomLabel, nomLineEdit);
+  layout->addRow(prenomLabel, prenomLineEdit);
+  layout->addRow(referenceLabel, referenceLineEdit);
+  layout->addRow(dateLabel, dateEdit);
+  layout->addWidget(buttonBox);
+
+  inputDialog.setLayout(layout);
+
+  if (inputDialog.exec() == QDialog::Rejected) {
+    return;
+  }
+
+  const int lineHeight = 300;
+  const int footerHeight = 500;
+
+  QString nom = nomLineEdit->text();
+  QString prenom = prenomLineEdit->text();
+  QString reference = referenceLineEdit->text();
+  QString date = QLocale().toString(dateEdit->date(), QLocale::ShortFormat);
+
+  QPdfWriter pdfWriter(fileName);
+  pdfWriter.setPageMargins(QMarginsF(20, 20, 20, 20));
+
+  QPainter painter(&pdfWriter);
+  QFont font = painter.font();
+  font.setPointSize(10);
+  painter.setFont(font);
+
+  int column = 2;
+  std::vector<int> result;
+
+  for (int i = 0; i < _Donnees.size(); ++i) {
+    if(_Donnees[i].size() > column)
+      result.push_back(_Donnees[i][column]);
+  }
+
+  bool tout0 = std::all_of(result.begin(), result.end(), [](int i) { return i == 0; });
+  QStringList headers;
+  std::vector<int> indices;
+  QVector<int> columnWidth;
+
+  if(tout0) {
+    headers << "Num" << "Long" << "NbAsp" << "DebitG" << "Espacement" << "Debit Ligne" << "Diametre" << "DenivelePeigne" << "Vitesse" << "Perte J" << "Piezo P" << "Cumul Perte" << "Cumul Piezo" << "Ø16/14" << "Piezo Ø16" << "Ø20/17.6" << "Piezo Ø20";
+    indices = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 15, 10, 16, 17, 18, 19, 14, 13, 11, 12, 20, 21};
+    columnWidth = {400,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800};
+  } else {
+    if(_parcelles[0].isAmont()){
+      headers << "Num" << "Long" <<"NbAsp"<< "Zamont" << "InterRangD" << "PeigneZam"<<"Diametre"<<"DenivelePeigne" << "Vitesse" << "Perte J" << "Piezo P"<<"Σ Perte J" << "Σ Piezo P";
+      indices = {0, 1,2,3, 5,11,15, 17, 18, 19,20, 21 ,22};
+    } else {
+      headers << "Num" << "Long" <<"NbAsp"<< "Zaval" << "InterRangF" << "PeigneZav"<<"Diametre"<<"DenivelePeigne" << "Vitesse" << "Perte J" << "Piezo P"<<"Σ Perte J" << "Σ Piezo P";
+      indices = {0, 1,2,4, 6,12,15, 17, 18, 19, 20, 21 ,22};
+    }
+    columnWidth = {400,600,600,600,900,900,800,1100,650,600,600,800,800};
+  }
+
+
+
+
+  int tableWidth = 0;
+  for (int width : columnWidth) {
+    tableWidth += width;
+  }
+
+  // Définir la taille de police pour l'en-tête
+  QFont headerFont = painter.font();
+  headerFont.setPointSize(10);
+  painter.setFont(headerFont);
+
+  int availablePageHeight = pdfWriter.height() - lineHeight * 4 - footerHeight;
+  int rowsPerPage = availablePageHeight / lineHeight;
+  int pageCount = ceil((double)_Donnees.size() / rowsPerPage);
+  int currentY = 0;
+  int currentX = 0;
+
+  int yOffset = lineHeight * 5;
+  int currentpage = 1;
+
+  auto drawHeaderAndLines = [&](int yOffset) {
+    int xPos = 0;
+    for (int i = 0; i < headers.size(); ++i) {
+      QRect headerRect(xPos, yOffset - lineHeight, columnWidth[i], lineHeight);
+      painter.drawText(headerRect, Qt::AlignCenter, headers[i]);
+      xPos += columnWidth[i];
     }
 
-    QString nom = nomLineEdit->text();
-    QString prenom = prenomLineEdit->text();
-    QString reference = referenceLineEdit->text();
-    QString date = QLocale().toString(dateEdit->date(), QLocale::ShortFormat);
+    yOffset += lineHeight;
 
-    QPdfWriter pdfWriter(fileName);
-    pdfWriter.setPageMargins(QMarginsF(20, 20, 20, 20));
+    // Dessiner une ligne horizontale pour séparer l'en-tête et les nombres
+    painter.setPen(QPen(Qt::black, 1));
+    painter.drawLine(0, yOffset - lineHeight, tableWidth, yOffset - lineHeight);
 
-    QPainter painter(&pdfWriter);
-    QFont font = painter.font();
-    font.setPointSize(10);
+    // Détermine le nombre de ligne par page
+    int maxRowsPerPage = (pdfWriter.height() - yOffset - 150) / lineHeight;
+
+    // Calculez le nombre de lignes restantes pour déterminer si vous êtes sur
+    // la dernière page
+    int remainingRows = _Donnees.size() - (currentpage - 1) * maxRowsPerPage;
+    bool isLastPage = (remainingRows <= maxRowsPerPage);
+
+    // Ajustez la hauteur des lignes verticales pour la dernière page en
+    // fonction du nombre de lignes restantes
+    int verticalLinesHeight = isLastPage ? (lineHeight * (remainingRows - 1))
+                                         : (lineHeight * (maxRowsPerPage - 1));
+
+    // Dessinez des lignes verticales pour séparer les colonnes
+    xPos = 0;
+    for (int i = 0; i < columnWidth.size(); ++i) {
+      painter.drawLine(xPos, yOffset - lineHeight, xPos,
+                       yOffset + verticalLinesHeight);
+      xPos += columnWidth[i];
+    }
+    painter.drawLine(xPos, yOffset - lineHeight, xPos,
+                     yOffset + verticalLinesHeight);
+
+    // Réinitialiser la taille de police pour le reste du contenu
     painter.setFont(font);
 
-    const int lineHeight = 300;
+    return yOffset;
+  };
 
-    painter.drawText(0, lineHeight, QString("Nom: %1").arg(nom));
-    painter.drawText(0, lineHeight * 2, QString("Prénom: %1").arg(prenom));
-    painter.drawText(0, lineHeight * 3, QString("Référence: %1").arg(reference));
-    painter.drawText(pdfWriter.width() - 1000, lineHeight - 200,
-                     QString("Date: %1").arg(date));
+  yOffset = drawHeaderAndLines(yOffset);
 
-    int column = 2;  // The column you want
-    std::vector<int> result;  // The vector to hold the column
+  for (const std::vector<float> &donneesLigne : _Donnees) {
 
-    for (int i = 0; i < _Donnees.size(); ++i) {
-        if(_Donnees[i].size() > column)  // Checking if the column index is within the range of inner vector
-            result.push_back(_Donnees[i][column]);
+    int xPos = 0;
+    int cpt = 0;
+    for (auto &i : indices) {
+      QString cellText;
+      if(donneesLigne[i] == 0 ) {
+        cellText = QString(" ");
+      } else {
+        cellText = QString::number(donneesLigne[i], 'f', 2);
+      }
+      if (i == 0) {
+        cellText = QString::number(donneesLigne[i], 'f', 0);
+      } else if (i == 18) {
+        cellText += "m/s";
+      } else if (i == 17 || i == 19 || i == 20 || i == 21 || i == 22) {
+        cellText += "m";
+      }
+
+      if(donneesLigne[i] == 0 ) {
+        cellText = QString(" ");
+      }
+
+      QRect cellRect(xPos, yOffset - lineHeight, columnWidth[cpt], lineHeight);
+      painter.drawText(cellRect, Qt::AlignCenter, cellText);
+      xPos += columnWidth[cpt++];
+
+
     }
 
-    bool tout0 = std::all_of(result.begin(), result.end(), [](int i) { return i == 0; });
-    QStringList headers;
-    if(tout0) {
-        headers << "Num" << "Long" << "NbAsp" << "Zamont" << "Zaval" << "InterD" << "InterF" << "DebitG" << "Espacement" << "Debit Ligne" << "Debit Cumul" << "PeigneZAm" << "PeigneZAv" << "DeltaLigneAm" << "DeltaLigneAv" << "Diametre" << "Nom" << "DenivelePeigne" << "Vitesse" << "Perte J" << "Piezo P" << "Cumul Perte" << "Cumul Piezo"<<"Ø16/14"<<"Piezo Ø16"<<"Ø20/17.6"<<"Piezo Ø20";
-    } else {
-        for(int i = 0; i <_Donnees.size();i++) {
-            _Donnees[i].resize(24);
-        }
-        headers << "Num" << "Long" << "NbAsp" << "Zamont" << "Zaval" << "InterD" << "InterF" << "DebitG" << "Espacement" << "Debit Ligne" << "Debit Cumul" << "PeigneZAm" << "PeigneZAv" << "DeltaLigneAm" << "DeltaLigneAv" << "Diametre" << "Nom" << "DenivelePeigne" << "Vitesse" <<"Perte J" << "Piezo P" << "Cumul Perte" << "Cumul Piezo"<<"Afficher";
+    yOffset += lineHeight;
+
+    if (yOffset > pdfWriter.height() - 2 * lineHeight) {
+      // Desinne le bas de page
+      QString footerText = QString("Page %1").arg(currentpage);
+      QRect footerRect(0, pdfWriter.height() - lineHeight, pdfWriter.width(),
+                       lineHeight);
+      painter.drawText(footerRect, Qt::AlignCenter, footerText);
+      QString referenceText = QString("Reference: %1").arg(reference);
+      QRect referenceRect(pdfWriter.width() - 1500,
+                          pdfWriter.height() - lineHeight, 1500, lineHeight);
+      painter.drawText(referenceRect, Qt::AlignCenter, referenceText);
+
+      // Créé une nouvelle page
+      pdfWriter.newPage();
+      yOffset = lineHeight * 2;
+      yOffset = drawHeaderAndLines(yOffset);
+      currentpage++;
     }
+  }
+  // Ajouter un pied de page sur la dernière page
+  QString footerText = QString("Page %1").arg(currentpage);
+  painter.drawText(
+      QRect(0, pdfWriter.height() - lineHeight, pdfWriter.width(), lineHeight),
+      Qt::AlignCenter, footerText);
+  painter.drawText(QRect(0, pdfWriter.height() - lineHeight,
+                         pdfWriter.width() - 20, lineHeight),
+                   Qt::AlignRight, QString("Référence: %1").arg(reference));
 
-    QVector<int> columnWidths;
-    for (int i = 0; i < headers.size(); ++i) {
-        columnWidths.push_back(1000); // Arbitrairement défini comme 1000 pour l'instant
-    }
-    int tableWidth = 0;
-    for (int width : columnWidths) {
-        tableWidth += width;
-    }
+  painter.end();
 
-    // Définir la taille de police pour l'en-tête
-    QFont headerFont = painter.font();
-    headerFont.setPointSize(10);
-    painter.setFont(headerFont);
-
-    int yOffset = lineHeight * 5;
-    int currentPage = 1;
-
-    // Définir une fonction pour dessiner l'en-tête et les lignes.
-    auto drawHeaderAndLines = [&](int yOffset) {
-        int xPos = 0;
-        for (int i = 0; i < headers.size(); ++i) {
-            QRect headerRect(xPos, yOffset - lineHeight, columnWidths[i], lineHeight);
-            painter.drawText(headerRect, Qt::AlignCenter, headers[i]);
-            xPos += columnWidths[i];
-        }
-
-        yOffset += lineHeight;
-
-        // Dessiner une ligne horizontale pour séparer l'en-tête et les nombres
-        painter.setPen(QPen(Qt::black, 1));
-        painter.drawLine(0, yOffset - lineHeight, tableWidth, yOffset - lineHeight);
-
-        // Détermine le nombre de ligne par page
-        int maxRowsPerPage = (pdfWriter.height() - yOffset - 150) / lineHeight;
-
-        // Calculez le nombre de lignes restantes pour déterminer si vous êtes sur
-        // la dernière page
-        int remainingRows = _Donnees.size() - (currentPage - 1) * maxRowsPerPage;
-        bool isLastPage = (remainingRows <= maxRowsPerPage);
-
-        // Ajustez la hauteur des lignes verticales pour la dernière page en
-        // fonction du nombre de lignes restantes
-        int verticalLinesHeight = isLastPage ? (lineHeight * (remainingRows - 1))
-                                             : (lineHeight * (maxRowsPerPage - 1));
-
-        // Dessinez des lignes verticales pour séparer les colonnes
-        xPos = 0;
-        for (int i = 0; i < columnWidths.size(); ++i) {
-            painter.drawLine(xPos, yOffset - lineHeight, xPos,
-                             yOffset + verticalLinesHeight);
-            xPos += columnWidths[i];
-        }
-        painter.drawLine(xPos, yOffset - lineHeight, xPos,
-                         yOffset + verticalLinesHeight);
-
-        // Réinitialiser la taille de police pour le reste du contenu
-        painter.setFont(font);
-
-        return yOffset;
-    };
-
-    yOffset = drawHeaderAndLines(yOffset);
-
-    for (const std::vector<float>& donneesLigne : _Donnees) {
-        int xPos = 0;
-
-        for (int i = 0; i < donneesLigne.size(); ++i) {
-            QString cellText = QString::number(donneesLigne[i], 'f', 2);
-            QRect cellRect(xPos, yOffset - lineHeight, columnWidths[i], lineHeight);
-            painter.drawText(cellRect, Qt::AlignCenter, cellText);
-            xPos += columnWidths[i];
-        }
-
-        yOffset += lineHeight;
-
-        if (yOffset > pdfWriter.height() - 2 * lineHeight) {
-            // Dessinez le pied de page
-            QString footerText = QString("Page %1").arg(currentPage);
-            QRect footerRect(0, pdfWriter.height() - lineHeight, pdfWriter.width(),
-                             lineHeight);
-            painter.drawText(footerRect, Qt::AlignCenter, footerText);
-            QString referenceText = QString("Reference: %1").arg(reference);
-            QRect referenceRect(pdfWriter.width() - 1500,
-                                pdfWriter.height() - lineHeight, 1500, lineHeight);
-            painter.drawText(referenceRect, Qt::AlignCenter, referenceText);
-
-            // Créer une nouvelle page
-            pdfWriter.newPage();
-            yOffset = lineHeight * 2;
-            yOffset = drawHeaderAndLines(yOffset);
-            currentPage++;
-        }
-    }
-
-// Ajouter un pied de page sur la dernière page
-    QString footerText = QString("Page %1").arg(currentPage);
-    painter.drawText(
-            QRect(0, pdfWriter.height() - lineHeight, pdfWriter.width(), lineHeight),
-            Qt::AlignCenter, footerText);
-    painter.drawText(QRect(0, pdfWriter.height() - lineHeight,
-                           pdfWriter.width() - 20, lineHeight),
-                     Qt::AlignRight, QString("Référence: %1").arg(reference));
-
-
-    painter.end();
 }
 
 
-
-#include <QFileDialog>
 
 void etude::savePdf() {
   QString fileName = QFileDialog::getSaveFileName(this,
@@ -1517,7 +1552,7 @@ void etude::savePdf() {
                                                   tr("PDF Files (*.pdf)"));
 
   if (!fileName.isEmpty()) {
-    if (QFileInfo(fileName).suffix().isEmpty()) { // If user didn't specify .pdf, add it
+    if (QFileInfo(fileName).suffix().isEmpty()) {
       fileName.append(".pdf");
     }
     exportPdf(fileName);
@@ -1532,7 +1567,7 @@ void etude::saveToFile(const std::string& filename) const {
         return;
     }
 
-    // Write _Donnees to file
+    // Ecriture
     for (const auto& row : _Donnees) {
         for (float value : row) {
             outFile << value << " ";
@@ -1540,10 +1575,10 @@ void etude::saveToFile(const std::string& filename) const {
         outFile << "\n";
     }
 
-    // Write a delimiter
+    // Délimiteur
     outFile << "---\n";
 
-    // Write certain attributes of _parcelles to file
+    // On écris les attributs nécéssaire à la sauvegarde
     for (const auto& p : _parcelles) {
         outFile << p.getNom().toStdString() << " "
                 << p.getPosteDeCommande() << " "
@@ -1568,7 +1603,6 @@ void etude::readFromFile(const std::string& filename) {
         return;
     }
 
-    // Read _Donnees from file
     std::vector<std::vector<float>> data;
     std::string line;
     while (std::getline(inFile, line) && line != "---") {
@@ -1583,11 +1617,11 @@ void etude::readFromFile(const std::string& filename) {
 
     _Donnees = data;
 
-    // Read parcelle data from file
+    // Lecture des données
     std::getline(inFile, line);
     while(!line.empty()) {
 
-        // replace space with underscore for the parcelle name
+        // remplace un espace par un _ pour ne pas avoir d'erreur dans le nom lié à " "
         std::replace(line.begin(), line.begin()+10, ' ', '_');
 
         std::istringstream iss(line);
@@ -1597,10 +1631,9 @@ void etude::readFromFile(const std::string& filename) {
         float aspdebit, aspinter, aspinterdebut;
 
         if (!(iss >> nom >> poste_de_commande >> indexdebut >> indexfin >> decalage >> aspdebit >> aspinter >>amont >>aspinterdebut)) {
-            std::cout<<"break"<<std::endl;
-            break; // Error in parsing
+            break; // Erreur dans la lecture
         }
-        parcelle p = parcelle(_Donnees, indexdebut, indexfin, database,QString::fromStdString(nom), amont);
+        parcelle p = parcelle(_Donnees, indexdebut, indexfin, database,QString::fromStdString(nom).replace("_", " "), amont);
 
         p.setPosteDeCommande(poste_de_commande);
         p.setAspdebit(aspdebit);

@@ -99,17 +99,18 @@ void parcelle::calcul() {
   float b = std::get<1>(coefficients);
   double k = std::get<2>(coefficients);
 
-
   auto aspesseurs = trouveaspersseurs();
 
-  /*for(int i=0; i<_Donnees.size(); i++){
+  /*
+  for(int i=0; i<_Donnees.size(); i++){
     std::cout << _Donnees[i][2] <<" "<< std::endl;
   }
   std::cout<<"-----------------------------CALCUL---------------------------------"<<std::endl;
-*/
+  */
 
   if(!aspesseurs.empty()){
     calculaspersseurs(aspesseurs,a,b,k);
+    _calcul = true;
     return;
   }
 
@@ -212,21 +213,21 @@ void parcelle::setDiametreDialog(std::string matiere) {
   }
   dialogLayout.addWidget(&materialComboBox);
 
-  // Pressure Label and ComboBox
+  // Label
   QLabel pressureLabel("Pression");
   dialogLayout.addWidget(&pressureLabel);
 
   QComboBox pressureComboBox;
   dialogLayout.addWidget(&pressureComboBox);
 
-  // Inner Diameter Label and ComboBox
+  // Combobox
   QLabel innerDiameterLabel("Diametre");
   dialogLayout.addWidget(&innerDiameterLabel);
 
   QComboBox innerDiameterComboBox;
   dialogLayout.addWidget(&innerDiameterComboBox);
 
-  // Interval SpinBoxes with Labels
+  // Choix des rangs
   QLabel startLabel("Départ");
   dialogLayout.addWidget(&startLabel);
 
@@ -251,16 +252,12 @@ void parcelle::setDiametreDialog(std::string matiere) {
 
   label.setText(text);
 
-  // Set button
+  // Boutton
   QPushButton setButton("Choix Intervale et Diametre");
   dialogLayout.addWidget(&setButton);
 
-
-
   diameterDialog.setLayout(&dialogLayout);
 
-
-  // Connections
   QObject::connect(&materialComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged),
                    [this, &pressureComboBox, &materialComboBox](int index) {
                      QString selectedMaterial = materialComboBox.itemText(index);
@@ -338,8 +335,6 @@ void parcelle::setDiametreDialog(std::string matiere) {
 }
 
 void parcelle::modifiedia(int index, float diameters){
-
-  _diameters[index] = diameters;
   _Donnees[index][15] = diameters;
 }
 
@@ -406,7 +401,6 @@ void parcelle::setPosteDeCommande(int posteDeCommande) {
   }
 
   if(posteDeCommande==_indexdebut){
-      std::cout<<"Poste de"<<std::endl;
       poste_de_commande=milieuhydro+_indexdebut+1;
   } else if(posteDeCommande<_indexdebut){
         poste_de_commande=posteDeCommande;
@@ -439,6 +433,11 @@ void parcelle::setPosteDeCommande(int posteDeCommande) {
 int parcelle::getPosteDeCommande() const {
   return poste_de_commande;
 }
+
+int parcelle::getvraiindiceposte(){
+    return poste_de_commande+_indexdebut;
+}
+
 bool parcelle::isCalcul() const {
   return _calcul;
 }
@@ -466,7 +465,7 @@ void parcelle::calcul_droit(float a, float b, double k) {
   // Calcul de la perte de charge, de la vitesse et du dénivelé du côté droit du poste de commande
   for (int i = fin_droit; i >=debut; --i) {
 
-    float Dia = _diameters[i]; // Diamètre en mm
+    float Dia = _Donnees[i][15]; // Diamètre en mm
     sigmadebit += _Donnees[i][9]; // Débit en l/h
     float L = _Donnees[i][5]; // Longueur de la conduite en mètre
 
@@ -481,8 +480,12 @@ void parcelle::calcul_droit(float a, float b, double k) {
       denivele = amont ?    _Donnees[i][3] - _Donnees[fin_gauche][3]  :  _Donnees[i][4] - _Donnees[fin_gauche][4] ;
 
 
-    piezo = perte + denivele ;
-    cumulperte += perte; // Cumul de la perte de charge
+    if(i-1 >= debut)
+        piezo = perte + (amont ?    _Donnees[i][3] - _Donnees[i-1][3]  :  _Donnees[i][4] - _Donnees[i-1][4]) ;
+    else
+        piezo = perte + (amont ?    _Donnees[i][3] - _Donnees[debut][3]  :  _Donnees[i][4] - _Donnees[debut][4]) ;
+
+      cumulperte += perte; // Cumul de la perte de charge
     cumulpiezo += piezo;
 
     float debitM3S = sigmadebit /3600 / 1000;
@@ -555,7 +558,7 @@ void parcelle::calcul_gauche(float a, float b, double k) {
   // Calcul de la perte de charge, de la vitesse et du dénivelé du côté gauche du poste de commande
   for (int i = 0; i < poste_de_commande - _decalage; ++i) {
 
-    float Dia = _diameters[i]; // Diamètre en mm
+    float Dia = _Donnees[i][15]; // Diamètre en mm
     sigmadebit += _Donnees[i][9]; // Débit en l/h
     float L = _Donnees[i][5]; // Longueur de la conduite en mètre
 
@@ -564,7 +567,11 @@ void parcelle::calcul_gauche(float a, float b, double k) {
 
     float denivele = amont ?    _Donnees[i][3] - _Donnees[fin_gauche][3]   :    _Donnees[i][4] - _Donnees[fin_gauche][4] ;
 
-    piezo = perte + denivele ;
+    if(i+1 < poste_de_commande)
+        piezo = perte + (amont ?    _Donnees[i][3] - _Donnees[i+1][3]  :  _Donnees[i][4] - _Donnees[i+1][4]) ;
+    else
+        piezo = perte + (amont ?    _Donnees[i][3] - _Donnees[poste_de_commande-1][3]  :  _Donnees[i][4] - _Donnees[poste_de_commande-1][4]) ;
+
     cumulperte += perte; // Cumul de la perte de charge
     cumulpiezo += piezo;
 
@@ -584,17 +591,19 @@ void parcelle::calcul_gauche(float a, float b, double k) {
     _Donnees[i][20] = piezo;
     _Donnees[i][21] = cumulperte;
     _Donnees[i][22] = cumulpiezo;
+/*
 
     // Imprime les informations de débogage de manière structurée
-    /*std::cout << "----- Information de la conduite (gauche) -----" << std::endl;
+    std::cout << "----- Information de la conduite (gauche) -----" << std::endl;
     std::cout << "Tuyau: " << _Donnees[i][0] << std::endl;
     std::cout << "Diamètre (D): " << Dia << " mm" << std::endl;
     std::cout << "Débit cumulatif (sigmadebit): " << sigmadebit << " l/h" << std::endl;
     std::cout << "Intervale (L): " << L << " m" << std::endl;
     std::cout << "Coefficients: " << "a=" << a << ", b=" << b << ", k=" << k << std::endl;
     std::cout << "Perte de charge calculée : " << perte << std::endl;
-    std::cout << "Perte de charge cumulée (perteg): " << perteg << std::endl;
-    std::cout << "-----------------------------------------------" << std::endl;*/
+    std::cout << "Perte de charge cumulée (perteg): " << cumulperte << std::endl;
+    std::cout << "-----------------------------------------------" << std::endl;
+*/
   }
 
 /*  std::cout << "--------------------------------"<<std::endl;
@@ -623,14 +632,8 @@ void parcelle::calcul_gauche(float a, float b, double k) {
     }*/
 }
 
-const std::vector<float> &parcelle::getDiameters() const { return _diameters; }
 const std::string &parcelle::getMatiere() const { return _matiere; }
 
-void parcelle::addDiameter(float a){
-  if(a> 0 ){
-    _diameters.push_back(a);
-  }
-}
 
 std::vector<int> parcelle::trouveaspersseurs() {
   std::vector<int> result;
@@ -640,7 +643,7 @@ std::vector<int> parcelle::trouveaspersseurs() {
     }
   }
 
-  // Trier le vecteur
+  // Trier le vecteur en ordre croissant
   std::sort(result.begin(), result.end());
 
   return result;
@@ -649,12 +652,12 @@ std::vector<int> parcelle::trouveaspersseurs() {
 
 #include <QInputDialog>
 
-// Créez une fonction pour calculer la perte
+/*// Créez une fonction pour calculer la perte
 float calculPerte(float debit, float Dia, float intervale, float a, float b, float k) {
   float perte = k * std::pow((debit), a) * std::pow(Dia, b) * intervale;
   //std::cout<<perte<<std::endl;
   return perte;
-}
+}*/
 
 void parcelle::calculpeigne(float a, float b, double k, float debitasp){
   int debut = poste_de_commande - _decalage;
@@ -726,7 +729,9 @@ void parcelle::calculaspersseurs(std::vector<int> &indices, float a, float b, do
   form.addRow(labelDebit, lineEditDebit);
 
   QLineEdit *lineEditDistRang = new QLineEdit(&dialog);
-  if(aspinter!=0){
+  dialog.setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
+
+    if(aspinter!=0){
     lineEditDistRang->setText(QString::number(aspinter));
   }
   QString labelDistRang = QString("Distance entre rangs:");
@@ -738,7 +743,6 @@ void parcelle::calculaspersseurs(std::vector<int> &indices, float a, float b, do
   }
   QString labelDistAsperseurs = QString("Distance entre asperseurs:");
   form.addRow(labelDistAsperseurs, lineEditDistAsperseurs);
-
 
   QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
   form.addRow(&buttonBox);
@@ -754,6 +758,8 @@ void parcelle::calculaspersseurs(std::vector<int> &indices, float a, float b, do
     aspdebit = debit;
     aspinter = distRangs;
     aspinterdebut = distAsperseurs;
+
+    _debit = 0;
 
     for(auto it : indices){
       _debit += aspdebit * _Donnees[it][2];
@@ -798,7 +804,7 @@ void parcelle::inverser() {
 
   // Réinitialiser les valeurs après l'indice 8
   for (auto& row : _Donnees) {
-    for (int i = 9; i < row.size(); ++i) {
+    for (int i = 10; i < row.size(); ++i) {
       row[i] = 0.0f;  // Vous pouvez ajuster cette valeur en fonction de ce que vous voulez pour la réinitialisation
     }
   }
@@ -810,7 +816,6 @@ void parcelle::inverser() {
 
   float zamontO = _Donnees[0][3];
   float zavalO =  _Donnees[0][4];
-
 
   for(int i=0;i<_Donnees.size();i++){
 
@@ -889,11 +894,6 @@ void parcelle::choisirCote(int a){
   _decalage = a;
 }
 
-void parcelle::updatediaasp(int ligne, int colonne, float val){
-  if(val > 0 && ligne>0 && colonne >0){
-    _Donnees[ligne][colonne] = val;
-  }
-}
 
 #include <unordered_set>
 
@@ -928,7 +928,6 @@ void parcelle::calcul_gauche_aspersseurs(std::vector<int> &indices,float debit, 
 
   int compteur =intervalles.size()-1;
 
-  // some constants to avoid repeated calculations
   float const_debitM3S = 1.0f / 3600 / 1000;
   float const_pi = 3.14159265358979323846f;
 
@@ -942,12 +941,16 @@ void parcelle::calcul_gauche_aspersseurs(std::vector<int> &indices,float debit, 
       // Calcul de la perte de charge
       float perte = k * std::pow(sigmadebit, a) * std::pow(Dia, b) * L;
 
+      int next_idx = 0;
+
       auto it = std::upper_bound(sorted_indices.begin(), sorted_indices.end(), i);
-      int next_idx = (it != sorted_indices.end() && *it > poste_de_commande) ? poste_de_commande : *it;
+      next_idx = (it != sorted_indices.end() && *it > poste_de_commande) ? fin_gauche :*it;
+
+      if(next_idx > poste_de_commande || next_idx < 0)
+        next_idx = poste_de_commande-1;
 
       float denivele = amont ? _Donnees[i][3] - _Donnees[next_idx][3]
                              : _Donnees[i][4] - _Donnees[next_idx][4];
-
 
 /*
       // Affichage des valeurs
@@ -958,7 +961,6 @@ void parcelle::calcul_gauche_aspersseurs(std::vector<int> &indices,float debit, 
       std::cout << "Matiere : " << _matiere << std::endl;
       std::cout<<"-------------------------" << std::endl;
 */
-
 
       piezo = perte + denivele;
       cumulperte += perte; // Cumul de la perte de charge
@@ -1028,7 +1030,7 @@ void parcelle::calcul_droit_aspersseurs(std::vector<int> &indices, float debit,f
   }
 
   std::vector<int> sorted_indices(indices.begin(), indices.end());
-  std::sort(sorted_indices.rbegin(), sorted_indices.rend()); // sort in descending order
+  std::sort(sorted_indices.rbegin(), sorted_indices.rend()); // on le trie dans l'ordre croissant
 
 
   float sigmadebit = 0;
@@ -1059,20 +1061,23 @@ void parcelle::calcul_droit_aspersseurs(std::vector<int> &indices, float debit,f
 
       float vitesse = debitM3S / aire;
 
-      // Affichage des valeurs
+/*      // Affichage des valeurs
       std::cout << "Diamètre (mm) : " << Dia <<" ";
       std::cout << "Sigma Débit (l/h) : " << sigmadebit << " ";
       std::cout << "a "<<a <<" b "<<b <<" k "<< k << " ";
       std::cout << "Longueur (m) : " << L << " ";
       std::cout << "perte (m) : " << perte << " ";
       std::cout << "vitesse (m/s) : " << vitesse << std::endl;
-      std::cout<<"-------------------------" << std::endl;
+      std::cout<<"-------------------------" << std::endl;*/
 
       auto nextIndexIter = std::find_if(indices.rbegin(), indices.rend(), [&](int index) { return index < i; });
       int nextIndex = (nextIndexIter != indices.rend() && *nextIndexIter > debut) ? *nextIndexIter : debut;
 
-      float denivele = amont ? _Donnees[i][3] - _Donnees[nextIndex][3]
-                             : _Donnees[i][4] - _Donnees[nextIndex][4];
+      if(nextIndex < 0 || nextIndex >= _Donnees.size())
+        nextIndex = debut;
+
+      float denivele = amont ? _Donnees[nextIndex][3] - _Donnees[i][3]
+                             : _Donnees[nextIndex][4] - _Donnees[i][4];
 
       piezo = perte + denivele;
       cumulperte += perte; // Cumul de la perte de charge
@@ -1093,21 +1098,15 @@ void parcelle::calcul_droit_aspersseurs(std::vector<int> &indices, float debit,f
 std::string parcelle::toString() const {
   std::string s;
 
-  // Save _Donnees to string
   for (const auto &row : _Donnees) {
     for (const auto &value : row) {
       s += std::to_string(value) + ",";
     }
-    s.back() = ';'; // replace last comma with semicolon to denote end of a row
+    s.back() = ';';
   }
 
-  // Save _diameters to string
-  for (const auto &value : _diameters) {
-    s += std::to_string(value) + ",";
-  }
-  s.back() = ';';
 
-  // Save other data to string
+  // on sauvegarde les données importantes
   s += _nom.toStdString() + ";";
   s += std::to_string(milieuhydro) + ";";
   s += std::to_string(poste_de_commande) + ";";
@@ -1128,7 +1127,7 @@ void parcelle::fromString(const std::string& s,std::shared_ptr<bdd> db) {
   std::istringstream ss(s);
   std::string item;
 
-  // Load _Donnees from string
+  // Charge les données passer en parametre dans la parcelle
   _Donnees.clear();
   while (std::getline(ss, item, ';')) {
     std::istringstream iss(item);
@@ -1138,15 +1137,6 @@ void parcelle::fromString(const std::string& s,std::shared_ptr<bdd> db) {
       row.push_back(std::stof(value));
     }
     _Donnees.push_back(row);
-  }
-
-  // Load _diameters from string
-  _diameters.clear();
-  std::getline(ss, item, ';');
-  std::istringstream iss(item);
-  std::string value;
-  while (std::getline(iss, value, ',')) {
-    _diameters.push_back(std::stof(value));
   }
 
   // Load other data from string

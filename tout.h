@@ -69,7 +69,7 @@ private:
     void on_show_MW_button_clicked();
 
     /// @brief Affiche la fenêtre de l'outil de calcul de perte de charge pour un goutte à goutte.
-    void on_show_gag_button_clicked();
+    //void on_show_gag_button_clicked();
 
     ///
     /// @brief Affiche la fenetre de goutte à goutte
@@ -88,7 +88,6 @@ protected:
 
     bool eventFilter(QObject *obj, QEvent *event) override;
 
-    void on_show_jeu_clicked();
 };
 
 

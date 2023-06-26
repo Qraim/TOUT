@@ -3,9 +3,7 @@
 //
 
 #include "pcdim.h"
-#include <cmath>
 
-#include <math.h>
 #include <QTableWidget>
 float PI3 = 3.14159265359;
 
@@ -168,7 +166,16 @@ float pcdim::calculdebit()
     diametretext.replace(',', '.');
     float diametre = diametretext.toFloat();
 
-    float debit = (vitesse * PI3 * std::pow((diametre / 2), 2)) / 1000; // Debit m³/h
+    float debit = (vitesse * PI3 * std::pow(((diametre/1000) / 2), 2)); // Debit m³/h
+
+    if(Unite->currentIndex()==0){
+        debit = debit*3600;
+    }if(Unite->currentIndex()==1){
+        debit = debit*3600/1000;
+    } if(Unite->currentIndex()==2){
+        debit = debit/1000;
+    }
+
     return debit;
 }
 

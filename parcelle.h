@@ -43,10 +43,7 @@ public:
   ///
   void modifiedia(int index, float diameters);
 
-  ///
-  /// @brief Initialise la boîte de dialogue pour régler le diamètre.
-  ///
-  void setDiametreDialog();
+
 
   ///
   /// @brief Récupère le nom de la parcelle.
@@ -134,18 +131,11 @@ public:
   /// @return vector of int
   std::vector<int> trouveaspersseurs();
 
-  /// @brief ajoute un diametre dans le vecteur _Donnees et diameter
-  /// @param a diametre à ajouter
-  void addDiameter(float a);
 
-  /// @brief Foction permettant de changer la valeurs d'une ligne et d'une colonne spécifique
-  /// @param text valeurs à changer
-  /// @param row numero de ligne
-  /// @param col numero de colonne
-  void onLineEditChanged(const QString &text, int row, int col);
 
-  /// @brief permet de choisir pour chaque ligne contennant un aspersseurs et pour chaque aspersseurs un diametre
-  void showDialogWithTable();
+
+
+
 
   /// @brief permet de changer l'interval ciblé
   /// @param index
@@ -169,8 +159,6 @@ public:
 
   /// @brief Liste des Getters
   /// @return
-  std::vector<std::vector<float>> getTableValues();
-  const std::vector<float> &getDiameters() const;
   const std::string &getMatiere() const;
 
 
@@ -203,6 +191,8 @@ public:
   void herse(int ligne);
   void fromString(const std::string &s, std::shared_ptr<bdd> db);
   std::string toString() const;
+
+    int getvraiindiceposte();
 
 public:
     int getDecalage() const;
@@ -245,12 +235,6 @@ private:
   /// @brief permet de recalculer certaines colonnes si on change le débit d'une ligne
   void recalcul();
 
-  /// @brief Permet de changer le diametre d'un asperseurs
-  /// @param ligne index de la ligne
-  /// @param colonne index de la colonne
-  /// @param val valeur
-  void updatediaasp(int ligne, int colonne, float val);
-
   /// @brief calcul la perte du cote gauche du poste en mode aspersions
   /// @param indices ligne contenant des aspersseurs
   /// @param debit debit pour chaque aspersseurs
@@ -269,16 +253,9 @@ private:
   void calcul_droit_aspersseurs(std::vector<int> &indices,float debit, float a, float b,
                                 double k);
 
-  /// @brief calcul la perte du peigne en mode aspersions
-  /// @param indices ligne contenant des aspersseurs
-  /// @param debit debit pour chaque aspersseurs
-  /// @param distasp distance entre chaque aspersseurs
-  /// @param a coefficient A de la matiere
-  /// @param b coefficient B de la matiere
-  /// @param k coefficient K de la matiere
-  void calculperteherseasp(std::vector<int> &indice, float debit,
-                           float distasp, float a, float b, double k);
+
   int trouvemilieuhydroasp();
+
 };
 
 #endif // TOUT_PARCELLE_H

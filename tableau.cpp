@@ -6,22 +6,13 @@
 #include <QDir>
 #include <QFileDialog>
 
-const double LH_TO_M3S = 1.0 / (1000.0 * 3600.0);
-const double LS_TO_M3S = 1.0 / 1000.0;
-const double M3H_TO_M3S = 1.0 / 3600.0;
+
 
 const int ROW_HEIGHT = 40;
 const int VERTICAL_SPACING = 1;
 
 float PI =3.14159265359;
 
-void espacementColonne(QGridLayout *layout) {
-  // Parcourt toutes les colonnes du layout
-  for (int i = 0; i < layout->columnCount(); i++) {
-    layout->setColumnStretch(i,
-                             1); // Étire la colonne i avec une proportion de 1
-  }
-}
 
 pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db, QWidget *parent)
     : QWidget(parent), database(db) {
@@ -31,6 +22,7 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db, QWidget *parent)
   setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
 
   ligne = 1;
+  _hauteurligne=0;
 
   QVBoxLayout *mainLayout = new QVBoxLayout(this);
 
@@ -333,6 +325,8 @@ void pertechargeherse::importdonees(float debitLH, float diametre,float interval
     _Donnees.push_back(temp); // mise dans le set des données
   }
   calcul();
+  milieuhydro = false;
+  _hauteurligne = hauteurligne;
   float piezo = sigmapertecase->text().toFloat() + hauteurligne;
   sigmapiezocase->setText(QString::number(piezo));
 }
@@ -838,7 +832,7 @@ void pertechargeherse::calcul() {
   sigmalongueurcase->setAlignment(Qt::AlignCenter);
   sigmapertecase->setText(QString::number(sigmaPerte, 'f', 2));
   sigmapertecase->setAlignment(Qt::AlignCenter);
-  sigmapiezocase->setText(QString::number(sigmaPiezo, 'f', 2));
+  sigmapiezocase->setText(QString::number(sigmaPiezo + _hauteurligne, 'f', 2));
   sigmapiezocase->setAlignment(Qt::AlignCenter);
 
   // Rafraîchit le pertechargeherse.
@@ -921,7 +915,7 @@ void pertechargeherse::RafraichirTableau() {
 
 
       // Colorie la ligne en orange pour le milieu hydrolique.
-      if (ligne - 1 == indexMilieuHydrolique) {
+      if (ligne - 1 == indexMilieuHydrolique && milieuhydro) {
         lineEdit->setStyleSheet("QLineEdit { background-color : orange; }");
       }
       // Définit l'espacement vertical du layout.
@@ -1246,7 +1240,7 @@ void pertechargeherse::createPdfReport(const QString &fileName) {
 
   const QStringList headerLabels = {
       "Index",   "Debit", "Cumul", "Diametre",    "Longueur",   "Hauteur",
-      "Vitesse", "Perte", "Piezo", "Cumul Perte", "Cumul Piezo"};
+      "Vitesse", "Perte", "Piezo", "Cumul Perte J", "Cumul Piezo P"};
 
   QVector<int> columnWidths = {600, 800, 800, 1000, 1000, 800,
                                800, 800, 800, 1000, 1000};

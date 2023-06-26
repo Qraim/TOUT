@@ -42,8 +42,8 @@ tout::tout(QWidget *parent) : QWidget(parent) {
     // Créez le premier QComboBox avec des options principales
     QComboBox *mainOptionsComboBox = new QComboBox(this);
     mainOptionsComboBox->addItem("Perte de charge");
-    mainOptionsComboBox->addItem("Diametre");
     mainOptionsComboBox->addItem("Débit");
+    mainOptionsComboBox->addItem("Diametre");
     mainOptionsComboBox->addItem("Etude");
 
 
@@ -192,10 +192,10 @@ void tout::on_show_MW_button_clicked() {
     MW->show();
 }
 
-void tout::on_show_gag_button_clicked() {
+/*void tout::on_show_gag_button_clicked() {
     goutte->refresh();
     goutte->showMaximized();
-}
+}*/
 
 void tout::on_show_gag2_button_clicked() {
     goutte2->refresh();

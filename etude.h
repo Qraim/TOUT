@@ -127,7 +127,6 @@ private :
     ///
     void updateDiameter(int row, const QString& newDiameter);
 
-    QLineEdit* findNextDiameterLineEdit(int startRow);
 
     bool eventFilter(QObject *obj, QEvent *event) override;
 
@@ -157,8 +156,6 @@ private :
 
     void savePdf();
 
-
-    void loadFromFile(const std::string& filename);
     void saveToFile(const std::string &filename) const;
 
     void updateDebit(int row, const QString &newDiameter);
