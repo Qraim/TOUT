@@ -15,7 +15,6 @@ etude::etude(std::shared_ptr<bdd> db,QWidget *parent)
 
   setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
 
-
   // Init et Insert
   QPushButton *initButton = new QPushButton("Init", this);
   QPushButton *divideButton = new QPushButton("Diviser", this);
@@ -488,6 +487,7 @@ void etude::rafraichirTableau() {
         gridLayout->addWidget(parcelDebitLineEdit, ligne - 2, 16);  // Ajoute le QLineEdit à la 18e colonne
 
 
+
         QComboBox *setamont = new QComboBox();
         setamont->addItem("  Amont");
         setamont->addItem("  Aval");
@@ -513,6 +513,12 @@ void etude::rafraichirTableau() {
           rafraichirTableau();
         });
 
+        if(!tout0){
+          QString nbasp = QString::number(_parcelles[parcelIndex].nbasp()) + " Asp";
+          QLineEdit *qelineeditnbasp = createLineEdit(nbasp, textColor, this);
+          gridLayout->addWidget(qelineeditnbasp, ligne - 5, 16);  // Ajoute le QLineEdit à la 18e colonne
+        }
+
         if(ligne == info.commandPost && poste){
           inverse->setStyleSheet("QPushButton { background-color: #e6ffff; color: black; }");
           setamont->setStyleSheet("QComboBox { background-color: #e6ffff; color: black; }");
@@ -526,6 +532,8 @@ void etude::rafraichirTableau() {
     // Incrémente le numéro de ligne.
     ligne++;
   }
+
+
 
   // Contrôle de visibilité des colonnes après avoir rempli la grille
   if (amont) {
@@ -552,6 +560,7 @@ void etude::rafraichirTableau() {
 
   // Contrôle de visibilité des colonnes après avoir rempli la grille
   if (tout0) {
+
     int i=2;
     for (int j = 0; j < gridLayout->rowCount(); ++j) {
       if (gridLayout->itemAtPosition(j, i) && gridLayout->itemAtPosition(j, i)->widget()) {
@@ -560,6 +569,7 @@ void etude::rafraichirTableau() {
     }
 
   } else {
+
     // Nous définissons un ensemble de colonnes que nous voulons cacher.
     // Cela facilite l'ajout ou la suppression de colonnes à l'avenir.
     std::set<int> colonnesACacher = {7, 8, 9, 10, 23};
@@ -1331,11 +1341,16 @@ void etude::refresh(){
 
 void etude::exportPdf(const QString& fileName) {
 
-
-  std::vector<int> postes;
+  std::vector<std::pair<int,int>> postes;
 
   for(auto &i : _parcelles){
-    postes.push_back(i.getvraiindiceposte());
+    postes.push_back(std::make_pair(i.getvraiindiceposte(),i.getDecalage()));
+  }
+
+  std::vector<int> parcelles;
+
+  for(auto &i : _parcelles){
+    parcelles.push_back(i.getIndexfin());
   }
 
   QDialog inputDialog;
@@ -1398,10 +1413,22 @@ void etude::exportPdf(const QString& fileName) {
   std::vector<int> indices;
   QVector<int> columnWidth;
 
+  // Définir la taille de police pour l'en-tête
+  QFont contentfont = painter.font();
+
+
   if(tout0) {
-    headers << "Num" << "Long" << "NbAsp" << "DebitG" << "Espacement" << "Debit Ligne" << "Diametre" << "DenivelePeigne" << "Vitesse" << "Perte J" << "Piezo P" << "Cumul Perte" << "Cumul Piezo" << "Ø16/14" << "Piezo Ø16" << "Ø20/17.6" << "Piezo Ø20";
-    indices = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 15, 10, 16, 17, 18, 19, 14, 13, 11, 12, 20, 21};
-    columnWidth = {400,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800};
+    if(_parcelles[0].isAmont()){
+      headers << "Num" << "Long" << "Zamont" << "InterRangD" <<"DebitG" << "Espacement" << "Q Ligne" << "Σ Q Ligne"<< "PeigneZam" <<"Diametre"<<"DenivelePeigne" << "Vitesse" << "Perte J" << "Piezo P"<<"Σ Perte J" << "Σ Piezo P";
+      indices = {0, 1,3, 5,7,8,9,10, 11,15, 17, 18, 19,20, 21 ,22};
+
+    } else {
+      headers << "Num" << "Long" << "Zaval" << "InterRangF"<<"DebitG" << "Espacement" << "Q Ligne" << "Σ Q Ligne" << "PeigneZav"<<"Diametre"<<"DenivelePeigne" << "Vitesse" << "Perte J" << "Piezo P"<<"Σ Perte J" << "Σ Piezo P";
+      indices = {0, 1,4, 6,7,8,9,10,12,15, 17, 18, 19, 20, 21 ,22};
+    }
+    contentfont.setPointSize(8); // change this to desired font size
+
+    columnWidth = {400,600,600,600,500,600,600,600,650,600,600,600,600,600,600,600};
   } else {
     if(_parcelles[0].isAmont()){
       headers << "Num" << "Long" <<"NbAsp"<< "Zamont" << "InterRangD" << "PeigneZam"<<"Diametre"<<"DenivelePeigne" << "Vitesse" << "Perte J" << "Piezo P"<<"Σ Perte J" << "Σ Piezo P";
@@ -1410,10 +1437,11 @@ void etude::exportPdf(const QString& fileName) {
       headers << "Num" << "Long" <<"NbAsp"<< "Zaval" << "InterRangF" << "PeigneZav"<<"Diametre"<<"DenivelePeigne" << "Vitesse" << "Perte J" << "Piezo P"<<"Σ Perte J" << "Σ Piezo P";
       indices = {0, 1,2,4, 6,12,15, 17, 18, 19, 20, 21 ,22};
     }
+    contentfont.setPointSize(10);
     columnWidth = {400,600,600,600,900,900,800,1100,650,600,600,800,800};
   }
 
-
+  painter.setFont(contentfont);
 
 
   int tableWidth = 0;
@@ -1423,7 +1451,13 @@ void etude::exportPdf(const QString& fileName) {
 
   // Définir la taille de police pour l'en-tête
   QFont headerFont = painter.font();
-  headerFont.setPointSize(10);
+  if(tout0){
+    headerFont.setPointSize(6);
+
+  } else {
+    headerFont.setPointSize(8);
+
+  }
   painter.setFont(headerFont);
 
   int availablePageHeight = pdfWriter.height() - lineHeight * 4 - footerHeight;
@@ -1434,6 +1468,16 @@ void etude::exportPdf(const QString& fileName) {
 
   int yOffset = lineHeight * 5;
   int currentpage = 1;
+
+  painter.drawText(0, lineHeight, QString("Nom: %1").arg(nom));
+  painter.drawText(0, lineHeight * 2, QString("Prénom: %1").arg(prenom));
+  painter.drawText(0, lineHeight * 3, QString("Référence: %1").arg(reference));
+  painter.drawText(pdfWriter.width() - 1000, lineHeight - 200,QString("Date: %1").arg(date));
+  if(!tout0){
+    painter.drawText(pdfWriter.width() - 1000, lineHeight ,QString::number(_parcelles[0].getAspdebit()) + QString("m3/h"));
+    painter.drawText(pdfWriter.width() - 1000, lineHeight + 200,QString::number(_parcelles[0].getAspinterdebut()) + QString("m Entre ASP"));
+    painter.drawText(pdfWriter.width() - 1000, lineHeight + 400 ,QString::number(_parcelles[0].getAspinter())+ QString("m Entre Rang"));
+  }
 
   auto drawHeaderAndLines = [&](int yOffset) {
     int xPos = 0;
@@ -1480,17 +1524,46 @@ void etude::exportPdf(const QString& fileName) {
 
   yOffset = drawHeaderAndLines(yOffset);
 
+  painter.setFont(headerFont);
+
   for (const std::vector<float> &donneesLigne : _Donnees) {
+
+    painter.setFont(headerFont);
+
+    if (std::find(parcelles.begin(), parcelles.end(), donneesLigne[0]) != parcelles.end()) {
+      painter.setPen(QPen(QColor("#0000ff"), 30));  // adjust thickness as needed
+      painter.drawLine(0, yOffset, tableWidth, yOffset);
+      painter.setPen(QColor(Qt::black));
+    }
+
+    // Check if the row should be highlighted
+    auto foundPoste = std::find_if(postes.begin(), postes.end(), [&](const std::pair<int,int>& pair) {
+      return pair.first == donneesLigne[0];
+    });
+    if (foundPoste != postes.end()) {
+      int secondValue = foundPoste->second;
+      painter.setPen(QPen(QColor("#e6ffff"), 40));  // adjust thickness as needed
+      painter.drawLine(0, yOffset - (lineHeight * secondValue), tableWidth, yOffset - (lineHeight * secondValue));
+      painter.setPen(QColor(Qt::black));
+    }
+
+
+
+
 
     int xPos = 0;
     int cpt = 0;
     for (auto &i : indices) {
+
+
+
       QString cellText;
       if(donneesLigne[i] == 0 ) {
         cellText = QString(" ");
       } else {
         cellText = QString::number(donneesLigne[i], 'f', 2);
       }
+
       if (i == 0) {
         cellText = QString::number(donneesLigne[i], 'f', 0);
       } else if (i == 18) {
@@ -1498,6 +1571,8 @@ void etude::exportPdf(const QString& fileName) {
       } else if (i == 17 || i == 19 || i == 20 || i == 21 || i == 22) {
         cellText += "m";
       }
+
+
 
       if(donneesLigne[i] == 0 ) {
         cellText = QString(" ");
@@ -1513,6 +1588,8 @@ void etude::exportPdf(const QString& fileName) {
     yOffset += lineHeight;
 
     if (yOffset > pdfWriter.height() - 2 * lineHeight) {
+      painter.setFont(headerFont);
+
       // Desinne le bas de page
       QString footerText = QString("Page %1").arg(currentpage);
       QRect footerRect(0, pdfWriter.height() - lineHeight, pdfWriter.width(),

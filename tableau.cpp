@@ -324,9 +324,10 @@ void pertechargeherse::importdonees(float debitLH, float diametre,float interval
     temp[5] = 0;
     _Donnees.push_back(temp); // mise dans le set des données
   }
-  calcul();
   milieuhydro = false;
   _hauteurligne = hauteurligne;
+  calcul();
+
   float piezo = sigmapertecase->text().toFloat() + hauteurligne;
   sigmapiezocase->setText(QString::number(piezo));
 }

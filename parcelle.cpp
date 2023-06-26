@@ -974,7 +974,7 @@ void parcelle::calcul_gauche_aspersseurs(std::vector<int> &indices,float debit, 
 
       float vitesse = debitM3S / aire;
 
-      _Donnees[i][17] = denivele;
+      _Donnees[i][17] = -denivele;
       _Donnees[i][18] = vitesse;
       _Donnees[i][19] = perte;
       _Donnees[i][20] = piezo;
@@ -1083,7 +1083,7 @@ void parcelle::calcul_droit_aspersseurs(std::vector<int> &indices, float debit,f
       cumulperte += perte; // Cumul de la perte de charge
       cumulpiezo += piezo;
 
-      _Donnees[i][17] = -denivele;
+      _Donnees[i][17] = denivele;
       _Donnees[i][18] = vitesse;
       _Donnees[i][19] = perte;
       _Donnees[i][20] = piezo;
@@ -1204,4 +1204,13 @@ float parcelle::getAspinterdebut() const {
 
 void parcelle::setAspinterdebut(float aspinterdebut) {
     parcelle::aspinterdebut = aspinterdebut;
+}
+
+
+int parcelle::nbasp(){
+    int nbasp = 0;
+    for(auto &i : _Donnees) {
+      nbasp += i[2];
+    }
+    return nbasp;
 }

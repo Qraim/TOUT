@@ -194,7 +194,9 @@ public:
 
     int getvraiindiceposte();
 
-public:
+  int nbasp();
+
+  public:
     int getDecalage() const;
 
     void setDecalage(int decalage);
@@ -255,7 +257,6 @@ private:
 
 
   int trouvemilieuhydroasp();
-
 };
 
 #endif // TOUT_PARCELLE_H
