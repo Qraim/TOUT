@@ -5,15 +5,15 @@
 #include "pcdim.h"
 
 #include <QTableWidget>
+
 float PI3 = 3.14159265359;
 
-pcdim::pcdim(std::shared_ptr<bdd> db,QWidget *parent)
+pcdim::pcdim(std::shared_ptr<bdd> db, QWidget *parent)
         : QWidget(parent), database(db),
-          mainLayout(new QGridLayout(this))
-{
+          mainLayout(new QGridLayout(this)) {
 
-  setWindowTitle(QString::fromStdString("Un peu tout"));
-  setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
+    setWindowTitle(QString::fromStdString("Un peu tout"));
+    setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
 
     materialComboBox = new QComboBox(this);
     pressureComboBox = new QComboBox(this);
@@ -118,8 +118,7 @@ pcdim::pcdim(std::shared_ptr<bdd> db,QWidget *parent)
     mainLayout->addWidget(bottomButtons[1], 8, 0, 1, 4, Qt::AlignCenter);
     connect(bottomButtons[1], &QPushButton::clicked, this, &pcdim::clearAll);
 
-    for (int i = 0; i < 5; ++i)
-    {
+    for (int i = 0; i < 5; ++i) {
         inputs[i]->installEventFilter(this);
     }
 
@@ -135,28 +134,23 @@ void pcdim::showDiametersTable() {
     database->afficher_tableaux();
 }
 
-void pcdim::clearInput()
-{
+void pcdim::clearInput() {
     QPushButton *button = qobject_cast<QPushButton *>(sender());
-    for (int i = 0; i < 5; ++i)
-    {
-        if (buttons[i] == button)
-        {
+    for (int i = 0; i < 5; ++i) {
+        if (buttons[i] == button) {
             inputs[i]->clear();
             break;
         }
     }
 }
 
-void pcdim::clearAll()
-{
-    for (int i = 0; i < 5; ++i){
+void pcdim::clearAll() {
+    for (int i = 0; i < 5; ++i) {
         inputs[i]->clear();
     }
 }
 
-float pcdim::calculdebit()
-{
+float pcdim::calculdebit() {
 
     QString vitessetext = inputs[2]->text();
     vitessetext.replace(',', '.');
@@ -166,21 +160,22 @@ float pcdim::calculdebit()
     diametretext.replace(',', '.');
     float diametre = diametretext.toFloat();
 
-    float debit = (vitesse * PI3 * std::pow(((diametre/1000) / 2), 2)); // Debit m³/h
+    float debit = (vitesse * PI3 * std::pow(((diametre / 1000) / 2), 2)); // Debit m³/h
 
-    if(Unite->currentIndex()==0){
-        debit = debit*3600;
-    }if(Unite->currentIndex()==1){
-        debit = debit*3600/1000;
-    } if(Unite->currentIndex()==2){
-        debit = debit/1000;
+    if (Unite->currentIndex() == 0) {
+        debit = debit * 3600;
+    }
+    if (Unite->currentIndex() == 1) {
+        debit = debit * 3600 / 1000;
+    }
+    if (Unite->currentIndex() == 2) {
+        debit = debit / 1000;
     }
 
     return debit;
 }
 
-float pcdim::calculvitesse()
-{
+float pcdim::calculvitesse() {
     QString debittext = inputs[0]->text();
     debittext.replace(',', '.');
     float debitValue = debittext.toFloat();
@@ -193,7 +188,7 @@ float pcdim::calculvitesse()
         debitValue = (debitValue * 3.6); // Convert to m³/h
     } // else: m³/h, no conversion needed
 
-    float debit = (debitValue*1000)/3600;
+    float debit = (debitValue * 1000) / 3600;
 
     QString diametretext = innerDiameterComboBox->currentText();
     diametretext.replace(',', '.');
@@ -203,8 +198,7 @@ float pcdim::calculvitesse()
     return vitesse;
 }
 
-float pcdim::calculdiametre()
-{
+float pcdim::calculdiametre() {
     QString debittext = inputs[0]->text();
     debittext.replace(',', '.');
     float debitValue = debittext.toFloat();
@@ -229,8 +223,7 @@ float pcdim::calculdiametre()
 }
 
 
-
-std::tuple<float, float, float> pcdim::getMaterialProperties(const std::string & pipe_material) {
+std::tuple<float, float, float> pcdim::getMaterialProperties(const std::string &pipe_material) {
     return database->get_material_coefficients(pipe_material);
 }
 
@@ -271,8 +264,7 @@ float pcdim::calculperte() {
 
 }
 
-void pcdim::calculate()
-{
+void pcdim::calculate() {
     // Vérifie si les valeurs ont été entrées pour les différents champs
     bool debitEntered = !inputs[0]->text().isEmpty();
     bool vitesseEntered = !inputs[2]->text().isEmpty();
@@ -284,21 +276,21 @@ void pcdim::calculate()
         inputs[4]->setText(QString::number(perte));
         return;
     }
-    // Sinon, si le débit et la vitesse sont renseignés, calcule le diamètre et l'affiche
+        // Sinon, si le débit et la vitesse sont renseignés, calcule le diamètre et l'affiche
     else if (debitEntered && vitesseEntered) {
         float diametre = calculdiametre();
         inputs[1]->setText(QString::number(diametre));
         return;
     }
 
-    // Si le débit et le diamètre sont renseignés, calcule la vitesse et l'affiche
+        // Si le débit et le diamètre sont renseignés, calcule la vitesse et l'affiche
     else if (debitEntered) {
         float vitesse = calculvitesse();
         inputs[2]->setText(QString::number(vitesse));
         return;
     }
 
-    // Sinon, si le diamètre et la vitesse sont renseignés, calcule le débit et l'affiche
+        // Sinon, si le diamètre et la vitesse sont renseignés, calcule le débit et l'affiche
     else if (vitesseEntered) {
         float debit = calculdebit();
         inputs[0]->setText(QString::number(debit));
@@ -307,47 +299,33 @@ void pcdim::calculate()
 
 }
 
-bool pcdim::eventFilter(QObject *obj, QEvent *event)
-{
-    for (int i = 0; i < 5; ++i)
-    {
-        if (obj == inputs[i] && event->type() == QEvent::KeyPress)
-        {
+bool pcdim::eventFilter(QObject *obj, QEvent *event) {
+    for (int i = 0; i < 5; ++i) {
+        if (obj == inputs[i] && event->type() == QEvent::KeyPress) {
             QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-            if (keyEvent->key() == Qt::Key_Control)
-            {
+            if (keyEvent->key() == Qt::Key_Control) {
                 // Control : Champ précédent
                 if (i != 0) inputs[i - 1]->setFocus();
                 return true;
-            }
-            else if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter)
-            {
-                if (keyEvent->modifiers() == Qt::ShiftModifier)
-                {
+            } else if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter) {
+                if (keyEvent->modifiers() == Qt::ShiftModifier) {
                     // Shift + Entrer: Calculer
                     calculate();
                     return true;
-                }
-                else if (i < 4)
-                {
+                } else if (i < 4) {
                     // Entrer : Champ suivant
                     inputs[i + 1]->setFocus();
                     return true;
-                }
-                else if (i == 4)
-                {
+                } else if (i == 4) {
                     // Si tout est rempli sauf perte, calculer
                     bool allFilled = true;
-                    for (int j = 0; j < 4; ++j)
-                    {
-                        if (inputs[j]->text().isEmpty())
-                        {
+                    for (int j = 0; j < 4; ++j) {
+                        if (inputs[j]->text().isEmpty()) {
                             allFilled = false;
                             break;
                         }
                     }
-                    if (allFilled)
-                    {
+                    if (allFilled) {
                         calculate();
                         return true;
                     }
@@ -359,7 +337,6 @@ bool pcdim::eventFilter(QObject *obj, QEvent *event)
 }
 
 
-
 void pcdim::onMaterialComboBoxIndexChanged(int index) {
     // Récupération des infos
     QString selectedMaterial = materialComboBox->itemText(index);
@@ -367,7 +344,7 @@ void pcdim::onMaterialComboBoxIndexChanged(int index) {
 
     // Mise à jour des infos
     pressureComboBox->clear();
-    for (int pressure : pressures) {
+    for (int pressure: pressures) {
         pressureComboBox->addItem(QString::number(pressure));
     }
 
@@ -380,11 +357,12 @@ void pcdim::onPressureComboBoxIndexChanged(int index) {
     // récupération des infos
     QString selectedMaterial = materialComboBox->currentText();
     int selectedPressure = pressureComboBox->itemText(index).toInt();
-    std::vector<float> innerDiameters = database->getInnerDiametersForMatiereAndPressure(selectedMaterial.toStdString(), selectedPressure);
+    std::vector<float> innerDiameters = database->getInnerDiametersForMatiereAndPressure(selectedMaterial.toStdString(),
+                                                                                         selectedPressure);
 
     // Mise à jour du diametre extérieur
     innerDiameterComboBox->clear();
-    for (float innerDiameter : innerDiameters) {
+    for (float innerDiameter: innerDiameters) {
         innerDiameterComboBox->addItem(QString::number(innerDiameter));
     }
 }
@@ -395,7 +373,7 @@ void pcdim::updateComboBoxes() {
 
     // Mise à jour des infos
     materialComboBox->clear();
-    for (const auto &material : materials) {
+    for (const auto &material: materials) {
         materialComboBox->addItem(QString::fromStdString(material));
     }
 

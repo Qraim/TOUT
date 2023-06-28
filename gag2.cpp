@@ -174,7 +174,7 @@ void gag2::calcul() {
   _Perte->setText(QString::number(perte, 'f', 2));
   _Piezo->setText(QString::number(piezo, 'f', 2));
 
-  D->setFocus();
+  D->setFocus(); // On remet le focus sur le premier input
 
 }
 

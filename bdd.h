@@ -171,7 +171,9 @@ public:
     ///
     void on_show_formula_button_clicked();
 
-
+    ///
+    /// \param index index de la formule
+    /// \return  stocke les formules et renvoie la bonne selon l'index choisis
     QString getFormulaText(int index);
 
     /// @brief permet de réactualiser la base de données

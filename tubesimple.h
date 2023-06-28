@@ -99,6 +99,7 @@ private:
     ///
     void clearresult();
 
+    /// @brief permet d'afficher une table des diametres
     void showdia();
 };
 

@@ -66,7 +66,7 @@ private :
     QGridLayout *bottomlayout;
 
     ///
-    /// @brief Initialise les données ou les paramètres nécessaires.
+    /// @brief Initialise les données ou les paramètres nécessaires. Permet de choisir entre 2.2/0.6 ou 1.6/0.5
     ///
     void init();
 
@@ -82,17 +82,17 @@ private :
     void rafraichirTableau();
 
     ///
-    /// @brief Efface les données ou les éléments enfants.
+    /// @brief Efface les éléments visible.
     ///
     void clearchild();
 
     ///
-    /// @brief Initialise les calculs à effectuer.
+    /// @brief Initialise les calculs à effectuer (zamont, zaval, debit).
     ///
     void initCalcul();
 
     ///
-    /// @brief Divise les données pour le traitement.
+    /// @brief Ouvre une fenetre permettant de diviser les données en plusieurs parcelles
     ///
     void divideData();
 
@@ -102,7 +102,7 @@ private :
     void calcul();
 
     ///
-    /// @brief Met à jour les données en fonction des modifications apportées.
+    /// @brief Met à jour les données en récupérant les donnes contenu dans les parcelles.
     ///
     void updateDonnees();
 
@@ -153,20 +153,39 @@ private :
     void updateinterval(int row, int ligne, const QString &newDiameter);
 
 
+    /// @brief fonction générant le pdf
+    /// @param fileName : nom du fichier
     void exportPdf(const QString &fileName);
 
+    /// @brief Permet de choisir l'emplacement et le nom du fichier
     void savePdf();
 
+    /// @brief Permet de sauvegarder dans un fichier les donnees
+    /// @param filename : nom du fichier
     void saveToFile(const std::string &filename) const;
 
+    /// @brief permet de modifier le débit d'une ligne
+    /// @param row : ligne ciblé
+    /// @param newDiameter : nouveau débit
     void updateDebit(int row, const QString &newDiameter);
+
+    /// @brief change le débit entre deux bornes
+    /// @param debut
+    /// @param fin
+    /// @param dia nouveau débit
     void modifierdebit(int debut, int fin, float dia);
+
+    /// @brief permet d'afficher un menu permettant de rentrer index début/fin et un nouveau debit
     void changerDebitDialog();
 
+    /// @brief permet de choisir l'emplacement et le nom de la sauvegarde
     void saveDataWrapper();
 
+    /// @brief permet de choisir le fichier à ouvrir
     void loadDataWrapper();
 
+    /// @brief permet de charger une sauvegarde
+    /// @param filename : nom du fichier
     void readFromFile(const std::string &filename);
 
     void keyPressEvent(QKeyEvent *event) override;

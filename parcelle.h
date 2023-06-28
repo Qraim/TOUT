@@ -43,8 +43,6 @@ public:
   ///
   void modifiedia(int index, float diameters);
 
-
-
   ///
   /// @brief Récupère le nom de la parcelle.
   ///
@@ -131,12 +129,6 @@ public:
   /// @return vector of int
   std::vector<int> trouveaspersseurs();
 
-
-
-
-
-
-
   /// @brief permet de changer l'interval ciblé
   /// @param index
   /// @param colonne
@@ -188,51 +180,34 @@ public:
   /// @param diameters valeurs du débit
   void modifiedebit(int index, float diameters);
 
+  /// @brief lance le calcul de perte de la ligne ciblé dans une herse
+  /// @param ligne
   void herse(int ligne);
+
+  /// @brief permet de charger une sauvegarde depuis un fichier // ABANDONNE
+  /// @param s
+  /// @param db
   void fromString(const std::string &s, std::shared_ptr<bdd> db);
+
+  /// @brief convertit une parcelle en texte
+  /// @return
   std::string toString() const;
 
-    int getvraiindiceposte();
+  /// @brief renvoie l'indice du poste dans la parcelle en entiere
+  /// @return
+  int getvraiindiceposte();
 
+  /// @brief renvoie le nombre d'aspersseurs
+  /// @return
   int nbasp();
 
-  public:
-    int getDecalage() const;
+  /// @brief renvoie le désalage pour savoir si la ligne du poste est compté comme au dessus ou en dessous
+  /// @return
+  int getDecalage() const;
 
-    void setDecalage(int decalage);
-
-    float getAspdebit() const;
-
-    void setAspdebit(float aspdebit);
-
-    float getAspinter() const;
-
-    void setAspinter(float aspinter);
-
-    float getAspinterdebut() const;
-
-    void setAspinterdebut(float aspinterdebut);
-
-private:
-    std::shared_ptr<bdd> database;
-  std::unique_ptr<pertechargeherse> hersealim;
-  std::vector<std::vector<float>> _Donnees;
-  std::vector<float> _diameters;
-  QString _nom;
-  int milieuhydro;
-  int poste_de_commande;
-  int _indexdebut;
-  int _indexfin;
-  float _longueur;
-  std::string _matiere;
-  bool amont;
-  float _debit;
-  bool _calcul;
-  int _decalage;
-
-  float aspdebit;
-  float aspinter;
-  float aspinterdebut;
+  /// @brief fixe le désalage pour savoir si la ligne du poste est compté comme au dessus ou en dessous
+  /// @return
+  void setDecalage(int decalage);
 
   /// @brief permet de recalculer certaines colonnes si on change le débit d'une ligne
   void recalcul();
@@ -256,7 +231,47 @@ private:
                                 double k);
 
 
+  /// @brief calcul et renvoie le milieu hydrolique en aspersions
+  /// @return int
   int trouvemilieuhydroasp();
+
+
+  /// @brief Liste de getters/setters
+  float getAspdebit() const;
+
+  void setAspdebit(float aspdebit);
+
+  float getAspinter() const;
+
+  void setAspinter(float aspinter);
+
+  float getAspinterdebut() const;
+
+  void setAspinterdebut(float aspinterdebut);
+
+private:
+
+  std::shared_ptr<bdd> database;
+  std::unique_ptr<pertechargeherse> hersealim;
+  std::vector<std::vector<float>> _Donnees;
+  std::vector<float> _diameters;
+  QString _nom;
+  int milieuhydro;
+  int poste_de_commande;
+  int _indexdebut;
+  int _indexfin;
+  float _longueur;
+  std::string _matiere;
+  bool amont;
+  float _debit;
+  bool _calcul;
+  int _decalage;
+
+  float aspdebit;
+  float aspinter;
+  float aspinterdebut;
+
+
 };
 
 #endif // TOUT_PARCELLE_H

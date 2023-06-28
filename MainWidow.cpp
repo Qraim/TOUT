@@ -1,9 +1,10 @@
 #include "MainWidow.h"
 
 
-float PI2 =3.14159265359;
+float PI2 = 3.14159265359;
 
-MainWindow::MainWindow(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db), Calcul("Calculer", this) {
+MainWindow::MainWindow(std::shared_ptr<bdd> db, QWidget *parent) : QWidget(parent), database(db),
+                                                                   Calcul("Calculer", this) {
     setFixedSize(800, 600);
 
     setWindowTitle(QString::fromStdString("Calcul du diametre intérieur d'un tube simple"));
@@ -21,7 +22,7 @@ MainWindow::MainWindow(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent
 
 
     std::vector<std::string> matiere_names = database->getAllMatiereNames();
-    for (const auto& matiere_name : matiere_names) {
+    for (const auto &matiere_name: matiere_names) {
         Materiau.addItem(QString::fromStdString(matiere_name));
     }
 
@@ -159,7 +160,7 @@ void MainWindow::onSwitchButtonClicked() {
 
 
 void MainWindow::updateSecondComboBox(int index) {
-    Pression.clear(); // Clear the contents to replace them
+    Pression.clear();
 
     // materiau selectionné
     QString selected_material = Materiau.itemText(index);
@@ -168,12 +169,10 @@ void MainWindow::updateSecondComboBox(int index) {
     std::vector<int> pressures = database->getAllPressuresForMatiere(selected_material.toStdString());
 
     // On remplis la comboox avec les pressions
-    for (const auto& pressure : pressures) {
+    for (const auto &pressure: pressures) {
         Pression.addItem(QString::number(pressure));
     }
 }
-
-
 
 
 float MainWindow::calculer() {
@@ -191,7 +190,7 @@ float MainWindow::calculer() {
 
 float MainWindow::calcullongueurdeniv() {
 
-    float a,b;
+    float a, b;
     double k;
 
     std::string material_name = Materiau.currentText().toStdString();
@@ -208,9 +207,9 @@ float MainWindow::calcullongueurdeniv() {
     QString unit = Unite->currentText();
 
     if (unit == "l/h") {
-        debitValue = (debitValue / 1000); // Convert to m³/h
+        debitValue = (debitValue / 1000); // Converti en m³/h
     } else if (unit == "l/s") {
-        debitValue = (debitValue * 3.6); // Convert to m³/h
+        debitValue = (debitValue * 3.6); // Converti en m³/h
     } // else: m³/h, pas de conversion
 
     float debits = (debitValue * 1000) / 3600;
@@ -223,8 +222,8 @@ float MainWindow::calcullongueurdeniv() {
     diametreText.replace(',', '.');
     float longueurs = diametreText.toFloat();
 
-    float area = (PI2 * std::pow(deniveles, 2)) / 4; // Calculate the cross-sectional area
-    float vitesses = debits / area; // Calculate the flow speed
+    float area = (PI2 * std::pow(deniveles, 2)) / 4; // On calcul l'aire du tuyau
+    float vitesses = debits / area; // Calcul de la vitesse
 
     float diametre = k * std::pow(debits, a) * std::pow(deniveles, b) * longueurs;
 
@@ -266,51 +265,55 @@ void MainWindow::Gettuyau(float diametre) {
 
     matiere selected_matiere = database->findMatiereByName(selected_material.toStdString());
 
-    const pression* found_pression_obj = nullptr;
+    const pression *found_pression_obj = nullptr;
 
-    for (const auto &pression_obj : selected_matiere.pressions) {
+    for (const auto &pression_obj: selected_matiere.pressions) {
         if (pression_obj.bar == selected_pressure.toInt()) {
-          found_pression_obj = &pression_obj;
-          break;
+            found_pression_obj = &pression_obj;
+            break;
         }
     }
 
     if (found_pression_obj != nullptr) {
         for (int i = 0; i < found_pression_obj->diametre.size(); ++i) {
-          float current_diametre = found_pression_obj->diametre[i].second;
-          if (current_diametre > diametre) {
-            closestDuo = {found_pression_obj->diametre[i].first, current_diametre};
-            closestIndex = i;
-            break;
-          }
+            float current_diametre = found_pression_obj->diametre[i].second;
+            if (current_diametre > diametre) {
+                closestDuo = {found_pression_obj->diametre[i].first, current_diametre};
+                closestIndex = i;
+                break;
+            }
         }
 
         if (closestIndex > 0) {
-          smallerDuo = {found_pression_obj->diametre[closestIndex - 1].first, found_pression_obj->diametre[closestIndex - 1].second};
+            smallerDuo = {found_pression_obj->diametre[closestIndex - 1].first,
+                          found_pression_obj->diametre[closestIndex - 1].second};
         }
 
         if (closestIndex + 1 < found_pression_obj->diametre.size()) {
-          largerDuo = {found_pression_obj->diametre[closestIndex + 1].first, found_pression_obj->diametre[closestIndex + 1].second};
+            largerDuo = {found_pression_obj->diametre[closestIndex + 1].first,
+                         found_pression_obj->diametre[closestIndex + 1].second};
         }
     }
 
     QString str1, str2, str3;
 
     if (smallerDuo.first != 0 || smallerDuo.second != 0) {
-        str1 = "Plus petit diamètre: [ " + QString::number(smallerDuo.first) + " ; " + QString::number(smallerDuo.second, 'f', 1) + " ] mm";
+        str1 = "Plus petit diamètre: [ " + QString::number(smallerDuo.first) + " ; " +
+               QString::number(smallerDuo.second, 'f', 1) + " ] mm";
     }
     if (closestDuo.first != 0 || closestDuo.second != 0) {
-        str2 = "Diamètre exact: [ " + QString::number(closestDuo.first) + " ; " + QString::number(closestDuo.second, 'f', 1) + " ] mm";
+        str2 = "Diamètre exact: [ " + QString::number(closestDuo.first) + " ; " +
+               QString::number(closestDuo.second, 'f', 1) + " ] mm";
     }
     if (largerDuo.first != 0 || largerDuo.second != 0) {
-        str3 = "Plus grand diamètre: [ " + QString::number(largerDuo.first) + " ; " + QString::number(largerDuo.second, 'f', 1) + " ] mm";
+        str3 = "Plus grand diamètre: [ " + QString::number(largerDuo.first) + " ; " +
+               QString::number(largerDuo.second, 'f', 1) + " ] mm";
     }
 
     Champligne.setText(str1);
     Champligne2.setText(str2);
     Champligne3.setText(str3);
 }
-
 
 
 void MainWindow::keyPressEvent(QKeyEvent *event) {
