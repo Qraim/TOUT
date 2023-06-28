@@ -1,4 +1,5 @@
 # TOUT
+Compilé avec MVSC, avec QT 5.15.2
 
 gag.h et gag.cpp non utilisé car remplacé par gag2.h et gag2.cpp, class gag contient une herse de goutte à goutte avec calcul invalide
 
