@@ -9,6 +9,8 @@ MainWindow::MainWindow(std::shared_ptr<bdd> db, QWidget *parent) : QWidget(paren
     setWindowTitle(QString::fromStdString("Calcul du diametre intérieur d'un tube simple"));
     setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
 
+    setFixedSize(650,600);
+
     Materiau.setFixedWidth(80);
     Pression.setFixedWidth(80);
     debit.setFixedWidth(60);
@@ -46,7 +48,6 @@ MainWindow::MainWindow(std::shared_ptr<bdd> db, QWidget *parent) : QWidget(paren
     longueurUnite = new QLabel("m");
     deniveleUnite = new QLabel("mm");
 
-
     // Débit et Vitesse
     gridLayout->addWidget(debitLabel, 2, 0);
     gridLayout->addWidget(&debit, 2, 1);
@@ -80,24 +81,24 @@ MainWindow::MainWindow(std::shared_ptr<bdd> db, QWidget *parent) : QWidget(paren
 
 
     Champligne.setReadOnly(true);
-    Champligne.setFixedSize(800,30);
+    Champligne.setFixedSize(650,30);
     Champligne.setAlignment(Qt::AlignCenter);
     gridLayout->addWidget(&ChampVitesse, 8, 0);
 
     ChampVitesse.setReadOnly(true);
-    ChampVitesse.setFixedSize(800,30);
+    ChampVitesse.setFixedSize(650,30);
     ChampVitesse.setAlignment(Qt::AlignCenter);
     gridLayout->addWidget(&Champligne, 9, 0);
 
     Champligne2.setReadOnly(true);
-    Champligne2.setFixedSize(800,30);
+    Champligne2.setFixedSize(650,30);
     Champligne2.setAlignment(Qt::AlignCenter);
 
     gridLayout->addWidget(&Champligne2, 10, 0);
 
     // Configuration of the third QLineEdit widget (Champligne3)
     Champligne3.setReadOnly(true);
-    Champligne3.setFixedSize(800,30);
+    Champligne3.setFixedSize(650,30);
     Champligne3.setAlignment(Qt::AlignCenter);
 
     gridLayout->addWidget(&Champligne3, 11, 0, 1, 4);
@@ -130,7 +131,6 @@ MainWindow::MainWindow(std::shared_ptr<bdd> db, QWidget *parent) : QWidget(paren
 
     // on déclenche les fonctions
     updateSecondComboBox(Materiau.currentIndex());
-    Changer.click();
     Changer.click();
 
 }
@@ -202,13 +202,17 @@ float MainWindow::calcullongueurdeniv() {
     debitText.replace(',', '.');
     float debitValue = debitText.toFloat();
 
-    QString unit = Unite->currentText();
+    int unit = Unite->currentIndex();
 
-    if (unit == "l/h") {
-        debitValue = (debitValue / 1000); // Converti en m³/h
-    } else if (unit == "l/s") {
-        debitValue = (debitValue * 3.6); // Converti en m³/h
-    } // else: m³/h, pas de conversion
+    if(unit==0){
+        debitValue = debitValue / 3600;  // m³/h -> m³/s
+    }
+    else if (unit == 1) {
+        debitValue = debitValue / 1000000 / 3600;  // l/h -> m³/s
+    }
+    else if (unit == 2) {
+        debitValue = debitValue / 1000;  // l/s -> m³/s
+    }
 
     float debits = (debitValue * 1000) / 3600;
 
@@ -220,10 +224,12 @@ float MainWindow::calcullongueurdeniv() {
     diametreText.replace(',', '.');
     float longueurs = diametreText.toFloat();
 
-    float area = (PI2 * std::pow(deniveles, 2)) / 4; // On calcul l'aire du tuyau
-    float vitesses = debits / area; // Calcul de la vitesse
+
 
     float diametre = k * std::pow(debits, a) * std::pow(deniveles, b) * longueurs;
+
+    float area = PI2 * std::pow((diametre/1000) / 2, 2);  // aire en m²
+    float vitesses = debits / area;  // vitesse en m/s
 
     // écris le champ vitesse
     setvitesse(vitesses);

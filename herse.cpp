@@ -481,6 +481,7 @@ void pertechargeherse::findWidgetIndex(QLineEdit *widget, int &row, int &col) {
             }
         }
     }
+
 }
 
 

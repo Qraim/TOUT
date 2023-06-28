@@ -9,7 +9,6 @@
 
 pertetubesimple::pertetubesimple(std::shared_ptr<bdd> db, QWidget *parent)
         : QWidget(parent), database(db) {
-
   setWindowTitle(QString::fromStdString("Tube simple"));
   setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
 
