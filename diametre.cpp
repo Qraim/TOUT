@@ -5,7 +5,6 @@ float PI2 = 3.14159265359;
 
 MainWindow::MainWindow(std::shared_ptr<bdd> db, QWidget *parent) : QWidget(parent), database(db),
                                                                    Calcul("Calculer", this) {
-    setFixedSize(800, 600);
 
     setWindowTitle(QString::fromStdString("Calcul du diametre intérieur d'un tube simple"));
     setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
@@ -19,7 +18,6 @@ MainWindow::MainWindow(std::shared_ptr<bdd> db, QWidget *parent) : QWidget(paren
     Champresultat.setFixedWidth(100);
     ChampVitesse.setFixedWidth(500);
     Changer.setFixedWidth(80);
-
 
     std::vector<std::string> matiere_names = database->getAllMatiereNames();
     for (const auto &matiere_name: matiere_names) {
@@ -38,7 +36,7 @@ MainWindow::MainWindow(std::shared_ptr<bdd> db, QWidget *parent) : QWidget(paren
     Unite->addItem("m3/h");
     Unite->addItem("l/h");
     Unite->addItem("l/s");
-    //Unite->setFixedWidth(100);
+    Unite->setFixedSize(100,40);
 
     debitLabel = new QLabel("Débit : ");
     vitesseLabel = new QLabel("Vitesse : ");
@@ -82,24 +80,24 @@ MainWindow::MainWindow(std::shared_ptr<bdd> db, QWidget *parent) : QWidget(paren
 
 
     Champligne.setReadOnly(true);
-    Champligne.setFixedWidth(800);
+    Champligne.setFixedSize(800,30);
     Champligne.setAlignment(Qt::AlignCenter);
-    gridLayout->addWidget(&ChampVitesse, 8, 0, 1, 4);
+    gridLayout->addWidget(&ChampVitesse, 8, 0);
 
     ChampVitesse.setReadOnly(true);
-    ChampVitesse.setFixedWidth(800);
+    ChampVitesse.setFixedSize(800,30);
     ChampVitesse.setAlignment(Qt::AlignCenter);
-    gridLayout->addWidget(&Champligne, 9, 0, 1, 4);
+    gridLayout->addWidget(&Champligne, 9, 0);
 
     Champligne2.setReadOnly(true);
-    Champligne2.setFixedWidth(800);
+    Champligne2.setFixedSize(800,30);
     Champligne2.setAlignment(Qt::AlignCenter);
 
-    gridLayout->addWidget(&Champligne2, 10, 0, 1, 4);
+    gridLayout->addWidget(&Champligne2, 10, 0);
 
     // Configuration of the third QLineEdit widget (Champligne3)
     Champligne3.setReadOnly(true);
-    Champligne3.setFixedWidth(800);
+    Champligne3.setFixedSize(800,30);
     Champligne3.setAlignment(Qt::AlignCenter);
 
     gridLayout->addWidget(&Champligne3, 11, 0, 1, 4);

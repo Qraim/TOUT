@@ -68,12 +68,11 @@ private:
     QLabel *longueurUnite;
     QLabel *deniveleUnite;
 
-    QLabel Champresultat;
+    QLineEdit Champresultat;
     QLineEdit Champligne;
     QLineEdit ChampVitesse;
     QLineEdit Champligne2;
     QLineEdit Champligne3;
-
 
     QPushButton Changer;
     QPushButton Calcul;

@@ -36,21 +36,37 @@ pertetubesimple::pertetubesimple(std::shared_ptr<bdd> db, QWidget *parent)
     gridLayout->setColumnStretch(3, 1);
     gridLayout->setColumnStretch(4, 1);
 
+    QLabel *labelMateriau = new QLabel("Materiau", this);
+    labelMateriau->setAlignment(Qt::AlignCenter);
+    gridLayout->addWidget(labelMateriau, 1, 0);
+
+    QLabel *labelDebit = new QLabel("Debit", this);
+    labelDebit->setAlignment(Qt::AlignCenter);
+    gridLayout->addWidget(labelDebit, 1, 1);
+
+    QLabel *labelDiametre = new QLabel("Diametre (mm)", this);
+    labelDiametre->setAlignment(Qt::AlignCenter);
+    gridLayout->addWidget(labelDiametre, 1, 3);
+
+    QLabel *labelLongueur = new QLabel("Longueur (m)", this);
+    labelLongueur->setAlignment(Qt::AlignCenter);
+    gridLayout->addWidget(labelLongueur, 1, 4);
+
+    QLabel *labelDenivele = new QLabel("Denivele (m)", this);
+    labelDenivele->setAlignment(Qt::AlignCenter);
+    gridLayout->addWidget(labelDenivele, 1, 5);
+
+
     // On ajoute les éléments à leur place dans la grille
-    gridLayout->addWidget(new QLabel("Materiau", this), 1, 0);
     gridLayout->addWidget(&materiau, 2, 0);
-    gridLayout->addWidget(new QLabel("Debit", this), 1, 1);
     debit.setFixedWidth(110);
     gridLayout->addWidget(&debit, 2, 1);
-    unite->setFixedWidth(90);
+    unite->setFixedWidth(110);
     gridLayout->addWidget(unite, 2, 2);
-    gridLayout->addWidget(new QLabel("Diametre (mm)", this), 1, 3);
-    diametre.setFixedWidth(120);
+    diametre.setFixedWidth(110);
     gridLayout->addWidget(&diametre, 2, 3);
-    gridLayout->addWidget(new QLabel("Longueur (m)", this), 1, 4);
     longueur.setFixedWidth(110);
     gridLayout->addWidget(&longueur, 2, 4);
-    gridLayout->addWidget(new QLabel("Denivele (m)", this), 1, 5);
     denivele.setFixedWidth(110);
     gridLayout->addWidget(&denivele, 2, 5);
 
@@ -68,9 +84,16 @@ pertetubesimple::pertetubesimple(std::shared_ptr<bdd> db, QWidget *parent)
 
 
     QHBoxLayout *resultFieldsLayout = new QHBoxLayout;
+
     Perte.setReadOnly(true);
+    Perte.setFixedHeight(30);
+
     Piezo.setReadOnly(true);
+    Piezo.setFixedHeight(30);
+
     Vitesse.setReadOnly(true);
+    Vitesse.setFixedHeight(30);
+
     resultFieldsLayout->addWidget(&Perte);
     resultFieldsLayout->addWidget(&Piezo);
     resultFieldsLayout->addWidget(&Vitesse);

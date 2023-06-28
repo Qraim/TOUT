@@ -50,27 +50,7 @@ tout::tout(QWidget *parent) : QWidget(parent) {
     // Créez le deuxième QComboBox pour les sous-options
     QComboBox *subOptionsComboBox = new QComboBox(this);
 
-    // Connectez le signal currentIndexChanged du premier QComboBox pour mettre à jour le deuxième QComboBox
-    connect(mainOptionsComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), [=](int index) {
-        subOptionsComboBox->clear();
-        switch (index) {
-        case 0: // Perte
-            subOptionsComboBox->addItem("Herse d'alimentation");
-            subOptionsComboBox->addItem("Goutte à goutte");
-            subOptionsComboBox->addItem("Tube simple");
-            break;
-        case 1: // Diametre
-            subOptionsComboBox->addItem("Un peu tout");
-            break;
-        case 2 :
-            subOptionsComboBox->addItem("Tube simple");
-            break;
 
-        case 3 :
-            subOptionsComboBox->addItem("Etude");
-            break;
-        }
-    });
 
     // Créez le QPushButton pour ouvrir la base de données
     QPushButton *openDatabaseButton = new QPushButton("Base de données", this);
@@ -87,34 +67,6 @@ tout::tout(QWidget *parent) : QWidget(parent) {
     connect(openDatabaseButton, &QPushButton::clicked, this, &tout::on_show_database_button_clicked);
 
     QPushButton *startButton = new QPushButton("Lancer", this);
-
-    connect(startButton, &QPushButton::clicked, [=]() {
-        switch (mainOptionsComboBox->currentIndex()) {
-        case 0: // Perte
-            if (subOptionsComboBox->currentIndex() == 0) {
-                on_show_pertechargeherse_button_clicked();
-            } else if (subOptionsComboBox->currentIndex() == 1) {
-                on_show_gag2_button_clicked();
-            } else if (subOptionsComboBox->currentIndex() == 2) {
-                on_show_tubesimple_button_clicked();
-            }
-            break;
-        case 1: // Diametre
-            if (subOptionsComboBox->currentIndex() == 0) {
-                on_show_pcdimm_button_clicked();
-            } else if (subOptionsComboBox->currentIndex() == 1) {
-                on_show_MW_button_clicked();
-            }
-            break;
-        case 2: // BDD
-            if (subOptionsComboBox->currentIndex() == 0) {
-                on_show_MW_button_clicked();
-            }
-            break;
-        case 3:
-            on_show_etud_button_clicked();
-        }
-    });
 
     subOptionsComboBox->addItem("Herse d'alimentation");
     subOptionsComboBox->addItem("Goutte à goutte");
@@ -166,6 +118,59 @@ tout::tout(QWidget *parent) : QWidget(parent) {
     startButton->setStyleSheet(buttonStyle);
     openDatabaseButton->setStyleSheet(openDatabaseButtonStyle);
 
+    // Connectez le signal currentIndexChanged du premier QComboBox pour mettre à jour le deuxième QComboBox
+    connect(mainOptionsComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), [=](int index) {
+        subOptionsComboBox->clear();
+        subOptionsComboBox->setVisible(true);
+        label2->setVisible(true);
+        switch (index) {
+            case 0: // Perte
+                subOptionsComboBox->addItem("Herse d'alimentation");
+                subOptionsComboBox->addItem("Goutte à goutte");
+                subOptionsComboBox->addItem("Tube simple");
+                break;
+            case 1: // Débit
+                subOptionsComboBox->addItem("Un peu tout");
+                break;
+            case 2 : // Diametre
+                subOptionsComboBox->addItem("Tube simple");
+                break;
+
+            case 3 : // etude
+                subOptionsComboBox->setVisible(false);
+                label2->setVisible(false);
+                break;
+        }
+    });
+
+    connect(startButton, &QPushButton::clicked, [=]() {
+        switch (mainOptionsComboBox->currentIndex()) {
+            case 0: // Perte
+                if (subOptionsComboBox->currentIndex() == 0) {
+                    on_show_pertechargeherse_button_clicked();
+                } else if (subOptionsComboBox->currentIndex() == 1) {
+                    on_show_gag2_button_clicked();
+                } else if (subOptionsComboBox->currentIndex() == 2) {
+                    on_show_tubesimple_button_clicked();
+                }
+                break;
+            case 1: // Diametre
+                if (subOptionsComboBox->currentIndex() == 0) {
+                    on_show_pcdimm_button_clicked();
+                } else if (subOptionsComboBox->currentIndex() == 1) {
+                    on_show_MW_button_clicked();
+                }
+                break;
+            case 2: // BDD
+                if (subOptionsComboBox->currentIndex() == 0) {
+                    on_show_MW_button_clicked();
+                }
+                break;
+            case 3:
+                on_show_etud_button_clicked();
+        }
+    });
+
 }
 
 void tout::on_show_tubesimple_button_clicked() {
@@ -211,6 +216,7 @@ void tout::on_show_etud_button_clicked(){
 void tout::closeEvent(QCloseEvent *event) {
     QApplication::quit();
 }
+
 
 bool tout::eventFilter(QObject *obj, QEvent *event) {
     if (event->type() == QEvent::KeyPress) {

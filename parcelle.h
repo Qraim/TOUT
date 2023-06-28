@@ -249,6 +249,9 @@ public:
 
   void setAspinterdebut(float aspinterdebut);
 
+  void doubledebit();
+
+
 private:
 
   std::shared_ptr<bdd> database;

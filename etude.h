@@ -189,6 +189,8 @@ private :
     void readFromFile(const std::string &filename);
 
     void keyPressEvent(QKeyEvent *event) override;
+
+    void doubledebit();
 };
 
 #endif // ETUDE_H

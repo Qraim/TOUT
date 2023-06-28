@@ -8,12 +8,12 @@ gag2::gag2(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent),database(d
   setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
 
 
-  QStringList headers = {"Matiere" ,"Débit", "Espacement", "Diamètre", "Longueur", "Hauteur", "Perte", "Piezo"};
+  QStringList headers = {"Matiere" ,"Débit", "Intervale", "Diamètre", "Longueur", "Hauteur", "Perte", "Piezo"};
   QStringList units = {" ", "m", "m", "mm", "m", "m", "m"};
 
   for (int i = 0; i < headers.size(); ++i) {
     QLabel *headerLabel = new QLabel(headers[i], this);
-    headerLabel->setFixedSize(200,30);
+    headerLabel->setFixedSize(100,30);
     headerLabel->setAlignment(Qt::AlignCenter);
     gridLayout->addWidget(headerLabel, 0, i);
   }
@@ -29,7 +29,7 @@ gag2::gag2(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent),database(d
 
   for (int i = 2; i < units.size(); ++i) {
     QLabel *unitLabel = new QLabel(units[i], this);
-    unitLabel->setFixedSize(200,40);
+    unitLabel->setFixedSize(100,40);
     unitLabel->setAlignment(Qt::AlignCenter);
     gridLayout->addWidget(unitLabel, 1, i);
   }
@@ -46,11 +46,11 @@ gag2::gag2(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent),database(d
   L->setAlignment(Qt::AlignCenter);
   H->setAlignment(Qt::AlignCenter);
 
-  Q->setFixedSize(200,40);
-  E->setFixedSize(200,40);
-  D->setFixedSize(200,40);
-  L->setFixedSize(200,40);
-  H->setFixedSize(200,40);
+  Q->setFixedSize(100,30);
+  E->setFixedSize(125,30);
+  D->setFixedSize(100,30);
+  L->setFixedSize(100,30);
+  H->setFixedSize(100,30);
 
   Q->installEventFilter(this);
   E->installEventFilter(this);
@@ -65,12 +65,12 @@ gag2::gag2(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent),database(d
   gridLayout->addWidget(H, 2, 5);
 
   QPushButton *calculateButton = new QPushButton("Calculer", this);
-  calculateButton->setFixedSize(200,40);
+  calculateButton->setFixedSize(100,30);
   connect(calculateButton, &QPushButton::clicked, this, &gag2::calcul);
   gridLayout->addWidget(calculateButton, 3, 3, Qt::AlignCenter);
 
   QPushButton *diametre = new QPushButton("Diametres", this);
-  diametre->setFixedSize(200,40);
+  diametre->setFixedSize(120,30);
   connect(diametre, &QPushButton::clicked, [=]() {
       database->afficher_tableaux();
   });
@@ -82,10 +82,10 @@ gag2::gag2(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent),database(d
   _Perte = new QLineEdit(this);
   _Piezo = new QLineEdit(this);
 
-  _Longueur->setFixedSize(200,40);
-  _Hauteur->setFixedSize(200,40);
-  _Perte->setFixedSize(200,40);
-  _Piezo->setFixedSize(200,40);
+  _Longueur->setFixedSize(100,30);
+  _Hauteur->setFixedSize(100,30);
+  _Perte->setFixedSize(100,30);
+  _Piezo->setFixedSize(100,30);
 
   _Longueur->setAlignment(Qt::AlignCenter);
   _Hauteur->setAlignment(Qt::AlignCenter);

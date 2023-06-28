@@ -6,6 +6,9 @@ float largueur = 150;
 
 etude::etude(std::shared_ptr<bdd> db, QWidget *parent)
         : QWidget(parent), database(db) {
+
+    setWindowTitle(QString::fromStdString("Etude"));
+
     milieu = true;
     limitations = true;
     poste = true;
@@ -60,11 +63,23 @@ etude::etude(std::shared_ptr<bdd> db, QWidget *parent)
 
     QPushButton *save = new QPushButton("Sauvegarder", this);
     QPushButton *pdfbutton = new QPushButton("Export PDF", this);
+    QPushButton *Debit = new QPushButton("Débit", this);
+    QPushButton *Diametre = new QPushButton("Diametre", this);
+
+    Debit->setFixedSize(140, 40);
+    Diametre->setFixedSize(140, 40);
     save->setFixedSize(140, 40);
     pdfbutton->setFixedSize(140, 40);
-    bottomlayout->addWidget(save, 0, 1);
-    bottomlayout->addWidget(pdfbutton, 0, 2);
 
+    connect(save, &QPushButton::clicked, this, &etude::saveDataWrapper);
+    connect(Debit, &QPushButton::clicked, this, &etude::changerDebitDialog);
+    connect(Diametre, &QPushButton::clicked, this, &etude::changerDiametreDialog);
+    connect(pdfbutton, &QPushButton::clicked, this, &etude::savePdf);
+
+    bottomlayout->addWidget(save, 0, 4);
+    bottomlayout->addWidget(pdfbutton, 0, 3);
+    bottomlayout->addWidget(Debit, 0, 2);
+    bottomlayout->addWidget(Diametre, 0, 1);
     mainLayout->addLayout(bottomlayout);
 
 
@@ -1248,6 +1263,15 @@ void etude::modifierdebit(int debut, int fin, float dia) {
     rafraichirTableau();
 }
 
+
+
+void etude::doubledebit() {
+    for (auto &parcelle: _parcelles) {
+        parcelle.doubledebit();
+    }
+    rafraichirTableau();
+}
+
 #include <QDialog>
 #include <QLineEdit>
 #include <QPushButton>
@@ -1293,9 +1317,7 @@ void etude::changerDiametreDialog() {
 void etude::changerDebitDialog() {
     QDialog dialog(nullptr);
     dialog.setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
-
     dialog.setWindowTitle("Changer debit");
-
 
     // Créer les QLineEdit
     std::string d = std::to_string(_Donnees.size());
@@ -1304,6 +1326,7 @@ void etude::changerDebitDialog() {
     QLineEdit diametreLineEdit;
 
     QPushButton button("Appliquer");
+    QPushButton doubleButton("x2"); // Bouton "x2"
 
     QVBoxLayout layout;
     layout.addWidget(new QLabel("Indice de début:"));
@@ -1313,9 +1336,19 @@ void etude::changerDebitDialog() {
     layout.addWidget(new QLabel("Nouveau débit:"));
     layout.addWidget(&diametreLineEdit);
     layout.addWidget(&button);
+
+    // Ajoute le bouton "x2" au layout
+    QHBoxLayout *topLayout = new QHBoxLayout;
+    topLayout->addStretch(1);  // Force le bouton à se déplacer à droite
+    topLayout->addWidget(&doubleButton);
+    layout.insertLayout(0, topLayout); // Ajoute le layout en haut du QVBoxLayout
+
     dialog.setLayout(&layout);
 
-    // Quand le boutton est clické appelle la fonction avec les parametres
+    // Connecte le bouton "x2" à la fonction doubledia
+    QObject::connect(&doubleButton, &QPushButton::clicked, this, &etude::doubledebit);
+
+    // Quand le bouton est clické, appelle la fonction avec les paramètres
     QObject::connect(&button, &QPushButton::clicked, [&]() {
         int debut = indiceDebutLineEdit.text().toInt() - 1;
         int fin = indiceFinLineEdit.text().toInt() - 1;
@@ -1326,6 +1359,7 @@ void etude::changerDebitDialog() {
 
     dialog.exec();
 }
+
 
 
 void etude::refresh() {

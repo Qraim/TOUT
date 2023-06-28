@@ -143,6 +143,7 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db, QWidget *parent)
 
     QGridLayout *bottomGrid = new QGridLayout();
     bottomLayout->addLayout(bottomGrid);
+/*
 
     QSpacerItem *spacer1 = new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Minimum);
     QSpacerItem *spacer2 = new QSpacerItem(5, 1, QSizePolicy::Expanding, QSizePolicy::Minimum);
@@ -161,6 +162,7 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db, QWidget *parent)
     bottomGrid->addItem(spacer6, 0, 5);
     bottomGrid->addItem(spacer7, 0, 7);
     bottomGrid->addItem(spacer8, 0, 8);
+*/
 
     // fixe la taille
     sigmadebitcase->setFixedSize(170, 40);
@@ -168,10 +170,18 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db, QWidget *parent)
     sigmapertecase->setFixedSize(170, 40);
     sigmapiezocase->setFixedSize(170, 40);
 
-    bottomGrid->addWidget(sigmadebitcase, 0, 2, Qt::AlignCenter);
-    bottomGrid->addWidget(sigmalongueurcase, 0, 4, Qt::AlignCenter);
-    bottomGrid->addWidget(sigmapertecase, 0, 10, Qt::AlignCenter);
-    bottomGrid->addWidget(sigmapiezocase, 0, 11, Qt::AlignCenter);
+
+    bottomGrid->addWidget(sigmadebitcase, 0, 12, Qt::AlignCenter);
+    bottomGrid->addWidget(sigmalongueurcase, 0, 18, Qt::AlignCenter);
+    bottomGrid->addWidget(sigmapertecase, 0, 38, Qt::AlignCenter);
+    bottomGrid->addWidget(sigmapiezocase, 0, 39, Qt::AlignCenter);
+
+    for(int i = 0; i < 40; i++) {
+        bottomGrid->setColumnStretch(i, 1);
+    }
+
+
+
 
     QPushButton *saveAsPdfButton = new QPushButton("Export PDF", this);
 
@@ -815,13 +825,13 @@ void pertechargeherse::calcul() {
 
     // Affiche les résultats dans les cases correspondantes en arrondissant à deux
     // chiffres après la virgule.
-    sigmadebitcase->setText(QString::number(sigmaDebit, 'f', 2));
+    sigmadebitcase->setText(QString::number(sigmaDebit, 'f', 2) + unite->currentText());
     sigmadebitcase->setAlignment(Qt::AlignCenter);
-    sigmalongueurcase->setText(QString::number(sigmaLongueur, 'f', 2));
+    sigmalongueurcase->setText(QString::number(sigmaLongueur, 'f', 2) + "m");
     sigmalongueurcase->setAlignment(Qt::AlignCenter);
-    sigmapertecase->setText(QString::number(sigmaPerte, 'f', 2));
+    sigmapertecase->setText(QString::number(sigmaPerte, 'f', 2) + "m");
     sigmapertecase->setAlignment(Qt::AlignCenter);
-    sigmapiezocase->setText(QString::number(sigmaPiezo + _hauteurligne, 'f', 2));
+    sigmapiezocase->setText(QString::number(sigmaPiezo + _hauteurligne, 'f', 2) + "m");
     sigmapiezocase->setAlignment(Qt::AlignCenter);
 
     // Rafraîchit le pertechargeherse.

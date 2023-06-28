@@ -424,7 +424,7 @@ void parcelle::setPosteDeCommande(int posteDeCommande) {
 
     for (int i = fin_droit; i >= debut; --i) {
         if (i == debut || i - 1 >= debut) {
-            _Donnees[i][amont ? 11 : 12] = _Donnees[i - 1][amont ? 3 : 4] - _Donnees[i][amont ? 3 : 4];
+            _Donnees[i][amont ? 11 : 12] =  _Donnees[i][amont ? 3 : 4] - _Donnees[i - 1][amont ? 3 : 4] ;
         }
     }
 
@@ -436,10 +436,6 @@ void parcelle::setPosteDeCommande(int posteDeCommande) {
         }
     }
 
-    /*for(auto &it : _Donnees[poste_de_commande]){
-      std::cout<<it<<" ";
-    }
-    std::cout<<std::endl;*/
 }
 
 int parcelle::getPosteDeCommande() const {
@@ -1027,4 +1023,12 @@ int parcelle::nbasp() { // Cmpte le nombre d'aspersseurs
         nbasp += i[2];
     }
     return nbasp;
+}
+
+void parcelle::doubledebit(){
+    for(auto &datas : _Donnees){
+        datas[9] *=2;
+    }
+    recalcul();
+    trouvemilieuhydro();
 }
