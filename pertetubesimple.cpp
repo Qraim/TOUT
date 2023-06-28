@@ -2,12 +2,12 @@
 // Created by qraim on 04/04/23.
 //
 
-#include "tubesimple.h"
+#include "pertetubesimple.h"
 #include <cmath>
 #include <memory>
 
 
-tubesimple::tubesimple(std::shared_ptr<bdd> db, QWidget *parent)
+pertetubesimple::pertetubesimple(std::shared_ptr<bdd> db, QWidget *parent)
         : QWidget(parent), database(db) {
 
   setWindowTitle(QString::fromStdString("Tube simple"));
@@ -101,13 +101,13 @@ tubesimple::tubesimple(std::shared_ptr<bdd> db, QWidget *parent)
     Calcul.setDisabled(true);
     debit.hasFocus();
 
-    connect(&Calcul, &QPushButton::clicked, this, &tubesimple::calculer);
-    connect(&debit, &QLineEdit::textChanged, this, &tubesimple::checkInputs);
-    connect(&diametre, &QLineEdit::textChanged, this, &tubesimple::checkInputs);
-    connect(&longueur, &QLineEdit::textChanged, this, &tubesimple::checkInputs);
-    connect(&denivele, &QLineEdit::textChanged, this, &tubesimple::checkInputs);
-    connect(&materiau, &QComboBox::currentTextChanged, this, &tubesimple::checkInputs);
-    connect(dia, &QPushButton::clicked, this, &tubesimple::showdia);
+    connect(&Calcul, &QPushButton::clicked, this, &pertetubesimple::calculer);
+    connect(&debit, &QLineEdit::textChanged, this, &pertetubesimple::checkInputs);
+    connect(&diametre, &QLineEdit::textChanged, this, &pertetubesimple::checkInputs);
+    connect(&longueur, &QLineEdit::textChanged, this, &pertetubesimple::checkInputs);
+    connect(&denivele, &QLineEdit::textChanged, this, &pertetubesimple::checkInputs);
+    connect(&materiau, &QComboBox::currentTextChanged, this, &pertetubesimple::checkInputs);
+    connect(dia, &QPushButton::clicked, this, &pertetubesimple::showdia);
 
 
     QDoubleValidator *debitValidator = new QDoubleValidator(0.01, 1000000, 2, this);
@@ -124,7 +124,7 @@ tubesimple::tubesimple(std::shared_ptr<bdd> db, QWidget *parent)
 
 }
 
-tubesimple::~tubesimple() {
+pertetubesimple::~pertetubesimple() {
     delete debit.validator();
     delete diametre.validator();
     delete longueur.validator();
@@ -132,7 +132,7 @@ tubesimple::~tubesimple() {
 }
 
 
-void tubesimple::keyPressEvent(QKeyEvent *event) {
+void pertetubesimple::keyPressEvent(QKeyEvent *event) {
 
     // Si la touche "Entrée" est appuyée
     if(event->key() == Qt::Key_Return){
@@ -169,7 +169,7 @@ void tubesimple::keyPressEvent(QKeyEvent *event) {
 
 
 
-void tubesimple::focusPreviousInput() {
+void pertetubesimple::focusPreviousInput() {
 
     if (denivele.hasFocus()) {
         longueur.setFocus();
@@ -182,7 +182,7 @@ void tubesimple::focusPreviousInput() {
     }
 }
 
-void tubesimple::focusNextInput() {
+void pertetubesimple::focusNextInput() {
 
     if (debit.hasFocus() ) {
         diametre.setFocus();
@@ -196,7 +196,7 @@ void tubesimple::focusNextInput() {
 
 }
 
-void tubesimple::calculer() {
+void pertetubesimple::calculer() {
 
     int index = unite->currentIndex();
     float flowRate = 0;
@@ -275,7 +275,7 @@ void tubesimple::calculer() {
 
 
 // Cette fonction permet de vérifier que les champs d'entrée sont correctement remplis
-void tubesimple::checkInputs() {
+void pertetubesimple::checkInputs() {
 
     // On réinitialise la couleur des champs d'entrée
     debit.setStyleSheet("");
@@ -324,13 +324,13 @@ void tubesimple::checkInputs() {
 
 }
 
-void tubesimple::clearresult(){
+void pertetubesimple::clearresult(){
     Vitesse.setText("");
     Piezo.setText("");
     Perte.setText("");
 }
 
 
-void tubesimple::showdia(){
+void pertetubesimple::showdia(){
     database->afficher_tableaux();
 }

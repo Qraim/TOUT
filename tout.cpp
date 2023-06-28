@@ -18,7 +18,7 @@ tout::tout(QWidget *parent) : QWidget(parent) {
     database = std::make_shared<bdd>(nullptr);
     database->setWindowFlags(Qt::Window);
 
-    tube = std::make_unique<tubesimple>(database, nullptr);
+    tube = std::make_unique<pertetubesimple>(database, nullptr);
     tube->setWindowFlags(Qt::Window);
 
     pcdimm = std::make_unique<pcdim>(database, nullptr);

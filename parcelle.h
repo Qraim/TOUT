@@ -11,7 +11,7 @@
 #include <QDialog>
 #include <QRadioButton>
 #include "bdd.h"
-#include "tableau.h"
+#include "herse.h"
 
 class parcelle {
 

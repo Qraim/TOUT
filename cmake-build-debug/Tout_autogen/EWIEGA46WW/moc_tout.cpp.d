@@ -88,15 +88,15 @@
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/stdio.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/syslimits.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/sys/wait.h \
-  /Users/qraim/CLionProjects/TOUT4/MainWidow.h \
   /Users/qraim/CLionProjects/TOUT4/bdd.h \
+  /Users/qraim/CLionProjects/TOUT4/diametre.h \
   /Users/qraim/CLionProjects/TOUT4/etude.h \
   /Users/qraim/CLionProjects/TOUT4/gag.h \
   /Users/qraim/CLionProjects/TOUT4/gag2.h \
+  /Users/qraim/CLionProjects/TOUT4/herse.h \
   /Users/qraim/CLionProjects/TOUT4/parcelle.h \
   /Users/qraim/CLionProjects/TOUT4/pcdim.h \
-  /Users/qraim/CLionProjects/TOUT4/tableau.h \
-  /Users/qraim/CLionProjects/TOUT4/tubesimple.h \
+  /Users/qraim/CLionProjects/TOUT4/pertetubesimple.h \
   /opt/homebrew/Cellar/qt@5/5.15.9/lib/QtCore.framework/Versions/5/Headers/QDebug \
   /opt/homebrew/Cellar/qt@5/5.15.9/lib/QtCore.framework/Versions/5/Headers/QFile \
   /opt/homebrew/Cellar/qt@5/5.15.9/lib/QtCore.framework/Versions/5/Headers/QLocale \

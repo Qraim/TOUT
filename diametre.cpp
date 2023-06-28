@@ -1,4 +1,4 @@
-#include "MainWidow.h"
+#include "diametre.h"
 
 
 float PI2 = 3.14159265359;

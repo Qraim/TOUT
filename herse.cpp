@@ -2,7 +2,7 @@
 // Created by qraim on 05/04/23.
 //
 
-#include "tableau.h"
+#include "herse.h"
 #include <QDir>
 #include <QFileDialog>
 

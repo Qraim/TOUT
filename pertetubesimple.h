@@ -25,13 +25,13 @@
 #include "bdd.h"
 
 
-class tubesimple : public QWidget {
+class pertetubesimple : public QWidget {
 Q_OBJECT
 
 public:
 
-    tubesimple(std::shared_ptr<bdd> db, QWidget *parent = nullptr);
-    ~tubesimple();
+    pertetubesimple(std::shared_ptr<bdd> db, QWidget *parent = nullptr);
+    ~pertetubesimple();
     void refresh(){
         debit.clear();
         diametre.clear();

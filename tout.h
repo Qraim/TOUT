@@ -7,10 +7,10 @@
 
 #include <memory>
 #include "bdd.h"
-#include "tubesimple.h"
-#include "tableau.h"
+#include "pertetubesimple.h"
+#include "herse.h"
 #include "pcdim.h"
-#include "MainWidow.h"
+#include "diametre.h"
 #include "gag.h"
 #include "gag2.h"
 #include "etude.h"
@@ -44,7 +44,7 @@ public:
 private:
 
     std::shared_ptr<bdd> database;
-    std::unique_ptr<tubesimple> tube;
+    std::unique_ptr<pertetubesimple> tube;
     std::unique_ptr<pertechargeherse> perteherse;
     std::unique_ptr<pcdim> pcdimm;
     std::unique_ptr<MainWindow> MW;
