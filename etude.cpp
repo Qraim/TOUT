@@ -426,7 +426,7 @@ void etude::rafraichirTableau() {
                 gridLayout->setVerticalSpacing(0);
                 gridLayout->addWidget(lineEdit, ligne, i);
                 // Ajoute un signal pour la 16ème/5éme/6éme colonne
-                if ((i == 15 || i == 5 || i == 6 || i == 9) || (i == 23 && !tout0)) {
+                if ((i == 15 || i == 5 || i == 6 || i == 9) || (i == 23 || i ==2 && !tout0)) {
                     lineEdit->installEventFilter(this);
                     lineEdit->setStyleSheet("QLineEdit { color: yellow; }");
                     lineEdit->setReadOnly(false);
@@ -443,20 +443,27 @@ void etude::rafraichirTableau() {
                             this->updateDebit(ligne - 1, newDiameter);
                         });
                     }
-                    if ((i == 23) && !tout0) {
-                        if (_Donnees[ligne - 1][2] != 0) {
-                            int parcelIndex = std::distance(parcelInfos.begin(), parcelInfoIt);
-                            QPushButton *afficher = new QPushButton("Afficher");
-                            afficher->setStyleSheet("border: 1px solid white;");
-                            gridLayout->addWidget(afficher, ligne, i);
-                            connect(afficher, &QPushButton::clicked, [this, ligne, parcelIndex]() {
-                                this->_parcelles[parcelIndex].herse(ligne - 1);
-                            });
+                    if (!tout0) {
+                        if(i == 23){
+                            if (_Donnees[ligne - 1][2] != 0) {
+                                int parcelIndex = std::distance(parcelInfos.begin(), parcelInfoIt);
+                                QPushButton *afficher = new QPushButton("Afficher");
+                                afficher->setStyleSheet("border: 1px solid white;");
+                                gridLayout->addWidget(afficher, ligne, i);
+                                connect(afficher, &QPushButton::clicked, [this, ligne, parcelIndex]() {
+                                    this->_parcelles[parcelIndex].herse(ligne - 1);
+                                });
 
+                            } else {
+                                lineEdit->setStyleSheet(textColor);
+                                lineEdit->setReadOnly(true);
+                            }
                         } else {
-                            lineEdit->setStyleSheet(textColor);
-                            lineEdit->setReadOnly(true);
+                            connect(lineEdit, &QLineEdit::textEdited, [this, ligne, parcelIndex](const QString &newnombre) {
+                                this->_parcelles[parcelIndex].placerarrosseurs(ligne - 1, newnombre.toInt() );
+                            });
                         }
+
 
                     } else {
                         int colonne = i;
@@ -529,6 +536,8 @@ void etude::rafraichirTableau() {
                 connect(setamont, QOverload<int>::of(&QComboBox::currentIndexChanged), [this, parcelIndex](int index) {
                     bool isAmont = (index == 0);
                     this->_parcelles[parcelIndex].SetAmont(isAmont);
+                    rafraichirTableau();
+
                 });
 
                 gridLayout->addWidget(setamont, ligne - 3, 16);  // Ajoute le QLineEdit à la 16e colonne
@@ -1521,8 +1530,6 @@ void etude::exportPdf(const QString &fileName) {
                          QString::number(_parcelles[0].getAspdebit()) + QString("m3/h"));
         painter.drawText(pdfWriter.width() - 1000, lineHeight + 200,
                          QString::number(_parcelles[0].getAspinterdebut()) + QString("m Entre ASP"));
-        painter.drawText(pdfWriter.width() - 1000, lineHeight + 400,
-                         QString::number(_parcelles[0].getAspinter()) + QString("m Entre Rang"));
     }
 
     auto drawHeaderAndLines = [&](int yOffset) {
@@ -1705,7 +1712,6 @@ void etude::saveToFile(const std::string &filename) const {
                 << p.getIndexfin() << " "
                 << p.getDecalage() << " "
                 << p.getAspdebit() << " "
-                << p.getAspinter() << " "
                 << p.isAmont() << " "
                 << p.getAspinterdebut() << "\n";
     }
@@ -1724,8 +1730,9 @@ void etude::readFromFile(const std::string &filename) {
 
     std::vector<std::vector<float>> data;
     std::string line;
-    while (std::getline(inFile, line) && line != "---") {
+    while (std::getline(inFile, line) && (line != "---\r" && line != "---")) {
         std::istringstream iss(line);
+
         std::vector<float> row;
         float value;
         while (iss >> value) {
@@ -1749,7 +1756,7 @@ void etude::readFromFile(const std::string &filename) {
         bool amont;
         float aspdebit, aspinter, aspinterdebut;
 
-        if (!(iss >> nom >> poste_de_commande >> indexdebut >> indexfin >> decalage >> aspdebit >> aspinter >> amont
+        if (!(iss >> nom >> poste_de_commande >> indexdebut >> indexfin >> decalage >> aspdebit  >> amont
                   >> aspinterdebut)) {
             break; // Erreur dans la lecture
         }
@@ -1757,8 +1764,8 @@ void etude::readFromFile(const std::string &filename) {
                               amont);
 
         p.setPosteDeCommande(poste_de_commande);
+        p.setDecalage(decalage);
         p.setAspdebit(aspdebit);
-        p.setAspinter(aspinter);
         p.setAspinterdebut(aspinterdebut);
 
         p.calcul();
@@ -1770,6 +1777,7 @@ void etude::readFromFile(const std::string &filename) {
     inFile.close();
 
     rafraichirTableau();
+
 }
 
 

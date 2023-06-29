@@ -12,7 +12,6 @@ parcelle::parcelle(std::vector<std::vector<float>> &data, int indexdebut, int in
 
     int range_size = indexfin - indexdebut;
     aspdebit = 0;
-    aspinter = 0;
     aspinterdebut = 0;
 
     _Donnees.resize(range_size);
@@ -500,7 +499,10 @@ void parcelle::calcul_gauche(float a, float b, double k) {
     float cumulperte = 0;
     float cumulpiezo = 0;
 
-    for (int i = 0; i < debut - _decalage; --i) {
+    for (int i = 0; i < debut - _decalage; ++i) {
+        if(i==-1){
+            return;
+        }
         float Dia = _Donnees[i][15]; // Diamètre en mm
         sigmadebit += _Donnees[i][9]; // Débit en l/h
         float L = _Donnees[i][5]; // Longueur de la conduite en mètre
@@ -597,7 +599,7 @@ void parcelle::calculaspersseurs(std::vector<int> &indices, float a, float b, do
 
     for(auto &it : _Donnees){
         if(it[2]==0){
-            it[15] = 0;
+            it[15] = 0; // On suprimme les diametre ou il n'y a pas d'aspersseurs
         }
     }
 
@@ -616,11 +618,6 @@ void parcelle::calculaspersseurs(std::vector<int> &indices, float a, float b, do
     }
     form.addRow("Débit en m³/h:", lineEditDebit);
 
-    QLineEdit *lineEditDistRang = new QLineEdit(&dialog);
-    if (aspinter != 0) {
-        lineEditDistRang->setText(QString::number(aspinter));
-    }
-    form.addRow("Distance entre rangs:", lineEditDistRang);
 
     QLineEdit *lineEditDistAsperseurs = new QLineEdit(&dialog);
     if (aspinterdebut != 0) {
@@ -638,7 +635,6 @@ void parcelle::calculaspersseurs(std::vector<int> &indices, float a, float b, do
 
     if (dialog.exec() == QDialog::Accepted) {
         aspdebit = lineEditDebit->text().toFloat();
-        aspinter = lineEditDistRang->text().toFloat();
         aspinterdebut = lineEditDistAsperseurs->text().toFloat();
 
         _debit = 0;
@@ -920,7 +916,6 @@ std::string parcelle::toString() const {
         s.back() = ';';
     }
 
-
     // on sauvegarde les données importantes
     s += _nom.toStdString() + ";";
     s += std::to_string(milieuhydro) + ";";
@@ -1005,13 +1000,6 @@ void parcelle::setAspdebit(float aspdebit) {
     parcelle::aspdebit = aspdebit;
 }
 
-float parcelle::getAspinter() const {
-    return aspinter;
-}
-
-void parcelle::setAspinter(float aspinter) {
-    parcelle::aspinter = aspinter;
-}
 
 float parcelle::getAspinterdebut() const {
     return aspinterdebut;
@@ -1036,4 +1024,10 @@ void parcelle::doubledebit(){
     }
     recalcul();
     trouvemilieuhydro();
+}
+
+void parcelle::placerarrosseurs(int ligne, int nombre){
+    if(nombre > 0)
+        return;
+    _Donnees[2][ligne] = nombre;
 }

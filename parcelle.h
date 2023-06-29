@@ -252,6 +252,8 @@ public:
   void doubledebit();
 
 
+    void placerarrosseurs(int ligne, int nombre);
+
 private:
 
   std::shared_ptr<bdd> database;
@@ -271,7 +273,6 @@ private:
   int _decalage;
 
   float aspdebit;
-  float aspinter;
   float aspinterdebut;
 
 
