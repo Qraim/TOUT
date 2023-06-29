@@ -232,7 +232,6 @@ void etude::traitements(QString data) {
 
         // Ignore lines that start with "Parcelle", "Intervalle", or "Nombre"
         if (lines[i].startsWith("Parcelle") || lines[i].startsWith("Intervalle") || lines[i].startsWith("Nombre")) {
-//      std::cout<<lines[i].toStdString()<<std::endl;
             continue;
         }
 
@@ -1139,7 +1138,6 @@ void etude::updateinterval(int row, int ligne, const QString &newDiameter) {
 
     for (auto &parcel: _parcelles) {
         if (row < parcel.getDonnees().size()) {
-            //std::cout<<row<<" "<<ligne<<std::endl;
             parcel.modifieinter(row, ligne, diameter);
             return;
         }
@@ -1600,6 +1598,10 @@ void etude::exportPdf(const QString &fileName) {
         int cpt = 0;
         for (auto &i: indices) {
 
+            if(i==15 && tout0)
+                if(donneesLigne[2]==0)
+                    continue;
+
 
             QString cellText;
             if (donneesLigne[i] == 0) {
@@ -1614,6 +1616,7 @@ void etude::exportPdf(const QString &fileName) {
                 cellText += "m/s";
             } else if (i == 17 || i == 19 || i == 20 || i == 21 || i == 22) {
                 cellText += "m";
+
             }
 
             if (donneesLigne[i] == 0) {

@@ -548,12 +548,7 @@ std::vector<int> parcelle::trouveaspersseurs() {
 
 #include <QInputDialog>
 
-/*// Créez une fonction pour calculer la perte
-float calculPerte(float debit, float Dia, float intervale, float a, float b, float k) {
-  float perte = k * std::pow((debit), a) * std::pow(Dia, b) * intervale;
-  //std::cout<<perte<<std::endl;
-  return perte;
-}*/
+
 
 void parcelle::calculpeigne(float a, float b, double k, float debitasp) {
     int debut = poste_de_commande - _decalage;
@@ -599,6 +594,13 @@ void parcelle::calculpeigne(float a, float b, double k, float debitasp) {
 
 
 void parcelle::calculaspersseurs(std::vector<int> &indices, float a, float b, double k) {
+
+    for(auto &it : _Donnees){
+        if(it[2]==0){
+            it[15] = 0;
+        }
+    }
+
     int debut = poste_de_commande - _decalage;
     if (debut < 0) {
         return;
@@ -810,7 +812,7 @@ void parcelle::calcul_gauche_aspersseurs(std::vector<int> &indices, float debit,
             const float aire = const_pi * std::pow((diametreM / 2), 2);
             const float vitesse = debitM3S / aire;
 
-            _Donnees[i][17] = -denivele;
+            _Donnees[i][17] = denivele;
             _Donnees[i][18] = vitesse;
             _Donnees[i][19] = perte;
             _Donnees[i][20] = piezo;
@@ -862,6 +864,9 @@ void parcelle::calcul_droit_aspersseurs(std::vector<int> &indices, float debit, 
         }
     }
 
+    std::vector<int> reverse = indices;
+    std::reverse(reverse.begin(), reverse.end());
+
     float sigmadebit = 0;
     float cumulperte = 0;
     float cumulpiezo = 0;
@@ -885,7 +890,7 @@ void parcelle::calcul_droit_aspersseurs(std::vector<int> &indices, float debit, 
             const float aire = const_pi * std::pow((diametreM / 2), 2);
             const float vitesse = debitM3S / aire;
 
-            const int nextIndex = *std::upper_bound(indices.begin(), indices.end(), i, std::greater<int>());
+            const int nextIndex = *std::upper_bound(reverse.begin(), reverse.end(), i, std::greater<int>());
             const float denivele = amont ? _Donnees[nextIndex][3] - _Donnees[i][3]
                                          : _Donnees[nextIndex][4] - _Donnees[i][4];
 

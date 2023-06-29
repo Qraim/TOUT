@@ -12,7 +12,6 @@ const int VERTICAL_SPACING = 1;
 
 float PI = 3.14159265359;
 
-
 pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db, QWidget *parent)
         : QWidget(parent), database(db) {
 
@@ -421,8 +420,6 @@ void pertechargeherse::on_lineEdit_editingFinished(const QString &text, int row,
     if (ok) {
         if (row >= 0 && row < _Donnees.size() && col >= 0 && col < _Donnees[row].size()) {
             _Donnees[row][col] = value;
-        } else {
-            qDebug() << "Error: Invalid row or col value.";
         }
     }
 }
@@ -1601,10 +1598,7 @@ void pertechargeherse::importData() {
 
             QStringList cols = lines[i].split(QRegExp("\\s+"));
             if (cols.size() >= 11) {
-/*        for(int j=0;j<cols.size();j++){
-            std::cout<<cols[j].toStdString()<<" ";
-        }
-        std::cout<<" "<<std::endl;*/
+
 
                 float col6 = cols[7].toFloat();
                 float col11 = cols[11].toFloat();
