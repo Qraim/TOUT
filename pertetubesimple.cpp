@@ -260,7 +260,7 @@ void pertetubesimple::calculer() {
 
     float pipeDiameter = Dia / 1000; // Convertit mm en m
 
-    float pipeArea = M_PI * pow(pipeDiameter / 2, 2); // Calcule l'aire de la section transversale du tuyau en m²
+    float pipeArea = 3.14159265359 * pow(pipeDiameter / 2, 2); // Calcule l'aire de la section transversale du tuyau en m²
     float v = flowRate / pipeArea; // Calcule la vitesse d'écoulement en m/s
 
     std::tuple<float, float, double> coefficients = database->get_material_coefficients(materiau.currentText().toStdString());

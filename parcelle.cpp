@@ -74,13 +74,28 @@ int parcelle::trouvemilieuhydro() {
         }
 
         debitTotal += donnee[9];
+
+    }
+
+
+    float milieudebitotal = debitTotal /2;
+
+
+    for (int i = 0; i < _Donnees.size(); ++i) {
+        const auto &donnee = _Donnees[i];
+        if (donnee.size() < 11) {
+            continue;
+        }
+
         cumulatedDebit += donnee[9];
 
         // Mettre à jour l'indice du milieu hydrologique lors du passage du débit cumulé à la moitié du débit total
-        if (cumulatedDebit >= debitTotal / 2 && midHydroIndex == 0) {
+        if (cumulatedDebit >= milieudebitotal ) {
             midHydroIndex = i;
+            break;
         }
     }
+
 
     _debit = debitTotal;
 
@@ -95,7 +110,15 @@ int parcelle::trouvemilieuhydro() {
 
 void parcelle::calcul() {
     // Si poste_de_commande est à zéro, on sort de la fonction
-    if (poste_de_commande == 0) return;
+    if (poste_de_commande<0 ||poste_de_commande> _Donnees.size() ){
+        if (milieuhydro == 0) { // Si le milieu hydraulique est 0
+            // Placer le poste de commande au milieu de la parcelle
+            poste_de_commande = _Donnees.size() / 2;
+        } else {
+            // Utiliser le milieu hydraulique comme poste de commande
+            poste_de_commande = milieuhydro +1;
+        }
+    }
 
     if (_matiere.empty()) _matiere = "PVC";
 
@@ -156,10 +179,10 @@ void parcelle::calculdiametre(float a, float b, double k) {
 
         float additional = amont ? _Donnees[i][14] : _Donnees[i][13];
 
-        _Donnees[i][23] = perte16;
-        _Donnees[i][24] = perte16 + additional;
-        _Donnees[i][25] = perte20;
-        _Donnees[i][26] = perte20 + additional;
+        _Donnees[i][24] = perte16;
+        _Donnees[i][25] = perte16 + additional;
+        _Donnees[i][26] = perte20;
+        _Donnees[i][27] = perte20 + additional;
     }
 }
 
@@ -468,7 +491,8 @@ void parcelle::calcul_droit(float a, float b, double k) {
         cumulperte += perte; // Cumul de la perte de charge
 
         float denivele = amont ? _Donnees[i][3] - _Donnees[std::max(0,fin_gauche)][3] : _Donnees[i][4] - _Donnees[std::max(0,fin_gauche)][4];
-        float piezo = perte + (amont ? _Donnees[i][3] - _Donnees[std::max(i - 1, debut)][3] : _Donnees[i][4] - _Donnees[std::max(i - 1, debut)][4]);
+
+        float piezo = perte + (amont ? _Donnees[i][11] : _Donnees[i][12]);
         cumulpiezo += piezo;
 
         float debitM3S = sigmadebit / 3600 / 1000; // Conversion de l/h à m³/s
@@ -512,7 +536,7 @@ void parcelle::calcul_gauche(float a, float b, double k) {
         cumulperte += perte; // Cumul de la perte de charge
 
         float denivele = amont ? _Donnees[i][3] - _Donnees[std::max(0,fin_gauche)][3] : _Donnees[i][4] - _Donnees[std::max(0,fin_gauche)][4];
-        float piezo = perte + (amont ? _Donnees[i][3] - _Donnees[std::max(i - 1, debut)][3] : _Donnees[i][4] - _Donnees[std::max(i - 1, debut)][4]);
+        float piezo = perte + (amont ? _Donnees[i][11] : _Donnees[i][12]);
         cumulpiezo += piezo;
 
         float debitM3S = sigmadebit / 3600 / 1000; // Conversion de l/h à m³/s
@@ -1027,7 +1051,12 @@ void parcelle::doubledebit(){
 }
 
 void parcelle::placerarrosseurs(int ligne, int nombre){
-    if(nombre > 0)
+    if(nombre < 0)
         return;
-    _Donnees[2][ligne] = nombre;
+    for(auto &datas : _Donnees){
+        if(datas[0]==ligne){
+            std::cout<<"fait"<<std::endl;
+            datas[2]=nombre;
+        }
+    }
 }

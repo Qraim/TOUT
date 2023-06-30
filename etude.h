@@ -26,6 +26,8 @@ const QString RED_TEXT = "QLineEdit { color: black; background-color : #e6ffff ;
 const QString ORANGE_TEXT = "QLineEdit { color: white; background-color : green; border: 1px solid gray; border-radius: 4px;padding: 2px 4px;}";
 const QString BLUE_TEXT = "QLineEdit { color: white; background-color : blue;border: 1px solid gray; border-radius: 4px;padding: 2px 4px; }";
 const QString PINK_TEXT = "QLineEdit { color: white; background-color : pink;border: 1px solid gray; border-radius: 4px;padding: 2px 4px; }";
+const QString YELLOW_TEXT = "QLineEdit { color: yellow;border: 1px solid white; border-radius: 4px;padding: 2px 4px; }";
+const QString SPEED_TEXT = "QLineEdit { color: white; background-color : red; border: 1px solid gray; border-radius: 4px;padding: 2px 4px; }";
 
 
 struct ParcelInfo {
@@ -64,6 +66,11 @@ private :
     QGridLayout *gridLayout;
     QVBoxLayout *mainLayout;
     QGridLayout *bottomlayout;
+
+
+    void updateAllLineEditsFromDonnees();
+
+    void modifierarro(int ligne, float nombre);
 
     ///
     /// @brief Initialise les données ou les paramètres nécessaires. Permet de choisir entre 2.2/0.6 ou 1.6/0.5
