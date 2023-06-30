@@ -1057,4 +1057,5 @@ void parcelle::placerarrosseurs(int ligne, int nombre){
         return;
 
     _Donnees[ligne-1][2] = nombre;
+    std::cout<<"fait"<<std::endl;
 }

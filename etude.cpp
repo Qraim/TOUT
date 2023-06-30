@@ -620,8 +620,8 @@ void etude::rafraichirTableau() {
                             int parcelIndex = std::distance(parcelInfos.begin(), parcelInfoIt);
 
                             connect(lineEdit, &QLineEdit::textEdited, [this, ligne, parcelIndex](const QString &newnombre) {
-                                this->_parcelles[parcelIndex].placerarrosseurs(ligne-1, newnombre.toInt() );
-                                rafraichirTableau();
+                                std::cout<<ligne<<" "<<parcelIndex<<" "<<newnombre.toStdString()<<std::endl;
+                                this->_parcelles[parcelIndex].placerarrosseurs(ligne, newnombre.toInt() );
                             });
                         }
 
