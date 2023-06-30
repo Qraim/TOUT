@@ -1053,10 +1053,8 @@ void parcelle::doubledebit(){
 void parcelle::placerarrosseurs(int ligne, int nombre){
     if(nombre < 0)
         return;
-    for(auto &datas : _Donnees){
-        if(datas[0]==ligne){
-            std::cout<<"fait"<<std::endl;
-            datas[2]=nombre;
-        }
-    }
+    if(ligne > _Donnees.size()-1)
+        return;
+
+    _Donnees[ligne-1][2] = nombre;
 }

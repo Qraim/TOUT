@@ -21,6 +21,9 @@ public:
 
   parcelle(std::vector<std::vector<float>> &data, int indexdebut, int indexfin, std::shared_ptr<bdd> db, QString nom, bool amont2 = true, std::string mat="PEHD");
 
+
+  void placerarrosseurs(int ligne, int nombre);
+
   ///
   /// @brief Récupère le milieu hydrologique.
   ///
@@ -252,7 +255,6 @@ public:
   void doubledebit();
 
 
-    void placerarrosseurs(int ligne, int nombre);
 
 private:
 

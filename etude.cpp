@@ -603,7 +603,7 @@ void etude::rafraichirTableau() {
                     if (!tout0) {
                         if(i == 23){
                             if (_Donnees[ligne - 1][2] != 0) {
-                                std::cout<<_Donnees[ligne - 1][2]<<std::endl;
+
                                 int parcelIndex = std::distance(parcelInfos.begin(), parcelInfoIt);
                                 QPushButton *afficher = new QPushButton("Afficher");
                                 afficher->setStyleSheet("border: 1px solid white;");
@@ -617,8 +617,11 @@ void etude::rafraichirTableau() {
                                 lineEdit->setReadOnly(false);
                             }
                         } else {
+                            int parcelIndex = std::distance(parcelInfos.begin(), parcelInfoIt);
+
                             connect(lineEdit, &QLineEdit::textEdited, [this, ligne, parcelIndex](const QString &newnombre) {
-                                modifierarro(ligne, newnombre.toInt() );
+                                this->_parcelles[parcelIndex].placerarrosseurs(ligne-1, newnombre.toInt() );
+                                rafraichirTableau();
                             });
                         }
 
@@ -630,17 +633,7 @@ void etude::rafraichirTableau() {
                         });
                     }
 
-                    if (!parcelInfos.empty()) {
-                        // Trouvez la dernière ligne de la parcelle actuelle
-                        int lastRowOfParcel = parcelInfoIt->limiteParcelle;
-                        // Si la ligne actuelle est la dernière ligne de la parcelle, connectez le signal editingFinished() à la méthode calcul()
-                        if (ligne == lastRowOfParcel) {
-                            int parcelIndex = std::distance(parcelInfos.begin(), parcelInfoIt);
-                            connect(lineEdit, &QLineEdit::editingFinished, [this, parcelIndex] {
-                                this->_parcelles[parcelIndex].calcul();
-                            });
-                        }
-                    }
+
                 } else if (i == 18) {
                     if (donneesLigne[i] > 2) {
                         lineEdit->setStyleSheet("QLineEdit { color: red; }");
@@ -1416,8 +1409,6 @@ void etude::modifierdiametre(int debut, int fin, float dia) {
     }
 
     rafraichirTableau();
-
-
 }
 
 
@@ -1441,16 +1432,20 @@ void etude::modifierdebit(int debut, int fin, float dia) {
 }
 
 void etude::modifierarro(int ligne, float nombre) {
-
+    std::cout<<"DEBUT "<<ligne<<std::endl;
     int i = 0;
+
     for (auto &parcelle: _parcelles) {
         auto &datas = parcelle.getDonnees();
         for (int j = 0; j < datas.size(); j++) {
-            if (datas[j][0]==ligne) {
-                datas[j][2] = nombre;
+            if(i==(ligne-1)){
+                datas[i][2] = nombre;
+                std::cout<<"fait "<<i<<std::endl;
+                break;
             }
             i++;
         }
+
     }
     rafraichirTableau();
 }
