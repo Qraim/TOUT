@@ -109,6 +109,7 @@ int parcelle::trouvemilieuhydro() {
 
 
 void parcelle::calcul() {
+
     // Si poste_de_commande est à zéro, on sort de la fonction
     if (poste_de_commande<0 ||poste_de_commande> _Donnees.size() ){
         if (milieuhydro == 0) { // Si le milieu hydraulique est 0
@@ -1053,9 +1054,9 @@ void parcelle::doubledebit(){
 void parcelle::placerarrosseurs(int ligne, int nombre){
     if(nombre < 0)
         return;
-    if(ligne > _Donnees.size()-1)
+    if(ligne-_indexdebut-1 > _Donnees.size()-1)
         return;
 
-    _Donnees[ligne-1][2] = nombre;
+    _Donnees[ligne-1-_indexdebut][2] = nombre;
     std::cout<<"fait"<<std::endl;
 }
