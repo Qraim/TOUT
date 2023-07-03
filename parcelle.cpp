@@ -840,6 +840,13 @@ void parcelle::calcul_gauche_aspersseurs(std::vector<int> &indices, float debit,
             _Donnees[i][20] = piezo;
             _Donnees[i][21] = cumulperte;
             _Donnees[i][22] = cumulpiezo;
+        } else {
+            _Donnees[i][17] = 0;
+            _Donnees[i][18] = 0;
+            _Donnees[i][19] = 0;
+            _Donnees[i][20] = 0;
+            _Donnees[i][21] = 0;
+            _Donnees[i][22] = 0;
         }
     }
 }
@@ -926,6 +933,13 @@ void parcelle::calcul_droit_aspersseurs(std::vector<int> &indices, float debit, 
             _Donnees[i][20] = piezo;
             _Donnees[i][21] = cumulperte;
             _Donnees[i][22] = cumulpiezo;
+        } else {
+            _Donnees[i][17] = 0;
+            _Donnees[i][18] = 0;
+            _Donnees[i][19] = 0;
+            _Donnees[i][20] = 0;
+            _Donnees[i][21] = 0;
+            _Donnees[i][22] = 0;
         }
     }
 }
@@ -1044,9 +1058,9 @@ int parcelle::nbasp() { // Cmpte le nombre d'aspersseurs
     return nbasp;
 }
 
-void parcelle::doubledebit(){
+void parcelle::doubledebit(float multi){
     for(auto &datas : _Donnees){
-        datas[9] *=2;
+        datas[9] *=multi;
     }
     recalcul();
     trouvemilieuhydro();
@@ -1060,4 +1074,15 @@ void parcelle::placerarrosseurs(int ligne, int nombre){
 
     _Donnees[ligne-1-_indexdebut][2] = nombre;
     std::cout<<"fait"<<std::endl;
+}
+
+float parcelle::hectare(){
+    float hectare = 0;
+
+    for(int i=0;i<_Donnees.size();i++){
+        hectare += _Donnees[i][1]*_Donnees[2][amont ? 5 : 6];
+    }
+
+    return hectare/10000;
+
 }

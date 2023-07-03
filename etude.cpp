@@ -72,7 +72,7 @@ etude::etude(std::shared_ptr<bdd> db, QWidget *parent)
     mainLayout->addWidget(scrollArea);
 
 // On crée les 20 colonnes
-    for (int i = 0; i < 20; ++i) {
+    for (int i = 0; i < 24; ++i) {
         gridLayout->setColumnStretch(i, 1);
         headerLayout->setColumnStretch(i, 1);
     }
@@ -443,6 +443,14 @@ void etude::clearchild() {
         }
         delete item;
     }
+    while ((item = headerLayout->takeAt(0)) != nullptr) {
+        if (QWidget *widget = item->widget()) {
+            widget->setParent(nullptr);
+            delete widget;
+        }
+        delete item;
+    }
+
 }
 
 
@@ -516,14 +524,12 @@ void etude::rafraichirTableau() {
         info.limiteParcelle = totalRows;
         info.commandPost = parcel.getPosteDeCommande() + parcel.getIndexdebut();
         info.nom = parcel.getNom();
-        info.longueur = parcel.getLongueur();
+        info.longueur = parcel.hectare();
         info.debit = parcel.getDebit();
         parcelInfos.push_back(info);
     }
 
     int parcelIndex = 0;  // Ajoutez ceci avant la boucle sur _parcelles
-
-
 
     // Ajoute les données au tableau.
     for (const std::vector<float> &donneesLigne: _Donnees) {
@@ -677,7 +683,7 @@ void etude::rafraichirTableau() {
                     gridLayout->addWidget(parcelNameLineEdit, ligne, 16);  // Ajoute le QLineEdit à la 16e colonne
 
                     // Crée un QLineEdit pour la longueur de la parcelle
-                    QLineEdit *parcelLengthLineEdit = createLineEdit(QString::number(info.longueur, 'f', 2) + " m",
+                    QLineEdit *parcelLengthLineEdit = createLineEdit(QString::number(info.longueur, 'f', 2) + " Hec",
                                                                      textColor, this);
                     gridLayout->addWidget(parcelLengthLineEdit, ligne - 1, 16);  // Ajoute le QLineEdit à la 17e colonne
 
@@ -707,8 +713,6 @@ void etude::rafraichirTableau() {
                     connect(setamont, QOverload<int>::of(&QComboBox::currentIndexChanged), [this, parcelIndex](int index) {
                         bool isAmont = (index == 0);
                         this->_parcelles[parcelIndex].SetAmont(isAmont);
-                        rafraichirTableau();
-
                     });
 
                     gridLayout->addWidget(setamont, ligne - 3, 16);  // Ajoute le QLineEdit à la 16e colonne
@@ -749,15 +753,20 @@ void etude::rafraichirTableau() {
                 for (int j = 0; j < gridLayout->rowCount(); ++j) {
                     if (gridLayout->itemAtPosition(j, i) && gridLayout->itemAtPosition(j, i)->widget()) {
                         gridLayout->itemAtPosition(j, i)->widget()->setVisible(false);
-
                     }
                 }
-                // Rend le header invisible
+                // Hide header too
                 if (headerLayout->itemAtPosition(0, i) && headerLayout->itemAtPosition(0, i)->widget()) {
-                    headerLayout->itemAtPosition(0, i)->widget()->setVisible(false);
+                    // Hide header too
+                    if (headerLayout->itemAtPosition(0, i)) {
+                        QLabel *label = qobject_cast<QLabel *>(headerLayout->itemAtPosition(0, i)->widget());
+                        if (label) {
+                            label->setVisible(false);
+                        }
+                    }
+
                 }
             }
-
         }
     } else {
         for (int i = 0; i < gridLayout->columnCount(); ++i) {
@@ -767,13 +776,21 @@ void etude::rafraichirTableau() {
                         gridLayout->itemAtPosition(j, i)->widget()->setVisible(false);
                     }
                 }
-                // Rend le header invisible
+                // Hide header too
                 if (headerLayout->itemAtPosition(0, i) && headerLayout->itemAtPosition(0, i)->widget()) {
-                    headerLayout->itemAtPosition(0, i)->widget()->setVisible(false);
+                    // Hide header too
+                    if (headerLayout->itemAtPosition(0, i)) {
+                        QLabel *label = qobject_cast<QLabel *>(headerLayout->itemAtPosition(0, i)->widget());
+                        if (label) {
+                            label->setVisible(false);
+                        }
+                    }
+
                 }
             }
         }
     }
+
 
     // Contrôle de visibilité des colonnes après avoir rempli la grille
     if (tout0) {
@@ -781,48 +798,56 @@ void etude::rafraichirTableau() {
         int i = 2;
         for (int j = 0; j < gridLayout->rowCount(); ++j) {
             if (gridLayout->itemAtPosition(j, i) && gridLayout->itemAtPosition(j, i)->widget()) {
-                gridLayout->itemAtPosition(j, i)->widget()->setVisible(false);
+                // Hide header too
+                if (gridLayout->itemAtPosition(0, i)) {
+                    QLineEdit *label = qobject_cast<QLineEdit *>(gridLayout->itemAtPosition(0, i)->widget());
+                    if (label) {
+                        label->setVisible(false);
+                    }
+                }
+
             }
-            // Rend le header invisible
-            if (headerLayout->itemAtPosition(0, i) && headerLayout->itemAtPosition(0, i)->widget()) {
-                headerLayout->itemAtPosition(0, i)->widget()->setVisible(false);
+            if (headerLayout->itemAtPosition(0, i)) {
+                QLabel *label = qobject_cast<QLabel *>(headerLayout->itemAtPosition(0, i)->widget());
+                if (label) {
+                    label->setVisible(false);
+                }
             }
         }
-
-
-
     } else {
 
         // Nous définissons un ensemble de colonnes que nous voulons cacher.
         // Cela facilite l'ajout ou la suppression de colonnes à l'avenir.
-        std::set<int> colonnesACacher = {7, 8, 9, 10, 23};
+        std::set<int> colonnesACacher = {7, 8, 9, 10};
         // Nous parcourons chaque colonne, de 0 à 10 (inclus).
         for (int i = 7; i < 24; i++) {
-            // Si notre colonne actuelle est dans l'ensemble des colonnes à cacher...
             if (colonnesACacher.count(i) > 0) {
-                // Nous parcourons chaque ligne de la grille
                 for (int j = 0; j < gridLayout->rowCount(); ++j) {
-                    // Nous vérifions que l'élément à cette position existe et est un widget
-                    if (gridLayout->itemAtPosition(j, i) && gridLayout->itemAtPosition(j, i)->widget()) {
-                        // Si la colonne est 23, nous vérifions que le widget est un QLineEdit
-                        if (i == 23) {
-                            QLineEdit *le = qobject_cast<QLineEdit *>(gridLayout->itemAtPosition(j, i)->widget());
-                            // Si le widget est un QLineEdit, nous le rendons invisible
-                            if (le) {
-                                le->setVisible(false);
+                    if (gridLayout->itemAtPosition(j, i)) {
+                        QWidget* widget = gridLayout->itemAtPosition(j, i)->widget();
+                        if (widget) {
+                            // Check if widget is QLineEdit or not
+                            QLineEdit* lineEdit = qobject_cast<QLineEdit*>(widget);
+                            if (lineEdit) {
+                                // If widget is QLineEdit, make it invisible
+                                lineEdit->setVisible(false);
                             }
-                        } else {
-                            // Nous rendons le widget invisible
-                            gridLayout->itemAtPosition(j, i)->widget()->setVisible(false);
+                            else {
+                                // If widget is not QLineEdit, make it also invisible
+                                widget->setVisible(false);
+                            }
                         }
                     }
                 }
-                // Rend le header invisible
-                if (headerLayout->itemAtPosition(0, i) && headerLayout->itemAtPosition(0, i)->widget()) {
-                    headerLayout->itemAtPosition(0, i)->widget()->setVisible(false);
+                if (headerLayout->itemAtPosition(0, i)) {
+                    QLabel *label = qobject_cast<QLabel *>(headerLayout->itemAtPosition(0, i)->widget());
+                    if (label) {
+                        label->setVisible(false);
+                    }
                 }
             }
         }
+
     }
 
     // Calcule la hauteur du widget de défilement et ajuste sa hauteur minimum et
@@ -1509,9 +1534,9 @@ void etude::modifierarro(int ligne, float nombre) {
     rafraichirTableau();
 }
 
-void etude::doubledebit() {
+void etude::doubledebit(float multi) {
     for (auto &parcelle: _parcelles) {
-        parcelle.doubledebit();
+        parcelle.doubledebit(multi);
     }
     rafraichirTableau();
 }
@@ -1568,9 +1593,10 @@ void etude::changerDebitDialog() {
     QLineEdit indiceDebutLineEdit(QString::fromStdString("1"));
     QLineEdit indiceFinLineEdit(QString::fromStdString(d));
     QLineEdit diametreLineEdit;
+    QLineEdit multiplicateurLineEdit; // Ajouter un QLineEdit pour le multiplicateur
 
     QPushButton button("Appliquer");
-    QPushButton doubleButton("x2"); // Bouton "x2"
+    QPushButton doubleButton("Multiplier"); // Changer le texte du bouton à "Multiplier"
 
     QVBoxLayout layout;
     layout.addWidget(new QLabel("Indice de début:"));
@@ -1579,9 +1605,11 @@ void etude::changerDebitDialog() {
     layout.addWidget(&indiceFinLineEdit);
     layout.addWidget(new QLabel("Nouveau débit:"));
     layout.addWidget(&diametreLineEdit);
+    layout.addWidget(new QLabel("Multiplicateur:")); // Ajouter un QLabel pour le multiplicateur
+    layout.addWidget(&multiplicateurLineEdit); // Ajouter le QLineEdit pour le multiplicateur
     layout.addWidget(&button);
 
-    // Ajoute le bouton "x2" au layout
+    // Ajoute le bouton "Multiplier" au layout
     QHBoxLayout *topLayout = new QHBoxLayout;
     topLayout->addStretch(1);  // Force le bouton à se déplacer à droite
     topLayout->addWidget(&doubleButton);
@@ -1589,8 +1617,11 @@ void etude::changerDebitDialog() {
 
     dialog.setLayout(&layout);
 
-    // Connecte le bouton "x2" à la fonction doubledia
-    QObject::connect(&doubleButton, &QPushButton::clicked, this, &etude::doubledebit);
+    // Connecte le bouton "Multiplier" à la fonction doubledebit
+    QObject::connect(&doubleButton, &QPushButton::clicked, this, [&]() {
+        float multiplicateur = multiplicateurLineEdit.text().toFloat();
+        doubledebit(multiplicateur);
+    });
 
     // Quand le bouton est clické, appelle la fonction avec les paramètres
     QObject::connect(&button, &QPushButton::clicked, [&]() {
@@ -1603,6 +1634,7 @@ void etude::changerDebitDialog() {
 
     dialog.exec();
 }
+
 
 
 
@@ -1842,7 +1874,7 @@ void etude::exportPdf(const QString &fileName) {
         int cpt = 0;
         for (auto &i: indices) {
 
-            if(i==15 && tout0)
+            if(i==15 && !tout0)
                 if(donneesLigne[2]==0)
                     continue;
 

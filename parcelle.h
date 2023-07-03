@@ -252,8 +252,9 @@ public:
 
   void setAspinterdebut(float aspinterdebut);
 
-  void doubledebit();
+  void doubledebit(float multi);
 
+    float hectare();
 
 
 private:

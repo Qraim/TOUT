@@ -198,7 +198,7 @@ private :
 
     void keyPressEvent(QKeyEvent *event) override;
 
-    void doubledebit();
+    void doubledebit(float multi);
 };
 
 #endif // ETUDE_H
