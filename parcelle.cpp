@@ -179,10 +179,10 @@ void parcelle::calculdiametre(float a, float b, double k) {
 
         float additional = amont ? _Donnees[i][14] : _Donnees[i][13];
 
-        _Donnees[i][24] = perte16;
-        _Donnees[i][25] = perte16 + additional;
-        _Donnees[i][26] = perte20;
-        _Donnees[i][27] = perte20 + additional;
+        _Donnees[i][27] = perte16;
+        _Donnees[i][28] = perte16 + additional;
+        _Donnees[i][29] = perte20;
+        _Donnees[i][30] = perte20 + additional;
     }
 }
 
@@ -453,6 +453,7 @@ void parcelle::setPosteDeCommande(int posteDeCommande) {
     for (int i = 0; i < poste_de_commande; ++i) {
         if (i + 1 < poste_de_commande) {
             _Donnees[i][amont ? 11 : 12] = _Donnees[i][amont ? 3 : 4] - _Donnees[i + 1][amont ? 3 : 4];
+
         } else {
             _Donnees[i][amont ? 11 : 12] = 0;
         }

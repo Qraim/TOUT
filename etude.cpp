@@ -14,6 +14,7 @@ etude::etude(std::shared_ptr<bdd> db, QWidget *parent)
     poste = true;
     premier = true;
     asp = false;
+
     // MainLayout
     mainLayout = new QVBoxLayout();
 
@@ -44,22 +45,42 @@ etude::etude(std::shared_ptr<bdd> db, QWidget *parent)
 
     mainLayout->insertLayout(0, buttonsLayout);
 
-    // QScrollArea
+    // Header Scroll Area
+    QScrollArea *headerScrollArea = new QScrollArea(this);
+    headerScrollArea->setFixedHeight(60);
+    headerScrollArea->setWidgetResizable(true);
+    headerScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);  // Désactive le défilement horizontal
+    headerScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);  // Désactive le défilement vertical
+
+    QWidget *headerWidget = new QWidget();
+    headerLayout = new QGridLayout(headerWidget);
+    headerScrollArea->setWidget(headerWidget);
+
+    // Content Scroll Area
     scrollArea = new QScrollArea(this);
     scrollArea->setWidgetResizable(true);
-    mainLayout->addWidget(scrollArea);
 
     scrollAreaWidgetContents = new QWidget();
+    gridLayout = new QGridLayout(scrollAreaWidgetContents);
     scrollArea->setWidget(scrollAreaWidgetContents);
 
-    gridLayout = new QGridLayout(scrollAreaWidgetContents);
+    // Connection du défilement horizontal
+    connect(scrollArea->horizontalScrollBar(), &QScrollBar::valueChanged, headerScrollArea->horizontalScrollBar(), &QScrollBar::setValue);
 
-    // On crée les 20 colonnes
+    // Ajout des QScrollArea au layout principal
+    mainLayout->addWidget(headerScrollArea);
+    mainLayout->addWidget(scrollArea);
+
+// On crée les 20 colonnes
     for (int i = 0; i < 20; ++i) {
         gridLayout->setColumnStretch(i, 1);
+        headerLayout->setColumnStretch(i, 1);
     }
 
     bottomlayout = new QGridLayout();
+    mainLayout->addLayout(bottomlayout);
+
+
 
     QPushButton *save = new QPushButton("Sauvegarder", this);
     QPushButton *pdfbutton = new QPushButton("Export PDF", this);
@@ -242,7 +263,7 @@ void etude::traitements(QString data) {
             continue;
         }
 
-        std::vector<float> rowData(28);
+        std::vector<float> rowData(31);
         rowData[0] = cols[2].toInt(); // numero du rang
         rowData[1] = cols[3].toFloat(); // Longueur du rang
         rowData[2] = cols[4].toFloat(); // Nombre d'asperseurs
@@ -460,17 +481,16 @@ void etude::rafraichirTableau() {
     // Initialize headers
     if (tout0) {
         headers << "No rang" << "Long" << "NbAsp" << "Zamont" << "Zaval" << "InterRangD" << "InterRangF" << "DebitG"
-                << "Espacement" << "Q Ligne" << "Σ Q Ligne" << "PeigneZAm" << "PeigneZAv" << "DeltaLigneAm"
-                << "DeltaLigneAv" << "Diametre" << "Nom" << "DenivelePeigne" << "Vitesse" << "Perte Peigne" << "Piezo Peigne"
-                << "Σ Perte J" << "Σ Piezo P" <<" "<< "J Ø16/14" << "Piezo Ø16" << "J Ø20/17.6" << "Piezo Ø20";
+                << "Espacement" << "Q Ligne" << "Σ Q Ligne" << "PeigneZAm" << "PeigneZAv"<<"DeltaLigneAm"<< "DeltaLigneAv" <<  "Diametre" << "Nom" << "DenivelePeigne" << "Vitesse" << "J Peigne" << "P Peigne"
+                << "Σ J" << "Σ P" <<" Ligne "<<"Longueur"<<"DeltaLigneAm"<< "DeltaLigneAv" <<"J Ø16/14" << "P Ø16" << "J Ø20/17.6" << "P Ø20";
     } else {
         for (int i = 0; i < _Donnees.size(); i++) {
             _Donnees[i].resize(24);
         }
         headers << "No rang" << "Long" << "NbAsp" << "Zamont" << "Zaval" << "InterRangD" << "InterRangF" << "DebitG"
                 << "Espacement" << "Q Ligne" << "Σ Q Ligne" << "PeigneZAm" << "PeigneZAv" << "DeltaLigneAm"
-                << "DeltaLigneAv" << "Diametre" << "Nom" << "DenivelePeigne" << "Vitesse" << "Perte Peigne" << "Piezo Peigne"
-                << "Σ Perte J" << "Σ Piezo P" << "Afficher";
+                << "DeltaLigneAv" << "Diametre" << "Nom" << "DenivelePeigne" << "Vitesse" << "J Peigne" << "P Peigne"
+                << "Σ J" << "Σ P" << "Afficher";
     }
 
     for (int i = 0; i < headers.size(); ++i) {
@@ -480,7 +500,7 @@ void etude::rafraichirTableau() {
         headerLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
         headerLabel->setFixedHeight(hauteur);
         headerLabel->setFixedWidth(largueur);
-        gridLayout->addWidget(headerLabel, 0, i);
+        headerLayout->addWidget(headerLabel, 0, i);
     }
 
     // Initialise le numéro de ligne.
@@ -565,7 +585,7 @@ void etude::rafraichirTableau() {
                     formattedText = QString::number(static_cast<int>(donneesLigne[i]));
                 } else if (donneesLigne[i] == 0) {
                     formattedText = " ";
-                } else if (i == 17 || i == 19 || i == 20 || i == 21 || i == 22) {
+                } else if (i == 17 || i == 19 || i == 20 || i == 21 || i == 22 || i==24 || i==25 || i == 26 || i == 27 || i == 28 || i == 29 || i==30) {
                     formattedText = QString::number(donneesLigne[i], 'f', 2) + "m";
                 } else if (i == 18) {
 
@@ -725,21 +745,31 @@ void etude::rafraichirTableau() {
     // Contrôle de visibilité des colonnes après avoir rempli la grille
     if (amont) {
         for (int i = 0; i < gridLayout->columnCount(); ++i) {
-            if (i == 4 || i == 6 || i == 12 || i == 13) {
+            if ( i == 6 || i == 12 || i == 13 || i == 25) {
+                for (int j = 0; j < gridLayout->rowCount(); ++j) {
+                    if (gridLayout->itemAtPosition(j, i) && gridLayout->itemAtPosition(j, i)->widget()) {
+                        gridLayout->itemAtPosition(j, i)->widget()->setVisible(false);
+
+                    }
+                }
+                // Rend le header invisible
+                if (headerLayout->itemAtPosition(0, i) && headerLayout->itemAtPosition(0, i)->widget()) {
+                    headerLayout->itemAtPosition(0, i)->widget()->setVisible(false);
+                }
+            }
+
+        }
+    } else {
+        for (int i = 0; i < gridLayout->columnCount(); ++i) {
+            if ( i == 5 || i == 11 || i == 14 || i==24) {
                 for (int j = 0; j < gridLayout->rowCount(); ++j) {
                     if (gridLayout->itemAtPosition(j, i) && gridLayout->itemAtPosition(j, i)->widget()) {
                         gridLayout->itemAtPosition(j, i)->widget()->setVisible(false);
                     }
                 }
-            }
-        }
-    } else {
-        for (int i = 0; i < gridLayout->columnCount(); ++i) {
-            if (i == 3 || i == 5 || i == 11 || i == 14) {
-                for (int j = 0; j < gridLayout->rowCount(); ++j) {
-                    if (gridLayout->itemAtPosition(j, i) && gridLayout->itemAtPosition(j, i)->widget()) {
-                        gridLayout->itemAtPosition(j, i)->widget()->setVisible(false);
-                    }
+                // Rend le header invisible
+                if (headerLayout->itemAtPosition(0, i) && headerLayout->itemAtPosition(0, i)->widget()) {
+                    headerLayout->itemAtPosition(0, i)->widget()->setVisible(false);
                 }
             }
         }
@@ -753,7 +783,13 @@ void etude::rafraichirTableau() {
             if (gridLayout->itemAtPosition(j, i) && gridLayout->itemAtPosition(j, i)->widget()) {
                 gridLayout->itemAtPosition(j, i)->widget()->setVisible(false);
             }
+            // Rend le header invisible
+            if (headerLayout->itemAtPosition(0, i) && headerLayout->itemAtPosition(0, i)->widget()) {
+                headerLayout->itemAtPosition(0, i)->widget()->setVisible(false);
+            }
         }
+
+
 
     } else {
 
@@ -780,6 +816,10 @@ void etude::rafraichirTableau() {
                             gridLayout->itemAtPosition(j, i)->widget()->setVisible(false);
                         }
                     }
+                }
+                // Rend le header invisible
+                if (headerLayout->itemAtPosition(0, i) && headerLayout->itemAtPosition(0, i)->widget()) {
+                    headerLayout->itemAtPosition(0, i)->widget()->setVisible(false);
                 }
             }
         }
@@ -838,7 +878,7 @@ void etude::initCalcul() {
         return;
     } else {
         for (int i = 0; i < _Donnees.size(); i++) {
-            _Donnees[i].resize(28);
+            _Donnees[i].resize(31);
         }
     }
 
@@ -930,6 +970,13 @@ void etude::calcul() {
     float zamontO = _Donnees[0][3];
     float zavalO = _Donnees[0][4];
 
+    bool tout0 = true;
+    for (int i = 0; i < _Donnees.size(); i++) {
+        if (_Donnees[i][2] != 0) {
+            tout0 = false;
+        }
+
+    }
 
     for (int i = 0; i < _Donnees.size(); i++) {
 
@@ -945,7 +992,14 @@ void etude::calcul() {
         _Donnees[i][12] = zaval - zavalO;
 
         _Donnees[i][13] = zamont - zaval;
+
         _Donnees[i][14] = zaval - zamont;
+
+        if(tout0){
+            _Donnees[i][24] = _Donnees[i][1];
+            _Donnees[i][25] = zamont - zaval;
+            _Donnees[i][26] = zaval - zamont;
+        }
 
     }
 }
@@ -1111,8 +1165,12 @@ void etude::divideData() {
 
 void etude::setTabOrderForLineEdits() {
     QLineEdit *previousLineEdit = nullptr;
-    QLineEdit *firstLineEdit = qobject_cast<QLineEdit *>(gridLayout->itemAtPosition(0, 15)->widget());
+    QLayoutItem *firstItem = gridLayout->itemAtPosition(0, 15);
+    QLineEdit *firstLineEdit = nullptr;
 
+    if (firstItem) {
+        firstLineEdit = qobject_cast<QLineEdit *>(firstItem->widget());
+    }
 
     for (int i = 0; i < gridLayout->rowCount(); ++i) {
         QLayoutItem *item = gridLayout->itemAtPosition(i, 15);
@@ -1128,10 +1186,11 @@ void etude::setTabOrderForLineEdits() {
             }
         }
     }
-    if (previousLineEdit) {
+    if (previousLineEdit && firstLineEdit) {
         QWidget::setTabOrder(previousLineEdit, firstLineEdit);
     }
 }
+
 
 
 void etude::updateDonnees() {

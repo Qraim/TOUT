@@ -66,6 +66,7 @@ private :
     QGridLayout *gridLayout;
     QVBoxLayout *mainLayout;
     QGridLayout *bottomlayout;
+    QGridLayout *headerLayout ;
 
 
     void updateAllLineEditsFromDonnees();
