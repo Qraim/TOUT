@@ -636,7 +636,7 @@ void etude::rafraichirTableau() {
                                 lineEdit->setStyleSheet(textColor);
                                 lineEdit->setReadOnly(false);
                             }
-                        } else {
+                        } else if (i == 2) {
                             int parcelIndex = std::distance(parcelInfos.begin(), parcelInfoIt);
 
                             connect(lineEdit, &QLineEdit::textEdited, [this, ligne, parcelIndex](const QString &newnombre) {
