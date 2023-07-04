@@ -25,4 +25,4 @@ permet de calculer le diametre et la vitesse à partir de différent champs d'en
 
 # BDD
 
-gére la base de donnée en format CSV qui contient tout les tuyaux / matiere
+gére la base de donnée en format CSV qui contient tout les tuyaux / matieres
