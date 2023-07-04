@@ -625,6 +625,11 @@ void etude::rafraichirTableau() {
                         connect(lineEdit, &QLineEdit::textEdited, [this, ligne, i](const QString &newDiameter) {
                             this->updateDebit(ligne - 1, newDiameter);
                         });
+                    } else if (i==5 || i==6){
+                        int colonne = i;
+                        connect(lineEdit, &QLineEdit::textEdited, [this, ligne, colonne](const QString &newDiameter) {
+                            this->updateinterval(ligne - 1, colonne, newDiameter);
+                        });
                     }
                     if (!tout0) {
                         if(i == 23){
@@ -652,11 +657,6 @@ void etude::rafraichirTableau() {
                         }
 
 
-                    } else {
-                        int colonne = i;
-                        connect(lineEdit, &QLineEdit::textEdited, [this, ligne, colonne](const QString &newDiameter) {
-                            this->updateinterval(ligne - 1, colonne, newDiameter);
-                        });
                     }
 
 
@@ -1190,31 +1190,43 @@ void etude::divideData() {
 
 void etude::setTabOrderForLineEdits() {
     QLineEdit *previousLineEdit = nullptr;
-    QLayoutItem *firstItem = gridLayout->itemAtPosition(0, 15);
     QLineEdit *firstLineEdit = nullptr;
 
-    if (firstItem) {
-        firstLineEdit = qobject_cast<QLineEdit *>(firstItem->widget());
+    // calculate tout0
+    int column = 2;
+    std::vector<int> result;
+    for (int i = 0; i < _Donnees.size(); ++i) {
+        if (_Donnees[i].size() > column)
+            result.push_back(_Donnees[i][column]);
     }
+    bool tout0 = std::all_of(result.begin(), result.end(), [](int i) { return i == 0; });
 
-    for (int i = 0; i < gridLayout->rowCount(); ++i) {
-        QLayoutItem *item = gridLayout->itemAtPosition(i, 15);
-        if (item) {
-            QLineEdit *lineEdit = qobject_cast<QLineEdit *>(item->widget());
-            // regarde si il est éditable
-            if (lineEdit && !lineEdit->isReadOnly()) {
-                // Si ce n'est pas le premier trouvé
-                if (previousLineEdit) {
-                    QWidget::setTabOrder(previousLineEdit, lineEdit);
+    for (int j = 0; j < gridLayout->columnCount(); ++j) {
+        if (j == 15 || j == 5 || j == 6 || j == 9 || ((j == 23 || j == 2) && !tout0)) {
+            for (int i = 0; i < gridLayout->rowCount(); ++i) {
+                QLayoutItem *item = gridLayout->itemAtPosition(i, j);
+                if (item) {
+                    QLineEdit *lineEdit = qobject_cast<QLineEdit *>(item->widget());
+                    if (lineEdit) {
+                        if (!firstLineEdit) {
+                            firstLineEdit = lineEdit;
+                        }
+                        if (previousLineEdit) {
+                            QWidget::setTabOrder(previousLineEdit, lineEdit);
+                        }
+                        previousLineEdit = lineEdit;
+                    }
                 }
-                previousLineEdit = lineEdit;
             }
         }
     }
+
+    // loop back to the first line edit
     if (previousLineEdit && firstLineEdit) {
         QWidget::setTabOrder(previousLineEdit, firstLineEdit);
     }
 }
+
 
 
 
