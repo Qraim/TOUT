@@ -244,17 +244,18 @@ public:
 
   void setAspdebit(float aspdebit);
 
-  float getAspinter() const;
-
-  void setAspinter(float aspinter);
 
   float getAspinterdebut() const;
 
   void setAspinterdebut(float aspinterdebut);
 
+  /// permet de changer le débit
+  /// \param multi
   void doubledebit(float multi);
 
-    float hectare();
+  /// calcul en hectare l'aire de la parcelle
+  /// \return
+  float hectare();
 
 
 private:
@@ -274,7 +275,6 @@ private:
   float _debit;
   bool _calcul;
   int _decalage;
-
   float aspdebit;
   float aspinterdebut;
 

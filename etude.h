@@ -21,13 +21,13 @@
 
 #include "parcelle.h"
 
-const QString WHITE_TEXT = "QLineEdit { color: white; border: 1px solid gray; border-radius: 4px;padding: 2px 4px; }";
-const QString RED_TEXT = "QLineEdit { color: black; background-color : #e6ffff ;border: 1px solid gray; border-radius: 4px;padding: 2px 4px; }";
-const QString ORANGE_TEXT = "QLineEdit { color: white; background-color : green; border: 1px solid gray; border-radius: 4px;padding: 2px 4px;}";
-const QString BLUE_TEXT = "QLineEdit { color: white; background-color : blue;border: 1px solid gray; border-radius: 4px;padding: 2px 4px; }";
-const QString PINK_TEXT = "QLineEdit { color: white; background-color : pink;border: 1px solid gray; border-radius: 4px;padding: 2px 4px; }";
-const QString YELLOW_TEXT = "QLineEdit { color: yellow;border: 1px solid white; border-radius: 4px;padding: 2px 4px; }";
-const QString SPEED_TEXT = "QLineEdit { color: white; background-color : red; border: 1px solid gray; border-radius: 4px;padding: 2px 4px; }";
+const QString WHITE_TEXT = "QLineEdit { color: white; font-size: 20px;border: 1px solid gray; border-radius: 4px;padding: 2px 4px; }";
+const QString RED_TEXT = "QLineEdit { color: black; font-size: 20px;background-color : #e6ffff ;border: 1px solid gray; border-radius: 4px;padding: 2px 4px; }";
+const QString ORANGE_TEXT = "QLineEdit { color: white; font-size: 20px;background-color : green; border: 1px solid gray; border-radius: 4px;padding: 2px 4px;}";
+const QString BLUE_TEXT = "QLineEdit { color: white; font-size: 20px;background-color : blue;border: 1px solid gray; border-radius: 4px;padding: 2px 4px; }";
+const QString PINK_TEXT = "QLineEdit { color: white; font-size: 20px;background-color : pink;border: 1px solid gray; border-radius: 4px;padding: 2px 4px; }";
+const QString YELLOW_TEXT = "QLineEdit { color: yellow;font-size: 20px;border: 1px solid white; border-radius: 4px;padding: 2px 4px; }";
+const QString SPEED_TEXT = "QLineEdit { color: white; font-size: 20px;background-color : red; border: 1px solid gray; border-radius: 4px;padding: 2px 4px; }";
 
 
 struct ParcelInfo {
@@ -71,6 +71,9 @@ private :
 
     void updateAllLineEditsFromDonnees();
 
+    ///
+    /// \param ligne ligne ou changer le nombre d'arroseurs
+    /// \param nombre nombre d'arroseurs à placer
     void modifierarro(int ligne, float nombre);
 
     ///
@@ -198,7 +201,10 @@ private :
 
     void keyPressEvent(QKeyEvent *event) override;
 
+    /// permet de changer le débit
+    /// \param multi
     void doubledebit(float multi);
+
 };
 
 #endif // ETUDE_H

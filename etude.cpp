@@ -1,8 +1,8 @@
 
 #include "etude.h"
 
-float hauteur = 40;
-float largueur = 150;
+float hauteur = 30;
+float largueur = 122.5;
 
 etude::etude(std::shared_ptr<bdd> db, QWidget *parent)
         : QWidget(parent), database(db) {
@@ -45,7 +45,7 @@ etude::etude(std::shared_ptr<bdd> db, QWidget *parent)
 
     mainLayout->insertLayout(0, buttonsLayout);
 
-    // Header Scroll Area
+    // Entete scroll area
     QScrollArea *headerScrollArea = new QScrollArea(this);
     headerScrollArea->setFixedHeight(60);
     headerScrollArea->setWidgetResizable(true);
@@ -56,7 +56,7 @@ etude::etude(std::shared_ptr<bdd> db, QWidget *parent)
     headerLayout = new QGridLayout(headerWidget);
     headerScrollArea->setWidget(headerWidget);
 
-    // Content Scroll Area
+    // contenu Scroll Area
     scrollArea = new QScrollArea(this);
     scrollArea->setWidgetResizable(true);
 
@@ -71,15 +71,13 @@ etude::etude(std::shared_ptr<bdd> db, QWidget *parent)
     mainLayout->addWidget(headerScrollArea);
     mainLayout->addWidget(scrollArea);
 
-// On crée les 20 colonnes
-    for (int i = 0; i < 24; ++i) {
+    // On crée les 20 colonnes
+    for (int i = 0; i < 40; ++i) {
         gridLayout->setColumnStretch(i, 1);
         headerLayout->setColumnStretch(i, 1);
     }
 
     bottomlayout = new QGridLayout();
-    mainLayout->addLayout(bottomlayout);
-
 
 
     QPushButton *save = new QPushButton("Sauvegarder", this);
@@ -106,6 +104,8 @@ etude::etude(std::shared_ptr<bdd> db, QWidget *parent)
 
     setLayout(mainLayout);
 }
+
+
 
 void etude::showOptionsDialog() {
 
@@ -239,6 +239,7 @@ void etude::init() {
         QString nomParcelle = "parcelle 1";
         initCalcul();
         _parcelles.push_back(parcelle(_Donnees, 0, _Donnees.size(), database, nomParcelle, amont));
+        std::cout<<_parcelles[0].isAmont()<<std::endl;
         rafraichirTableau();
     }
 }
@@ -251,7 +252,7 @@ void etude::traitements(QString data) {
     QStringList lines = data.split("\n");
     for (int i = 0; i < lines.size() - 1; i++) {
 
-        // Ignore lines that start with "Parcelle", "Intervalle", or "Nombre"
+        // Ignore les lignes qui commencent avec "Parcelle", "Intervalle", or "Nombre"
         if (lines[i].startsWith("Parcelle") || lines[i].startsWith("Intervalle") || lines[i].startsWith("Nombre")) {
             continue;
         }
@@ -281,25 +282,18 @@ void etude::traitements(QString data) {
 }
 
 void etude::updateAllLineEditsFromDonnees() {
-    if (_parcelles.empty()) {
+    if (_parcelles.size() != 0) {
+        updateDonnees(); // Met à jour les données
+    }
+    if (_Donnees.size() == 0) {
         return;
     }
+    // Sauvegarder la position actuelle des barres de défilement
+    int scrollPosVertical = scrollArea->verticalScrollBar()->value();
+    int scrollPosHorizontal = scrollArea->horizontalScrollBar()->value();
 
-    updateDonnees(); // Met à jour les données
-
-    if (_Donnees.empty()) {
-        return;
-    }
-
-    int column = 2;
-    std::vector<int> result;
-    for (int i = 0; i < _Donnees.size(); ++i) {
-        if (_Donnees[i].size() > column) {
-            result.push_back(_Donnees[i][column]);
-        }
-    }
-
-
+    // Initialise le numéro de ligne.
+    int ligne = 1;
     int totalRows = 0;
     std::vector<ParcelInfo> parcelInfos;
     for (auto &parcel: _parcelles) {
@@ -310,129 +304,62 @@ void etude::updateAllLineEditsFromDonnees() {
         info.limiteParcelle = totalRows;
         info.commandPost = parcel.getPosteDeCommande() + parcel.getIndexdebut();
         info.nom = parcel.getNom();
-        info.longueur = parcel.getLongueur();
+        info.longueur = parcel.hectare();
         info.debit = parcel.getDebit();
         parcelInfos.push_back(info);
     }
+    int parcelIndex = 0;
 
-
-    bool tout0 = std::all_of(result.begin(), result.end(), [](int i) { return i == 0; });
-
-    // Ajoute les données au tableau.
-    for (int row = 1; row < gridLayout->rowCount(); ++row) {
-        for (int col = 0; col < gridLayout->columnCount(); ++col) {
-            if (QWidget *widget = gridLayout->itemAtPosition(row, col)->widget()) {
-                // Vérifier si le widget est un QLineEdit
-                if (QLineEdit *lineEdit = qobject_cast<QLineEdit *>(widget)) {
-                    // Récupérer la valeur mise à jour à partir de _Donnees
-                    const std::vector<float> &donneesLigne = _Donnees[row - 1];
-                    QString formattedText;
-
-                    // Détermine la couleur du texte.
-                    QString textColor = WHITE_TEXT;
-                    int distanceToNearestCommandPost = std::numeric_limits<int>::max();
-
-                    // Trouve la parcelle à laquelle cette ligne appartient
-                    auto parcelInfoIt = std::find_if(parcelInfos.begin(), parcelInfos.end(),
-                                                     [row](const ParcelInfo &info) { return row <= info.limiteParcelle; });
-
-                    if (parcelInfoIt != parcelInfos.end()) {
-                        const ParcelInfo &info = *parcelInfoIt;
-                        if (row == info.limiteParcelle && limitations) {
-                            textColor = BLUE_TEXT; // Limite entre deux parcelles
-                        } else if (row == info.commandPost && poste) {
-                            textColor = RED_TEXT; // Poste de commande
-                        } else if (row == info.milieuHydro && milieu) {
-                            textColor = ORANGE_TEXT; // Milieu hydrolique
-                        } else if (donneesLigne[0] == 1 && premier) {
-                            textColor = PINK_TEXT; // Première ligne d'une parcelle
-                        }
-                        distanceToNearestCommandPost = std::abs(row - info.commandPost);
-                    }
-
-                    if (col == 0) {
-                        formattedText = QString::number(static_cast<int>(donneesLigne[col]));
-                    } else if (donneesLigne[col] == 0) {
-                        formattedText = " ";
-                    } else if (col == 17 || col == 19 || col == 20 || col == 21 || col == 22) {
-                        formattedText = QString::number(donneesLigne[col], 'f', 2) + "m";
-                    } else if (col == 18) {
-                        formattedText = QString::number(donneesLigne[col], 'f', 2) + "m/s";
-                    } else {
-                        formattedText = QString::number(donneesLigne[col], 'f', 2);
-                    }
-
-                    // Mettre à jour la valeur du QLineEdit
-                    lineEdit->setText(formattedText);
-
-                    // Gérer les styles et les connexions pour les colonnes spéciales
-                    if (col == 15) {
-                        lineEdit->setReadOnly(false);
-
-                        if (donneesLigne[2] <= 0 && !tout0) {
-                            lineEdit->setVisible(false);
-                        }
-
-                        // Connecter le signal textEdited à la fonction d'actualisation du diamètre
-                        connect(lineEdit, &QLineEdit::textEdited, [this, row](const QString &newDiameter) {
-                            this->updateDiameter(row - 1, newDiameter);
-                        });
-                    } else if (col == 9) {
-                        lineEdit->setReadOnly(false);
-
-                        // Connecter le signal textEdited à la fonction d'actualisation du débit
-                        connect(lineEdit, &QLineEdit::textEdited, [this, row, col](const QString &newDiameter) {
-                            this->updateDebit(row - 1, newDiameter);
-                        });
-                    } else if (col == 23 && !tout0) {
-                        if (donneesLigne[2] != 0) {
-                            auto parcelInfoIt = std::find_if(parcelInfos.begin(), parcelInfos.end(),
-                                                             [row](const ParcelInfo &info) { return row <= info.limiteParcelle; });
-                            if (parcelInfoIt != parcelInfos.end()) {
-                                int parcelIndex = std::distance(parcelInfos.begin(), parcelInfoIt);
-                                QPushButton *afficher = new QPushButton("Afficher");
-                                afficher->setStyleSheet("border: 1px solid white;");
-                                gridLayout->addWidget(afficher, row, col);
-                                connect(afficher, &QPushButton::clicked, [this, row, parcelIndex]() {
-                                    this->_parcelles[parcelIndex].herse(row - 1);
-                                });
-                            }
-                        } else {
-                            lineEdit->setReadOnly(false);
-                        }
-                    } else if (col == 23 && tout0) {
-                        lineEdit->setStyleSheet(textColor);
-                        lineEdit->setReadOnly(false);
-                    } else if (col == 2) {
-                        // Gérer les connexions pour la colonne 2
-                        if (!tout0) {
-                            lineEdit->setReadOnly(false);
-                            auto parcelInfoIt = std::find_if(parcelInfos.begin(), parcelInfos.end(),
-                                                             [row](const ParcelInfo &info) { return row <= info.limiteParcelle; });
-                            if (parcelInfoIt != parcelInfos.end()) {
-                                int parcelIndex = std::distance(parcelInfos.begin(), parcelInfoIt);
-                                connect(lineEdit, &QLineEdit::textEdited, [this, row, parcelIndex](const QString &newnombre) {
-                                    this->_parcelles[parcelIndex].placerarrosseurs(row - 1, newnombre.toInt());
-                                });
-                            }
-                        }
-                    } else if (col == 16 || col == 18 || col == 21 || col == 22) {
-                        // Gérer les styles pour les colonnes spéciales
-                        lineEdit->setStyleSheet(textColor);
-                    }
+    // Parcourt les QLineEdit existants dans le tableau et actualise leur texte avec les données les plus récentes.
+    for (int row = 1; row <= gridLayout->rowCount(); ++row) {
+        for (int column = 0; column < gridLayout->columnCount(); ++column) {
+            QLineEdit *lineEdit = qobject_cast<QLineEdit *>(gridLayout->itemAtPosition(row, column)->widget());
+            if (lineEdit != nullptr) {
+                const std::vector<float> &donneesLigne = _Donnees[row - 1];
+                QString formattedText;
+                if (column == 0) {
+                    formattedText = QString::number(static_cast<int>(donneesLigne[column]));
+                } else if (donneesLigne[column] == 0) {
+                    formattedText = " ";
+                } else {
+                    formattedText = QString::number(donneesLigne[column], 'f', 2);
                 }
+                lineEdit->setText(formattedText);
             }
         }
     }
+
+    // Met à jour les couleurs des QLineEdit existants dans le tableau.
+    for (int row = 1; row <= gridLayout->rowCount(); ++row) {
+        QString textColor = WHITE_TEXT;
+        int distanceToNearestCommandPost = std::numeric_limits<int>::max();
+        auto parcelInfoIt = std::find_if(parcelInfos.begin(), parcelInfos.end(),
+                                         [row](const ParcelInfo &info) { return row <= info.limiteParcelle; });
+        if (parcelInfoIt != parcelInfos.end()) {
+            const ParcelInfo &info = *parcelInfoIt;
+            if (row == info.limiteParcelle && limitations) {
+                textColor = BLUE_TEXT; // Limite entre deux parcelles
+            } else if (row == info.commandPost && poste) {
+                textColor = RED_TEXT; // Poste de commande
+            } else if (row == info.milieuHydro && milieu) {
+                textColor = ORANGE_TEXT; // Milieu hydrolique
+            } else if (row == 1 && premier) {
+                textColor = PINK_TEXT; //premiere ligne d'une parcelle
+            }
+            distanceToNearestCommandPost = std::abs(row - info.commandPost);
+        }
+        for (int column = 0; column < gridLayout->columnCount(); ++column) {
+            QLineEdit *lineEdit = qobject_cast<QLineEdit *>(gridLayout->itemAtPosition(row, column)->widget());
+            if (lineEdit != nullptr) {
+                lineEdit->setStyleSheet(textColor);
+            }
+        }
+    }
+
+    // Remet la position des barres de défilement.
+    scrollArea->verticalScrollBar()->setValue(scrollPosVertical);
+    scrollArea->horizontalScrollBar()->setValue(scrollPosHorizontal);
 }
-
-
-
-
-
-
-
-
 
 void etude::clearchild() {
     QLayoutItem *item;
@@ -488,22 +415,84 @@ void etude::rafraichirTableau() {
     QStringList headers;
     // Initialize headers
     if (tout0) {
+        // Description du vecteur _Donnees en mode GAG :
+
+        // _Donnees[i][0] - "No rang" : Le numéro du rang, utilisé pour identifier chaque rang.
+        // _Donnees[i][1] - "Long" : La longueur du rang.
+        // _Donnees[i][2] - "NbAsp" : Le nombre d'aspersions pour le rang.
+        // _Donnees[i][3] - "Zamont" : L'altitude du côté amont du rang.
+        // _Donnees[i][4] - "Zaval" : L'altitude du côté aval du rang.
+        // _Donnees[i][5] - "InterRangD" : L'intervalle entre les rangs sur le côté droit.
+        // _Donnees[i][6] - "InterRangF" : L'intervalle entre les rangs sur le côté gauche.
+        // _Donnees[i][7] - "DebitG" : Le débit de l'eau sur le côté gauche.
+        // _Donnees[i][8] - "Espacement" : L'espacement entre les aspersions.
+        // _Donnees[i][9] - "Q Ligne" : Le débit total de la ligne.
+        // _Donnees[i][10] - "Σ Q Ligne" : Le débit cumulé de la ligne.
+        // _Donnees[i][11] - "PeigneZAm" : L'altitude du peigne côté amont.
+        // _Donnees[i][12] - "PeigneZAv" : L'altitude du peigne côté aval.
+        // _Donnees[i][13] - "DeltaLigneAm" : Le delta de la ligne côté amont.
+        // _Donnees[i][14] - "DeltaLigneAv" : Le delta de la ligne côté aval.
+        // _Donnees[i][15] - "Diametre" : Le diamètre du tuyau de la ligne.
+        // _Donnees[i][16] - "Colonne vide."
+        // _Donnees[i][17] - "DenivelePeigne" : Le dénivelé du peigne.
+        // _Donnees[i][18] - "Vitesse" : La vitesse de l'eau dans la ligne.
+        // _Donnees[i][19] - "J Peigne" : La perte de charge du peigne.
+        // _Donnees[i][20] - "P Peigne" : Le Piezo du peigne.
+        // _Donnees[i][21] - "Σ J" : La perte de charge cumulée.
+        // _Donnees[i][22] - "Σ P" : Le Piezo cumulée.
+        // _Donnees[i][23] -  "Colonne vide."
+        // _Donnees[i][24] - "Longueur" : La longueur totale de la ligne.
+        // _Donnees[i][25] - "DeltaLigneAm" : Le delta de la ligne côté amont.
+        // _Donnees[i][26] - "DeltaLigneAv" : Le delta de la ligne côté aval.
+        // _Donnees[i][27] - "J Ø16/14" : La perte de charge pour un diamètre de 16/14.
+        // _Donnees[i][28] - "P Ø16" : Le Piezo pour un diamètre de 16.
+        // _Donnees[i][29] - "J Ø20/17.6 La perte de charge pour un diamètre de 20/17.6.
+        // _Donnees[i][30] - "P Ø20" : Le Piezo pour un diamètre de 20.
+
         headers << "No rang" << "Long" << "NbAsp" << "Zamont" << "Zaval" << "InterRangD" << "InterRangF" << "DebitG"
-                << "Espacement" << "Q Ligne" << "Σ Q Ligne" << "PeigneZAm" << "PeigneZAv"<<"DeltaLigneAm"<< "DeltaLigneAv" <<  "Diametre" << "Nom" << "DenivelePeigne" << "Vitesse" << "J Peigne" << "P Peigne"
+                << "Espacement" << "Q Ligne" << "Σ Q Ligne" << "PeigneZAm" << "PeigneZAv"<<"DeltaLigneAm"<< "DeltaLigneAv" <<  "Diametre" << "Nom" << "Hauteur" << "Vitesse" << "J Peigne" << "P Peigne"
                 << "Σ J" << "Σ P" <<" Ligne "<<"Longueur"<<"DeltaLigneAm"<< "DeltaLigneAv" <<"J Ø16/14" << "P Ø16" << "J Ø20/17.6" << "P Ø20";
     } else {
         for (int i = 0; i < _Donnees.size(); i++) {
             _Donnees[i].resize(24);
         }
+
+        // Description du vecteur _Donnees en mode asperssions :
+
+        // _Donnees[i][0] - "No rang" : Le numéro du rang, utilisé pour identifier chaque rang.
+        // _Donnees[i][1] - "Long" : La longueur du rang.
+        // _Donnees[i][2] - "NbAsp" : Le nombre d'aspersions pour le rang.
+        // _Donnees[i][3] - "Zamont" : L'altitude du côté amont du rang.
+        // _Donnees[i][4] - "Zaval" : L'altitude du côté aval du rang.
+        // _Donnees[i][5] - "InterRangD" : L'intervalle entre les rangs sur le côté droit.
+        // _Donnees[i][6] - "InterRangF" : L'intervalle entre les rangs sur le côté gauche.
+        // _Donnees[i][7] - "DebitG" : Le débit de l'eau sur le côté gauche.
+        // _Donnees[i][8] - "Espacement" : L'espacement entre les aspersions.
+        // _Donnees[i][9] - "Q Ligne" : Le débit total de la ligne.
+        // _Donnees[i][10] - "Σ Q Ligne" : Le débit cumulé de la ligne.
+        // _Donnees[i][11] - "PeigneZAm" : L'altitude du peigne côté amont.
+        // _Donnees[i][12] - "PeigneZAv" : L'altitude du peigne côté aval.
+        // _Donnees[i][13] - "DeltaLigneAm" : Le delta de la ligne côté amont.
+        // _Donnees[i][14] - "DeltaLigneAv" : Le delta de la ligne côté aval.
+        // _Donnees[i][15] - "Diametre" : Le diamètre du tuyau sur la ligne.
+        // _Donnees[i][16] - "Colonne Vide".
+        // _Donnees[i][17] - "DenivelePeigne" : Le dénivelé du peigne.
+        // _Donnees[i][18] - "Vitesse" : La vitesse de l'eau dans la ligne.
+        // _Donnees[i][19] - "J Peigne" : La perte de charge du peigne.
+        // _Donnees[i][20] - "P Peigne" : Le Piezo du peigne.
+        // _Donnees[i][21] - "Σ J" : La perte de charge cumulée.
+        // _Donnees[i][22] - "Σ P" : Le Piezo cumulée.
+        // _Donnees[i][23] - "Afficher" : Bouton permettant de lancer le calcul sur la ligne.
+
         headers << "No rang" << "Long" << "NbAsp" << "Zamont" << "Zaval" << "InterRangD" << "InterRangF" << "DebitG"
                 << "Espacement" << "Q Ligne" << "Σ Q Ligne" << "PeigneZAm" << "PeigneZAv" << "DeltaLigneAm"
-                << "DeltaLigneAv" << "Diametre" << "Nom" << "DenivelePeigne" << "Vitesse" << "J Peigne" << "P Peigne"
+                << "DeltaLigneAv" << "Diametre" << "Nom" << "Hauteur" << "Vitesse" << "J Peigne" << "P Peigne"
                 << "Σ J" << "Σ P" << "Afficher";
     }
 
     for (int i = 0; i < headers.size(); ++i) {
         QLabel *headerLabel = new QLabel(headers[i], this);
-        headerLabel->setStyleSheet("QLabel { color: white; }");
+        headerLabel->setStyleSheet("QLabel { color: white; font-size: 22px;font-weight: bold; }");
         headerLabel->setAlignment(Qt::AlignCenter);
         headerLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
         headerLabel->setFixedHeight(hauteur);
@@ -607,7 +596,7 @@ void etude::rafraichirTableau() {
                 // Ajoute un signal pour la 16ème/5éme/6éme colonne
                 if ((i == 15 || i == 5 || i == 6 || i == 9) || ((i == 23 || i ==2) && !tout0)) {
                     lineEdit->installEventFilter(this);
-                    lineEdit->setStyleSheet("QLineEdit { color: yellow; }");
+                    lineEdit->setStyleSheet("QLineEdit { color: yellow;font-size: 20px }");
                     lineEdit->setReadOnly(false);
                     // Connecte textEdited signal comme avant
                     if (i == 15) {
@@ -755,9 +744,9 @@ void etude::rafraichirTableau() {
                         gridLayout->itemAtPosition(j, i)->widget()->setVisible(false);
                     }
                 }
-                // Hide header too
+                // Cache les entetes
                 if (headerLayout->itemAtPosition(0, i) && headerLayout->itemAtPosition(0, i)->widget()) {
-                    // Hide header too
+                    // Cache les entetes
                     if (headerLayout->itemAtPosition(0, i)) {
                         QLabel *label = qobject_cast<QLabel *>(headerLayout->itemAtPosition(0, i)->widget());
                         if (label) {
@@ -776,9 +765,9 @@ void etude::rafraichirTableau() {
                         gridLayout->itemAtPosition(j, i)->widget()->setVisible(false);
                     }
                 }
-                // Hide header too
+                // cache les entetes
                 if (headerLayout->itemAtPosition(0, i) && headerLayout->itemAtPosition(0, i)->widget()) {
-                    // Hide header too
+                    // cache les entetes
                     if (headerLayout->itemAtPosition(0, i)) {
                         QLabel *label = qobject_cast<QLabel *>(headerLayout->itemAtPosition(0, i)->widget());
                         if (label) {
@@ -798,7 +787,7 @@ void etude::rafraichirTableau() {
         int i = 2;
         for (int j = 0; j < gridLayout->rowCount(); ++j) {
             if (gridLayout->itemAtPosition(j, i) && gridLayout->itemAtPosition(j, i)->widget()) {
-                // Hide header too
+                // cache les entetes
                 if (gridLayout->itemAtPosition(0, i)) {
                     QLineEdit *label = qobject_cast<QLineEdit *>(gridLayout->itemAtPosition(0, i)->widget());
                     if (label) {
@@ -1192,7 +1181,7 @@ void etude::setTabOrderForLineEdits() {
     QLineEdit *previousLineEdit = nullptr;
     QLineEdit *firstLineEdit = nullptr;
 
-    // calculate tout0
+    // terminations du mode de calcul
     int column = 2;
     std::vector<int> result;
     for (int i = 0; i < _Donnees.size(); ++i) {
@@ -1221,7 +1210,7 @@ void etude::setTabOrderForLineEdits() {
         }
     }
 
-    // loop back to the first line edit
+    // reviens au premier LineEdit
     if (previousLineEdit && firstLineEdit) {
         QWidget::setTabOrder(previousLineEdit, firstLineEdit);
     }
@@ -1363,14 +1352,16 @@ void etude::appelSetDiametreDialog() {
     dialog.setLayout(&layout);
 
     QObject::connect(&launchButton, &QPushButton::clicked,
-                     [this, &comboBox]() {
+                     [this, &comboBox, &dialog]() {
                          int index = comboBox.currentIndex();
                          if (index >= 0 && index < _parcelles.size()) {
                              _parcelles[index].setDiametreDialog(_matiere);
                              updateDonnees();
                              rafraichirTableau();
                          }
+                         dialog.accept(); // ferme le dialogue
                      });
+
     dialog.exec();
 }
 
@@ -1465,6 +1456,10 @@ bool etude::eventFilter(QObject *obj, QEvent *event) {
 }
 
 void etude::keyPressEvent(QKeyEvent *event) {
+
+    double scaleFactor = 1.2;  // Changez-le selon vos besoins
+    double scaleDownFactor = 1 / scaleFactor;
+    QSize newSize;
     switch (event->key()) {
         case Qt::Key_D:
             changerDiametreDialog();
@@ -1870,7 +1865,7 @@ void etude::exportPdf(const QString &fileName) {
             painter.setPen(QColor(Qt::black));
         }
 
-        // Check if the row should be highlighted
+        // Regarde si la ligne doit etre surligné
         auto foundPoste = std::find_if(postes.begin(), postes.end(), [&](const std::pair<int, int> &pair) {
             return pair.first == donneesLigne[0];
         });

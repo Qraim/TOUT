@@ -21,7 +21,7 @@ parcelle::parcelle(std::vector<std::vector<float>> &data, int indexdebut, int in
 
     std::copy(data.begin() + indexdebut, data.begin() + indexfin, _Donnees.begin());
 
-    poste_de_commande = 0;
+    poste_de_commande = -1;
 
     milieuhydro = trouvemilieuhydro();
 
@@ -130,8 +130,9 @@ void parcelle::calcul() {
     double k = std::get<2>(coefficients);
 
     if (a == 0 || b == 0 || k == 0) {
-        _calcul = false; // Aucun calcul n'est possible
-        return;
+        a = 1.75;
+        b = -4.85;
+        k = 8381743.11;
     }
 
     auto aspesseurs = trouveaspersseurs();
@@ -156,35 +157,38 @@ void parcelle::calculdiametre(float a, float b, double k) {
     float powDia20 = std::pow(dia20, b);
 
     for (int i = 0; i < _Donnees.size(); ++i) {
-        // Calcul du goutte à goutte
-        float arosseurs = _Donnees[i][8] != 0 ? _Donnees[i][1] / _Donnees[i][8] : 0;
+        // Ensure that _Donnees[i] has enough elements
+        if (_Donnees[i].size() >= 31) {
+            // Calcul du goutte à goutte
+            float arosseurs = (_Donnees[i][8] != 0) ? _Donnees[i][1] / _Donnees[i][8] : 0;
 
-        // Move conversion to second outside the loop
-        float debitLS = _Donnees[i][7] / 3600;
+            float debitLS = _Donnees[i][7] / 3600;
 
-        float espacement = _Donnees[i][8];
-        float perte16 = 0;
-        float perte20 = 0;
+            float espacement = _Donnees[i][8];
+            float perte16 = 0;
+            float perte20 = 0;
 
-        // Calculating k * powDia16 * espacement and k * powDia20 * espacement beforehand
-        float calcDia16 = k * powDia16 * espacement;
-        float calcDia20 = k * powDia20 * espacement;
+            float calcDia16 = k * powDia16 * espacement;
+            float calcDia20 = k * powDia20 * espacement;
 
-        for (int j = 1; j <= arosseurs; ++j) {
-            float debitPow = std::pow(debitLS * j, a);
+            for (int j = 1; j <= arosseurs; ++j) {
+                float debitPow = std::pow(debitLS * j, a);
+                perte16 += debitPow * calcDia16;
+                perte20 += debitPow * calcDia20;
+            }
 
-            // Using pre-calculated values
-            perte16 += debitPow * calcDia16;
-            perte20 += debitPow * calcDia20;
+            float additional = amont ? _Donnees[i][14] : _Donnees[i][13];
+
+            _Donnees[i][27] = perte16;
+            _Donnees[i][28] = perte16 + additional;
+            _Donnees[i][29] = perte20;
+            _Donnees[i][30] = perte20 + additional;
         }
-
-        float additional = amont ? _Donnees[i][14] : _Donnees[i][13];
-
-        _Donnees[i][27] = perte16;
-        _Donnees[i][28] = perte16 + additional;
-        _Donnees[i][29] = perte20;
-        _Donnees[i][30] = perte20 + additional;
+        else {
+            //Gestion des erreurs
+        }
     }
+
 }
 
 
@@ -192,7 +196,7 @@ void parcelle::setDiametreDialog(std::string matiere) {
 
     _matiere = matiere;
 
-    if (poste_de_commande == 0) {
+    if (poste_de_commande < 0) {
         setPosteDeCommande(milieuhydro);
     }
 
@@ -373,6 +377,37 @@ void parcelle::setDiametreDialog(std::string matiere) {
 
 void parcelle::modifiedia(int index, float diameters) {
     _Donnees[index][15] = diameters;
+    auto indices = trouveaspersseurs();
+
+    if(indices.size()>0){
+        if(aspdebit !=0 && aspinterdebut!=0){
+            bool toutdiametre = true;
+            for (auto &it: indices) {
+                if (_Donnees[it][15] == 0) {
+                    toutdiametre = false;
+                    break;
+                }
+            }
+
+            if (toutdiametre) {
+                calcul();
+                return;
+            }
+        }
+    } else {
+        bool toutlestuyaux = true;
+
+        for (int i = 0; i < _diameters.size(); i++) {
+            if (_diameters[i] == 0) {
+                toutlestuyaux = false;
+                break;
+            }
+        }
+
+        if (toutlestuyaux) {
+            calcul();
+        }
+    }
 }
 
 void parcelle::modifiedebit(int index, float diameters) {
@@ -446,19 +481,59 @@ void parcelle::setPosteDeCommande(int posteDeCommande) {
     int fin_droit = _Donnees.size() - 1;
 
     for (int i = fin_droit; i >= debut; --i) {
-        if (i == debut || i - 1 >= debut) {
+        if ((i == debut || i - 1 >= debut) && _Donnees.size() > i && _Donnees[i].size() >= 13 && _Donnees[i-1].size() >= 5) {
             _Donnees[i][amont ? 11 : 12] =  _Donnees[i][amont ? 3 : 4] - _Donnees[i - 1][amont ? 3 : 4] ;
+        }
+        else{
+            // Gestion d'erreur si les données ne sont pas disponibles
         }
     }
 
     for (int i = 0; i < poste_de_commande; ++i) {
-        if (i + 1 < poste_de_commande) {
+        if ((i + 1 < poste_de_commande) && _Donnees.size() > i && _Donnees[i].size() >= 13 && _Donnees[i+1].size() >= 5) {
             _Donnees[i][amont ? 11 : 12] = _Donnees[i][amont ? 3 : 4] - _Donnees[i + 1][amont ? 3 : 4];
-
         } else {
-            _Donnees[i][amont ? 11 : 12] = 0;
+            if(_Donnees.size() > i && _Donnees[i].size() >= 13){
+                _Donnees[i][amont ? 11 : 12] = 0;
+            }
+            else{
+                // Gestion d'erreur si les données ne sont pas disponibles
+            }
         }
     }
+
+    auto indices = trouveaspersseurs();
+
+    if(indices.size()>0){
+        if(aspdebit !=0 && aspinterdebut!=0){
+            bool toutdiametre = true;
+            for (auto &it: indices) {
+                if (_Donnees[it][15] == 0) {
+                    toutdiametre = false;
+                    break;
+                }
+            }
+
+            if (toutdiametre) {
+                calcul();
+                return;
+            }
+        }
+    } else {
+        bool toutlestuyaux = true;
+
+        for (int i = 0; i < _diameters.size(); i++) {
+            if (_diameters[i] == 0) {
+                toutlestuyaux = false;
+                break;
+            }
+        }
+
+        if (toutlestuyaux) {
+            calcul();
+        }
+    }
+
 
 }
 
@@ -484,9 +559,12 @@ void parcelle::calcul_droit(float a, float b, double k) {
     float sigmadebit = 0, cumulperte = 0, cumulpiezo = 0;
 
     for (int i = fin_droit; i >= debut; --i) {
+        if(i>_Donnees.size() && _Donnees[i].size() >=23){
+            return;
+        }
         float Dia = _Donnees[i][15]; // Diamètre en mm
         sigmadebit += _Donnees[i][9]; // Débit en l/h
-        float L = _Donnees[i][5]; // Longueur de la conduite en mètre
+        float L = _Donnees[i][amont ? 5 : 6]; // Longueur de la conduite en mètre
 
         // Calcul de la perte de charge
         float perte = k * std::pow(sigmadebit / 3600, a) * std::pow(Dia, b) * L;
@@ -526,12 +604,12 @@ void parcelle::calcul_gauche(float a, float b, double k) {
     float cumulpiezo = 0;
 
     for (int i = 0; i < debut - _decalage; ++i) {
-        if(i==-1){
+        if(i==-1 && _Donnees[i].size() >=23){
             return;
         }
         float Dia = _Donnees[i][15]; // Diamètre en mm
         sigmadebit += _Donnees[i][9]; // Débit en l/h
-        float L = _Donnees[i][5]; // Longueur de la conduite en mètre
+        float L = _Donnees[i][amont ? 5 : 6]; // Longueur de la conduite en mètre
 
         // Calcul de la perte de charge
         float perte = k * std::pow(sigmadebit / 3600, a) * std::pow(Dia, b) * L;
@@ -592,32 +670,43 @@ void parcelle::calculpeigne(float a, float b, double k, float debitasp) {
     const float debit_scale = 1000.0f / 3600.0f;
 
     for (int i = 0; i < debut; ++i) {
-        float interval = amont ? _Donnees[i][6] : _Donnees[i][5];
-        float debit = _Donnees[i][2] * debitasp;
+        if(_Donnees.size() > i && _Donnees[i].size() >= 16){
+            float interval = amont ? _Donnees[i][6] : _Donnees[i][5];
+            float debit = _Donnees[i][2] * debitasp;
 
-        if (_Donnees[i][2] != 0) {
-            float Dia = _Donnees[i][15]; // Diamètre en mm
-            sigmadebitg += debit; // Débit en M3/h
-            float perte = k * std::pow(sigmadebitg * debit_scale, a) * std::pow(Dia, b) * interval;
-            perteg += perte;
+            if (_Donnees[i][2] != 0) {
+                float Dia = _Donnees[i][15]; // Diamètre en mm
+                sigmadebitg += debit; // Débit en M3/h
+                float perte = k * std::pow(sigmadebitg * debit_scale, a) * std::pow(Dia, b) * interval;
+                perteg += perte;
+            }
+            intervalleg += interval;
         }
-        intervalleg += interval;
+        else{
+            // Gestion d'erreur si les données ne sont pas disponibles
+        }
     }
 
     for (int i = fin_droit; i >= debut; --i) {
-        float interval = amont ? _Donnees[i][6] : _Donnees[i][5];
-        float debit = _Donnees[i][2] * debitasp;
+        if(_Donnees.size() > i && _Donnees[i].size() >= 16){
+            float interval = amont ? _Donnees[i][6] : _Donnees[i][5];
+            float debit = _Donnees[i][2] * debitasp;
 
-        if (_Donnees[i][2] != 0) {
-            float Dia = _Donnees[i][15];    // Diamètre en mm
-            sigmadebitd += debit; // Débit en l/h
+            if (_Donnees[i][2] != 0) {
+                float Dia = _Donnees[i][15];    // Diamètre en mm
+                sigmadebitd += debit; // Débit en l/h
 
-            // Calcul de la perte de charge
-            float perte = k * std::pow(sigmadebitd * debit_scale, a) * std::pow(Dia, b) * interval;
-            perted += perte; // Cumul de la perte de charge
+                // Calcul de la perte de charge
+                float perte = k * std::pow(sigmadebitd * debit_scale, a) * std::pow(Dia, b) * interval;
+                perted += perte; // Cumul de la perte de charge
+            }
+            intervalled += interval;
         }
-        intervalled += interval;
+        else{
+            // Gestion d'erreur si les données ne sont pas disponibles
+        }
     }
+
 }
 
 
@@ -625,7 +714,7 @@ void parcelle::calculaspersseurs(std::vector<int> &indices, float a, float b, do
 
     for(auto &it : _Donnees){
         if(it[2]==0){
-            it[15] = 0; // On suprimme les diametre ou il n'y a pas d'aspersseurs
+            it[15] = 0; // On suprimme les diametres où il n'y a pas d'asperseurs
         }
     }
 
@@ -634,21 +723,36 @@ void parcelle::calculaspersseurs(std::vector<int> &indices, float a, float b, do
         return;
     }
 
+    if(aspdebit!=0 && aspinterdebut!=0){
+        _debit = 0;
+        for (const auto &it: indices) {
+            _debit += aspdebit * _Donnees[it][2];
+        }
+
+        _debit *= 1000;
+
+        float debitConverti = (aspdebit * 1000) / 3600;
+
+        milieuhydro = trouvemilieuhydroasp();
+
+        std::sort(indices.begin(), indices.end());
+
+        calcul_gauche_aspersseurs(indices, debitConverti, a, b, k);
+        calcul_droit_aspersseurs(indices, debitConverti, a, b, k);
+        return;
+    }
+
     // Création de la boîte de dialogue
     QDialog dialog(nullptr);
     QFormLayout form(&dialog);
 
     QLineEdit *lineEditDebit = new QLineEdit(&dialog);
-    if (aspdebit != 0) {
-        lineEditDebit->setText(QString::number(aspdebit));
-    }
+    lineEditDebit->setText(QString::number(0));
     form.addRow("Débit en m³/h:", lineEditDebit);
 
 
     QLineEdit *lineEditDistAsperseurs = new QLineEdit(&dialog);
-    if (aspinterdebut != 0) {
-        lineEditDistAsperseurs->setText(QString::number(aspinterdebut));
-    }
+    lineEditDistAsperseurs->setText(QString::number(0));
     form.addRow("Distance entre asperseurs:", lineEditDistAsperseurs);
 
     QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
@@ -678,6 +782,10 @@ void parcelle::calculaspersseurs(std::vector<int> &indices, float a, float b, do
 
         calcul_gauche_aspersseurs(indices, debitConverti, a, b, k);
         calcul_droit_aspersseurs(indices, debitConverti, a, b, k);
+
+
+
+
     }
 }
 
@@ -812,7 +920,7 @@ void parcelle::calcul_gauche_aspersseurs(std::vector<int> &indices, float debit,
 
     // Calcul de la perte de charge, de la vitesse et du dénivelé du côté gauche du poste de commande
     for (int i = 0; i < debut; ++i) {
-        if (indicesSet.count(i)) {
+        if (indicesSet.count(i) && _Donnees[i].size() >= 23 ) {
 
             const float Dia = _Donnees[i][15]; // Diamètre en mm
             sigmadebit += _Donnees[i][2] * debit; // Débit en l/s
@@ -821,9 +929,13 @@ void parcelle::calcul_gauche_aspersseurs(std::vector<int> &indices, float debit,
             // Calcul de la perte de charge
             const float perte = k * std::pow(sigmadebit, a) * std::pow(Dia, b) * L;
 
-            const int next_idx = *std::upper_bound(indices.begin(), indices.end(), i);
-            const float denivele = amont ? _Donnees[i][3] - _Donnees[next_idx][3]
-                                         : _Donnees[i][4] - _Donnees[next_idx][4];
+            int next_idx = *std::upper_bound(indices.begin(), indices.end(), i);
+
+            if(next_idx>poste_de_commande)
+                next_idx = poste_de_commande;
+
+            const float denivele = amont ? _Donnees[next_idx][3] - _Donnees[i][3]
+                                         : _Donnees[next_idx][4] - _Donnees[i][4];
 
             const float piezo = perte + denivele;
             cumulperte += perte; // Cumul de la perte de charge
@@ -872,6 +984,7 @@ void parcelle::herse(int ligne) {
         denivele = _Donnees[index][3] - _Donnees[index][4];
     }
 
+    // Permet de lancer un calcul de herse sur la ligne avec un diametr" 55.4 de rentrer ainsi que le débit de la ligne
     hersealim->importdonees(aspdebit, 55.4, aspinterdebut, _Donnees[index], denivele);
     hersealim->show();
 }
@@ -906,7 +1019,7 @@ void parcelle::calcul_droit_aspersseurs(std::vector<int> &indices, float debit, 
 
     // Calcul de la perte de charge, de la vitesse et du dénivelé du côté droit du poste de commande
     for (int i = fin_droit; i >= debut; --i) {
-        if (indicesSet.count(i)) {
+        if (indicesSet.count(i) && _Donnees[i].size() >= 23) {
 
             const float Dia = _Donnees[i][15]; // Diamètre en mm
             sigmadebit += _Donnees[i][2] * debit; // Débit en l/s
@@ -919,9 +1032,13 @@ void parcelle::calcul_droit_aspersseurs(std::vector<int> &indices, float debit, 
             const float aire = const_pi * std::pow((diametreM / 2), 2);
             const float vitesse = debitM3S / aire;
 
-            const int nextIndex = *std::upper_bound(reverse.begin(), reverse.end(), i, std::greater<int>());
-            const float denivele = amont ? _Donnees[nextIndex][3] - _Donnees[i][3]
-                                         : _Donnees[nextIndex][4] - _Donnees[i][4];
+            int nextIndex = *std::upper_bound(reverse.begin(), reverse.end(), i, std::greater<int>());
+
+            if(nextIndex<poste_de_commande)
+                nextIndex = poste_de_commande;
+
+            const float denivele = amont ? _Donnees[i][3] - _Donnees[nextIndex][3]
+                                         : _Donnees[i][4] - _Donnees[nextIndex][4];
 
             const float piezo = perte + denivele;
             cumulperte += perte; // Cumul de la perte de charge
@@ -989,7 +1106,7 @@ void parcelle::fromString(const std::string &s, std::shared_ptr<bdd> db) {
         _Donnees.push_back(row);
     }
 
-    // Load other data from string
+    // Chargement des autre données
     std::getline(ss, item, ';');
     _nom = QString::fromStdString(item);
 
@@ -1050,7 +1167,7 @@ void parcelle::setAspinterdebut(float aspinterdebut) {
 }
 
 
-int parcelle::nbasp() { // Cmpte le nombre d'aspersseurs
+int parcelle::nbasp() { // Compte le nombre d'asperseurs
     int nbasp = 0;
     for (auto &i: _Donnees) {
         nbasp += i[2];
@@ -1073,7 +1190,6 @@ void parcelle::placerarrosseurs(int ligne, int nombre){
         return;
 
     _Donnees[ligne-1-_indexdebut][2] = nombre;
-    std::cout<<"fait"<<std::endl;
 }
 
 float parcelle::hectare(){

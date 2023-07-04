@@ -79,7 +79,7 @@ private:
     float calculdiametre();
 
     ///
-    /// @return
+    /// @return perte de charge
     /// @brief Calcule les pertes de charge en fonction des champs de l'interface utilisateur et renvoie le résultat
     float calculperte();
 
@@ -92,7 +92,7 @@ private:
 
     ///
     /// @param pipe_material : Matériau de la canalisation
-    /// @return
+    /// @return coefficient nécéssaire au calcul
     /// @brief Renvoie un tuple contenant les propriétés matérielles de la canalisation en fonction du matériau de la canalisation
     std::tuple<float, float, float> getMaterialProperties(const std::string &pipe_material);
 
