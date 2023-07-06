@@ -932,7 +932,7 @@ void parcelle::calcul_gauche_aspersseurs(std::vector<int> &indices, float debit,
             int next_idx = *std::upper_bound(indices.begin(), indices.end(), i);
 
             if(next_idx>poste_de_commande)
-                next_idx = poste_de_commande;
+                next_idx = poste_de_commande-1;
 
             const float denivele = amont ? _Donnees[next_idx][3] - _Donnees[i][3]
                                          : _Donnees[next_idx][4] - _Donnees[i][4];
@@ -991,7 +991,7 @@ void parcelle::herse(int ligne) {
 
 
 void parcelle::calcul_droit_aspersseurs(std::vector<int> &indices, float debit, float a, float b, double k) {
-    const int debut = poste_de_commande - _decalage;
+    const int debut = poste_de_commande - _decalage ;
     const int fin_droit = _Donnees.size() - 1;
 
     std::unordered_set<int> indicesSet(indices.begin(), indices.end());
@@ -1035,7 +1035,7 @@ void parcelle::calcul_droit_aspersseurs(std::vector<int> &indices, float debit, 
             int nextIndex = *std::upper_bound(reverse.begin(), reverse.end(), i, std::greater<int>());
 
             if(nextIndex<poste_de_commande)
-                nextIndex = poste_de_commande;
+                nextIndex = poste_de_commande-1;
 
             const float denivele = amont ? _Donnees[i][3] - _Donnees[nextIndex][3]
                                          : _Donnees[i][4] - _Donnees[nextIndex][4];
@@ -1044,7 +1044,7 @@ void parcelle::calcul_droit_aspersseurs(std::vector<int> &indices, float debit, 
             cumulperte += perte; // Cumul de la perte de charge
             cumulpiezo += piezo;
 
-            _Donnees[i][17] = denivele;
+            _Donnees[i][17] = -denivele;
             _Donnees[i][18] = vitesse;
             _Donnees[i][19] = perte;
             _Donnees[i][20] = piezo;
@@ -1192,13 +1192,29 @@ void parcelle::placerarrosseurs(int ligne, int nombre){
     _Donnees[ligne-1-_indexdebut][2] = nombre;
 }
 
-float parcelle::hectare(){
-    float hectare = 0;
+#include <map>
 
+float parcelle::hectare(){
+    std::map<float, int> freq;
+    float max_val = 0;
+    int max_count = -1;
+
+    // find the most frequent value in _Donnees[i][amont ? 5 : 6]
     for(int i=0;i<_Donnees.size();i++){
-        hectare += _Donnees[i][1]*_Donnees[2][amont ? 5 : 6];
+        float val = _Donnees[i][amont ? 5 : 6];
+        freq[val]++;
+
+        if (freq[val] > max_count) {
+            max_val = val;
+            max_count = freq[val];
+        }
+    }
+
+    // use the most frequent value for calculation
+    float hectare = 0;
+    for(int i=0;i<_Donnees.size();i++){
+        hectare += _Donnees[i][1]*max_val;
     }
 
     return hectare/10000;
-
 }
