@@ -36,6 +36,7 @@ Q_OBJECT
 
 public:
     pertechargeherse(std::shared_ptr<bdd> db,QWidget *parent = nullptr);
+    ~pertechargeherse();
     void refresh(){
         _Donnees.clear();
         clearchild();
@@ -63,7 +64,7 @@ private:
 
     int ligne;
 
-    int _hauteurligne;
+    float *_hauteurligne;
 
     bool milieuhydro = true;
 
@@ -189,6 +190,10 @@ protected :
 
     /// @brief Fonction enveloppe pour enregistrer les données.
     void saveDataWrapper();
-   };
+
+    void optimiseDiametres();
+
+    void calculligne(int ligne);
+};
 
 #endif //PERTEDECHARGEHERSE_TABLEAU_H

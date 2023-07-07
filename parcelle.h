@@ -257,6 +257,7 @@ public:
   /// \return
   float hectare();
 
+  void optimize(float aspdebit = 0, float aspinterdebut=0);
 
 private:
 
@@ -279,6 +280,22 @@ private:
   float aspinterdebut;
 
 
+    void optimize_diameters_droit(float a, float b, double k);
+
+    void optimize_diameters_gauche(float a, float b, double k);
+
+    float calcul_vitesse(int i, float a, float b, double k, float &Dia, float &L, float &sigmadebit, float &cumulperte,
+                         float &cumulpiezo);
+
+    float calcul_vitesse(float dia, float a, float b, double k);
+
+    float calcul_vitesse(float dia, float sigmadebit, float a, float b, double k);
+
+    void optimize_aspersseurs(std::vector<int> indices, float a, float d, double k);
+
+    void optimize_gauche_aspersseurs(std::vector<int> &indices, float debit, float a, float b, double k);
+
+    void optimize_droit_aspersseurs(std::vector<int> &indices, float debit, float a, float b, double k);
 };
 
 #endif // TOUT_PARCELLE_H

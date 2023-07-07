@@ -239,7 +239,6 @@ void etude::init() {
         QString nomParcelle = "parcelle 1";
         initCalcul();
         _parcelles.push_back(parcelle(_Donnees, 0, _Donnees.size(), database, nomParcelle, amont));
-        std::cout<<_parcelles[0].isAmont()<<std::endl;
         rafraichirTableau();
     }
 }
@@ -640,7 +639,6 @@ void etude::rafraichirTableau() {
                             int parcelIndex = std::distance(parcelInfos.begin(), parcelInfoIt);
 
                             connect(lineEdit, &QLineEdit::textEdited, [this, ligne, parcelIndex](const QString &newnombre) {
-                                std::cout<<ligne<<" "<<parcelIndex<<" "<<newnombre.toStdString()<<std::endl;
                                 this->_parcelles[parcelIndex].placerarrosseurs(ligne, newnombre.toInt() );
                             });
                         }
@@ -1263,18 +1261,25 @@ void etude::chooseCommandPost() {
             int defaultIndex = -1;
             int commandPost = parcel.getPosteDeCommande() + parcel.getIndexdebut();
 
-            for (size_t i = 1; i < parcelData.size() + 1; ++i) { // On ajoute 1 à la taille de parcelData
-                rangeIndexComboBox->addItem(QString::number(globalIndex));
+            for (size_t i = 1; i < parcelData.size() + 1; ++i) {
+                if(i != 0) {
+                    rangeIndexComboBox->addItem(QString::number(globalIndex));
+                } else {
+                    rangeIndexComboBox->addItem(""); // Add empty string if the index is 0.
+                }
                 ++globalIndex;
             }
 
-            if (commandPost != -1) {
+            if (commandPost != -1 && commandPost != 0) { // Added commandPost != 0 to the condition.
                 defaultIndex = commandPost;
             }
 
             if (defaultIndex != -1) {
                 rangeIndexComboBox->setCurrentIndex(rangeIndexComboBox->findText(QString::number(defaultIndex)));
+            } else {
+                rangeIndexComboBox->setCurrentIndex(rangeIndexComboBox->findText("")); // Select the empty string if the default index is -1.
             }
+
 
             // Ajouter les comboboxes au layout du QDialog
             QHBoxLayout *parcelLayout = new QHBoxLayout();
@@ -1477,6 +1482,9 @@ void etude::keyPressEvent(QKeyEvent *event) {
         case Qt::Key_P:
             savePdf();
             break;
+        case Qt::Key_A:
+            optimizeparcelle();
+            break;
         default:
             QWidget::keyPressEvent(event);
     }
@@ -1523,7 +1531,6 @@ void etude::modifierdebit(int debut, int fin, float dia) {
 }
 
 void etude::modifierarro(int ligne, float nombre) {
-    std::cout<<"DEBUT "<<ligne<<std::endl;
     int i = 0;
 
     for (auto &parcelle: _parcelles) {
@@ -1531,7 +1538,6 @@ void etude::modifierarro(int ligne, float nombre) {
         for (int j = 0; j < datas.size(); j++) {
             if(i==(ligne-1)){
                 datas[i][2] = nombre;
-                std::cout<<"fait "<<i<<std::endl;
                 break;
             }
             i++;
@@ -1641,7 +1647,6 @@ void etude::changerDebitDialog() {
 
     dialog.exec();
 }
-
 
 
 
@@ -2057,3 +2062,56 @@ void etude::readFromFile(const std::string &filename) {
 }
 
 
+void etude::optimizeparcelle(){
+    updateDonnees();
+
+    int column = 2;
+    std::vector<int> result;
+
+    for (int i = 0; i < _Donnees.size(); ++i) {
+        if (_Donnees[i].size() > column)
+            result.push_back(_Donnees[i][column]);
+    }
+
+    bool tout0 = std::all_of(result.begin(), result.end(), [](int i) { return i == 0; });
+
+    if(tout0){
+        for(auto &parcel : _parcelles)
+            parcel.optimize();
+        rafraichirTableau();
+        return;
+    }
+
+
+    // Création de la boîte de dialogue
+    QDialog dialog(nullptr);
+    QFormLayout form(&dialog);
+
+    QLineEdit *lineEditDebit = new QLineEdit(&dialog);
+    lineEditDebit->setText(QString::number(0));
+    form.addRow("Débit en m³/h:", lineEditDebit);
+
+
+    QLineEdit *lineEditDistAsperseurs = new QLineEdit(&dialog);
+    lineEditDistAsperseurs->setText(QString::number(0));
+    form.addRow("Distance entre asperseurs:", lineEditDistAsperseurs);
+
+    QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
+    form.addRow(&buttonBox);
+
+    QObject::connect(&buttonBox, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+    QObject::connect(&buttonBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+
+    dialog.setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
+
+    if (dialog.exec() == QDialog::Accepted) {
+        float aspdebit = lineEditDebit->text().replace(",",".").toFloat();
+        float aspinterdebut = lineEditDistAsperseurs->text().replace(",",".").toFloat();
+
+        for(auto &parcel : _parcelles)
+            parcel.optimize(aspdebit,aspinterdebut);
+        rafraichirTableau();
+
+    }
+
+}

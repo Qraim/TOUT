@@ -205,6 +205,7 @@ private :
     /// \param multi
     void doubledebit(float multi);
 
+    void optimizeparcelle();
 };
 
 #endif // ETUDE_H

@@ -20,7 +20,6 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db, QWidget *parent)
     setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
 
     ligne = 1;
-    _hauteurligne = 0;
 
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
 
@@ -334,7 +333,7 @@ void pertechargeherse::importdonees(float debitLH, float diametre, float interva
         _Donnees.push_back(temp); // mise dans le set des données
     }
     milieuhydro = false;
-    _hauteurligne = hauteurligne;
+    _hauteurligne = new float(hauteurligne);
     calcul();
 
     float piezo = sigmapertecase->text().toFloat() + hauteurligne;
@@ -702,6 +701,10 @@ void pertechargeherse::keyPressEvent(QKeyEvent *event) {
         addRow();
     }
 
+    else if (event->key() == Qt::Key_O) {
+        optimiseDiametres();
+    }
+
         // Save as PDF (Ctrl + S)
     else if (controlPressed && event->key() == Qt::Key_S && !shiftPressed) {
         saveAsPdf();
@@ -768,6 +771,8 @@ void pertechargeherse::calcul() {
     // Effectue les calculs pour chaque ligne de données.
     for (int i = 0; i < _Donnees.size(); ++i) {
 
+
+
         // Calcule le cumul de débit.
         sigmaDebit += _Donnees[i][1];
         _Donnees[i][2] = sigmaDebit;
@@ -829,7 +834,12 @@ void pertechargeherse::calcul() {
     sigmalongueurcase->setAlignment(Qt::AlignCenter);
     sigmapertecase->setText(QString::number(sigmaPerte, 'f', 2) + "m");
     sigmapertecase->setAlignment(Qt::AlignCenter);
-    sigmapiezocase->setText(QString::number(sigmaPiezo + _hauteurligne, 'f', 2) + "m");
+
+    if(_hauteurligne==nullptr){
+        sigmapiezocase->setText(QString::number(sigmaPiezo, 'f', 2) + "m");
+    } else {
+        sigmapiezocase->setText(QString::number(sigmaPiezo + *_hauteurligne, 'f', 2) + "m");
+    }
     sigmapiezocase->setAlignment(Qt::AlignCenter);
 
     // Rafraîchit le pertechargeherse.
@@ -1627,3 +1637,125 @@ void pertechargeherse::importData() {
         calcul();
     }
 }
+
+pertechargeherse::~pertechargeherse() {
+    delete _hauteurligne;
+}
+void pertechargeherse::calculligne(int ligne) {
+    // Récupère les coefficients du matériau
+    std::tuple<float, float, double> coefficients =
+            database->get_material_coefficients(
+                    Materiau->currentText().toStdString());
+    float a = std::get<0>(coefficients);
+    float b = std::get<1>(coefficients);
+    double k = std::get<2>(coefficients);
+
+    // Récupère l'unité de mesure
+    int unit = unite->currentIndex();
+
+    // Récupère les données de la ligne courante
+    float diametre = _Donnees[ligne][3];
+    float longueur = _Donnees[ligne][4];
+    float hauteur = _Donnees[ligne][5];
+
+    // Calcule le débit cumulé
+    float sigmaDebit = 0;
+    for (int i = 0; i <= ligne; ++i) {
+        sigmaDebit += _Donnees[i][1];
+    }
+
+    float debitM3 = 0; // Débit en m3/h
+    float sigmaDebitLs = 0; // Cumul débit en l/s
+
+    // Convertit le débit en fonction de l'unité
+    if (unit == 0) { // l/h
+        debitM3 = sigmaDebit / 1000 / 3600;
+        sigmaDebitLs = sigmaDebit / 3600;
+    } else if (unit == 1) { // l/s
+        sigmaDebitLs = sigmaDebit;
+        debitM3 = sigmaDebit / 1000;
+    } else if (unit == 2) { // m3/h
+        sigmaDebitLs = sigmaDebit / 3.6;
+        debitM3 = sigmaDebit / 3600;
+    }
+
+    // Calcule l'aire du tuyau
+    float aireTuyau = PI * pow((diametre / 1000) / 2, 2);
+
+    // Calcule la vitesse
+    float vitesse = debitM3 / aireTuyau;
+
+    // Calcule la perte de charge
+    float perteCharge = k * pow(sigmaDebitLs, a) * pow(diametre, b) * longueur;
+
+    // Calcule la hauteur piezométrique
+    float piezo = perteCharge + hauteur;
+
+    // Met à jour les données calculées
+    _Donnees[ligne][6] = vitesse;
+    _Donnees[ligne][7] = perteCharge;
+    _Donnees[ligne][8] = piezo;
+}
+
+
+void pertechargeherse::optimiseDiametres() {
+    // Initialise les limites.
+    float limitevitesse = 2.0f;
+    float limitecumulpiezo = 3.0f;
+
+    // Liste des diamètres disponibles.
+    std::vector<float> diametresDisponibles = {28.0f, 35.2f, 44.0f, 55.4f, 63.2f, 69.00f};
+    std::sort(diametresDisponibles.begin(), diametresDisponibles.end()); // Tri croissant
+
+    float cumulPiezo = 0.0f; // Initialisation du cumul du piezométrique pour chaque ligne.
+
+    // Parcours de chaque ligne de données.
+    for (int i = 0; i < _Donnees.size(); ++i) {
+        for (float diametre : diametresDisponibles) {
+            // Applique le nouveau diamètre.
+            _Donnees[i][3] = diametre;
+
+            // Refait les calculs pour cette ligne.
+            calculligne(i);
+
+            // Si les nouvelles valeurs sont dans les limites, c'est bon, on a trouvé le diamètre optimal pour cette ligne.
+            if (_Donnees[i][6] <= limitevitesse) {
+                // Ajoute la hauteur piezométrique à la hauteur cumulée.
+                cumulPiezo += _Donnees[i][8];
+                break;
+            }
+        }
+    }
+
+    // Si le cumul piezo est supérieur à la limite, on recommence le processus en excluant le plus petit diamètre disponible
+    // et ce jusqu'à ce que le cumul piezo soit inférieur à la limite.
+    while (cumulPiezo > limitecumulpiezo && !diametresDisponibles.empty()) {
+        diametresDisponibles.erase(diametresDisponibles.begin()); // Enlève le plus petit diamètre disponible
+
+        cumulPiezo = 0.0f; // Réinitialise le cumul du piezométrique pour chaque ligne.
+
+        // Recommence le processus pour chaque ligne de données.
+        for (int i = 0; i < _Donnees.size(); ++i) {
+            for (float diametre : diametresDisponibles) {
+                // Applique le nouveau diamètre.
+                _Donnees[i][3] = diametre;
+
+                // Refait les calculs pour cette ligne.
+                calculligne(i);
+
+                // Si les nouvelles valeurs sont dans les limites, c'est bon, on a trouvé le diamètre optimal pour cette ligne.
+                if (_Donnees[i][6] <= limitevitesse) {
+                    // Ajoute la hauteur piezométrique à la hauteur cumulée.
+                    cumulPiezo += _Donnees[i][8];
+                    break;
+                }
+            }
+        }
+    }
+
+    calcul();
+
+}
+
+
+

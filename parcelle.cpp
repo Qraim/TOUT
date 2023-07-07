@@ -149,6 +149,115 @@ void parcelle::calcul() {
     _calcul = true;
 }
 
+void parcelle::optimize(float aspdebit, float aspinterdebut){
+    if (_matiere.empty()) _matiere = "PVC";
+
+    // Coefficients pour le calcul de la perte de charge
+    auto coefficients = database->get_material_coefficients(_matiere);
+    float a = std::get<0>(coefficients);
+    float b = std::get<1>(coefficients);
+    double k = std::get<2>(coefficients);
+
+    if (a == 0 || b == 0 || k == 0) {
+        a = 1.75;
+        b = -4.85;
+        k = 8381743.11;
+    }
+
+
+    auto aspesseurs = trouveaspersseurs();
+
+    if (!aspesseurs.empty()) {
+        parcelle::aspdebit = aspdebit;
+        parcelle::aspinterdebut = aspinterdebut;
+
+        optimize_aspersseurs(aspesseurs, a, b, k);
+        _calcul = true;
+        return;
+    }
+
+    optimize_diameters_droit(a,b,k);
+    optimize_diameters_gauche(a,b,k);
+    calculdiametre(a,b,k);
+}
+
+void parcelle::optimize_aspersseurs(std::vector<int> indices, float a, float b, double k) {
+
+
+    for(auto &it : _Donnees){
+        if(it[2]==0){
+            it[15] = 0; // On suprimme les diametres où il n'y a pas d'asperseurs
+        }
+    }
+
+    int debut = poste_de_commande - _decalage;
+    if (debut < 0) {
+        return;
+    }
+
+    if(aspdebit!=0 && aspinterdebut!=0){
+        _debit = 0;
+        for (const auto &it: indices) {
+            _debit += aspdebit * _Donnees[it][2];
+        }
+
+        _debit *= 1000;
+
+        float debitConverti = (aspdebit * 1000) / 3600;
+
+        milieuhydro = trouvemilieuhydroasp();
+
+        std::sort(indices.begin(), indices.end());
+
+        optimize_gauche_aspersseurs(indices, debitConverti, a, b, k);
+        optimize_droit_aspersseurs(indices, debitConverti, a, b, k);
+        return;
+    }
+
+    // Création de la boîte de dialogue
+    QDialog dialog(nullptr);
+    QFormLayout form(&dialog);
+
+    QLineEdit *lineEditDebit = new QLineEdit(&dialog);
+    lineEditDebit->setText(QString::number(0));
+    form.addRow("Débit en m³/h:", lineEditDebit);
+
+
+    QLineEdit *lineEditDistAsperseurs = new QLineEdit(&dialog);
+    lineEditDistAsperseurs->setText(QString::number(0));
+    form.addRow("Distance entre asperseurs:", lineEditDistAsperseurs);
+
+    QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
+    form.addRow(&buttonBox);
+
+    QObject::connect(&buttonBox, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+    QObject::connect(&buttonBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+
+    dialog.setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
+
+    if (dialog.exec() == QDialog::Accepted) {
+    aspdebit = lineEditDebit->text().toFloat();
+    aspinterdebut = lineEditDistAsperseurs->text().toFloat();
+
+    _debit = 0;
+    for (const auto &it: indices) {
+    _debit += aspdebit * _Donnees[it][2];
+    }
+
+    _debit *= 1000;
+
+    float debitConverti = (aspdebit * 1000) / 3600;
+
+    milieuhydro = trouvemilieuhydroasp();
+
+    std::sort(indices.begin(), indices.end());
+
+    optimize_gauche_aspersseurs(indices, debitConverti, a, b, k);
+    optimize_droit_aspersseurs(indices, debitConverti, a, b, k);
+
+    }
+}
+
 
 void parcelle::calculdiametre(float a, float b, double k) {
     float dia16 = 14;
@@ -783,9 +892,6 @@ void parcelle::calculaspersseurs(std::vector<int> &indices, float a, float b, do
         calcul_gauche_aspersseurs(indices, debitConverti, a, b, k);
         calcul_droit_aspersseurs(indices, debitConverti, a, b, k);
 
-
-
-
     }
 }
 
@@ -937,7 +1043,7 @@ void parcelle::calcul_gauche_aspersseurs(std::vector<int> &indices, float debit,
             const float denivele = amont ? _Donnees[next_idx][3] - _Donnees[i][3]
                                          : _Donnees[next_idx][4] - _Donnees[i][4];
 
-            const float piezo = perte + denivele;
+            const float piezo = perte + (-denivele);
             cumulperte += perte; // Cumul de la perte de charge
             cumulpiezo += piezo;
 
@@ -946,7 +1052,7 @@ void parcelle::calcul_gauche_aspersseurs(std::vector<int> &indices, float debit,
             const float aire = const_pi * std::pow((diametreM / 2), 2);
             const float vitesse = debitM3S / aire;
 
-            _Donnees[i][17] = denivele;
+            _Donnees[i][17] = -denivele;
             _Donnees[i][18] = vitesse;
             _Donnees[i][19] = perte;
             _Donnees[i][20] = piezo;
@@ -1040,11 +1146,11 @@ void parcelle::calcul_droit_aspersseurs(std::vector<int> &indices, float debit, 
             const float denivele = amont ? _Donnees[i][3] - _Donnees[nextIndex][3]
                                          : _Donnees[i][4] - _Donnees[nextIndex][4];
 
-            const float piezo = perte + denivele;
+            const float piezo = perte + (denivele);
             cumulperte += perte; // Cumul de la perte de charge
             cumulpiezo += piezo;
 
-            _Donnees[i][17] = -denivele;
+            _Donnees[i][17] = denivele;
             _Donnees[i][18] = vitesse;
             _Donnees[i][19] = perte;
             _Donnees[i][20] = piezo;
@@ -1218,3 +1324,262 @@ float parcelle::hectare(){
 
     return hectare/10000;
 }
+
+
+
+void parcelle::optimize_diameters_droit(float a, float b, double k) {
+    const float PI = 3.14159265358979323846;
+    int debut = poste_de_commande - _decalage;
+    int fin_droit = _Donnees.size() - 1;
+    float sigmadebit = 0.0f;
+
+    std::vector<float> diametresDisponibles = {21.0f, 28.0f, 35.2f, 44.0f, 55.4f, 66.0f, 79.20f};
+
+    int count = 0;
+    for (int index = debut; index <= fin_droit; index++) {
+        if (index >= _Donnees.size() || _Donnees[index].size() < 23){
+            break;
+        }
+        ++count;
+    }
+
+    float limite_cumul_piezo = 2;
+    float denivele_total_peigne = amont ? _Donnees[fin_droit][3] - _Donnees[debut][3] : _Donnees[fin_droit][4] - _Donnees[debut][4];
+    float limite_cumul_perte = limite_cumul_piezo - denivele_total_peigne;
+    float limite_perte_rang = limite_cumul_perte / count;
+
+    for (int i = fin_droit; i >= debut; --i) {
+        if(i >= _Donnees.size() && _Donnees[i].size() < 23){
+            return;
+        }
+
+        float bestDiameter = _Donnees[i][15];
+        float bestVitesse = std::numeric_limits<float>::max();
+        float bestPerte = -1;
+
+        sigmadebit += _Donnees[i][9]; // Débit en l/h
+
+        for (float dia : diametresDisponibles) {
+            float vitesse = calcul_vitesse(dia, sigmadebit, a, b, k);
+            float perte = k * std::pow(sigmadebit/3600 , a) * std::pow(dia, b);
+
+            float difference = limite_perte_rang - perte;
+
+            if (vitesse < bestVitesse && vitesse < 2.0f && difference >= 0 && (bestPerte == -1 || difference < (limite_perte_rang - bestPerte)) && perte <limite_perte_rang) {
+                bestDiameter = dia;
+                bestVitesse = vitesse;
+                bestPerte = perte;
+            }
+        }
+
+        _Donnees[i][15] = bestDiameter;
+    }
+
+    calcul_droit(a,b,k);
+}
+
+float parcelle::calcul_vitesse(float dia, float sigmadebit, float a, float b, double k) {
+    const float PI = 3.14159265358979323846;
+    float debitM3S = sigmadebit / 3600 / 1000; // Conversion de l/h à m³/s
+    float diametreM = dia / 1000; // Conversion de mm à m
+    float aire = PI * pow((diametreM / 2), 2); // Calcul de l'aire de la section de la conduite
+    float vitesse = debitM3S / aire; // Calcul de la vitesse
+    return vitesse;
+}
+
+void parcelle::optimize_gauche_aspersseurs(std::vector<int> &indices, float debit, float a, float b, double k) {
+    const int debut = poste_de_commande - _decalage;
+    int fin_gauche = debut - 1;
+
+    std::unordered_set<int> indicesSet(indices.begin(), indices.end());
+
+    float sigmadebit = 0;
+
+    std::vector<float> diametresDisponibles = {19.0f, 26.0f, 34.0f, 44.0f, 57.0f, 69.0f, 83.0f, 101.4f, 116.2f, 130.2f, 148.8f};
+
+    int count = 0;
+    for (int index : indices) {
+        if (index >= 0 && index < fin_gauche) {
+            ++count;
+        }
+    }
+
+
+    float limite_cumul_piezo = 2;
+    float denivele_total_peigne = amont ? _Donnees[indices[0]][3] - _Donnees[fin_gauche][3] : _Donnees[0][4] - _Donnees[fin_gauche][4];
+    float limite_cumul_perte = limite_cumul_piezo - denivele_total_peigne;
+    float limite_perte_rang = limite_cumul_perte / count;
+
+    std::cout<<limite_perte_rang<<std::endl;
+
+    std::vector<float> intervalles;
+    float interval = 0;
+    for (int i = debut - 1; i >= 0; i--) {
+        interval += amont ? _Donnees[i][5] : _Donnees[i][6];
+        if (indicesSet.count(i)) {
+            intervalles.push_back(interval);
+            interval = 0;
+        }
+    }
+
+    int compteur = intervalles.size() - 1;
+
+
+    for (int i = 0; i < debut; ++i) {
+        if (indicesSet.count(i) && _Donnees[i].size() >= 23 ) {
+            sigmadebit += _Donnees[i][2] * debit; // Débit en l/s
+
+            float bestDiameter = _Donnees[i][15];
+            float bestVitesse = std::numeric_limits<float>::max();
+            float bestPerte = -1; // initialize bestPerte to -1
+            const float L = intervalles[compteur--]; // Longueur de la conduite en mètre
+
+
+            for (float dia : diametresDisponibles) {
+                float vitesse = calcul_vitesse(dia, sigmadebit*3600, a, b, k);
+                float perte = k * std::pow(sigmadebit , a) * std::pow(dia, b) * L;
+
+                float difference = limite_perte_rang - perte;
+
+                // Now the condition checks if the difference is smaller and positive (i.e., perte is closer to the limit but not over it)
+                if (vitesse <= 2.0f && difference >= 0 && (bestPerte == -1 || difference < (limite_perte_rang - bestPerte))) {
+                    bestPerte = perte;
+                    bestDiameter = dia;
+                    bestVitesse = vitesse;
+                }
+
+
+            }
+
+            // Après avoir parcouru tous les diamètres disponibles, on fixe le diamètre de la conduite à la meilleure valeur trouvée.
+            _Donnees[i][15] = bestDiameter;
+            _Donnees[i][18] = bestVitesse;
+        }
+    }
+    calcul_gauche_aspersseurs(indices,debit,a,b,k);
+}
+
+
+
+
+void parcelle::optimize_droit_aspersseurs(std::vector<int> &indices, float debit, float a, float b, double k) {
+    const int debut = poste_de_commande - _decalage ;
+    const int fin_droit = _Donnees.size() - 1;
+
+    std::unordered_set<int> indicesSet(indices.begin(), indices.end());
+
+    float sigmadebit = 0;
+
+    std::vector<float> diametresDisponibles = {19.0f, 26.0f, 34.0f, 44.0f, 57.0f, 69.0f, 83.0f, 101.4f, 116.2f, 130.2f, 148.8f};
+
+    int count = 0;
+    for (int index : indices) {
+        if (index >= debut && index <= fin_droit) {
+            ++count;
+        }
+    }
+
+    float limite_cumul_piezo = 2;
+    float denivele_total_peigne = amont ? _Donnees[indices.back()][3] - _Donnees[debut][3] : _Donnees[fin_droit][4] - _Donnees[debut][4];
+    float limite_cumul_perte = limite_cumul_piezo - denivele_total_peigne;
+    float limite_perte_rang = limite_cumul_perte / count;
+
+    std::cout<<limite_perte_rang<<std::endl;
+
+    std::vector<float> intervalles;
+    float interval = 0;
+    for (int i = debut + 1; i <= fin_droit; i++) {
+        interval += amont ? _Donnees[i][5] : _Donnees[i][6];
+        if (indicesSet.count(i)) {
+            intervalles.push_back(interval);
+            interval = 0;
+        }
+    }
+
+    int compteur = 0;
+
+    for (int i = fin_droit; i >= debut; --i) {
+        if (indicesSet.count(i) && _Donnees[i].size() >= 23 ) {
+            sigmadebit += _Donnees[i][2] * debit; // Débit en l/s
+
+            float bestDiameter = _Donnees[i][15];
+            float bestVitesse = std::numeric_limits<float>::max();
+            float bestPerte = -1;
+            const float L = intervalles[compteur++];
+
+            for (float dia : diametresDisponibles) {
+                float vitesse = calcul_vitesse(dia, sigmadebit*3600, a, b, k);
+                float perte = k * std::pow(sigmadebit , a) * std::pow(dia, b) * L;
+
+                float difference = limite_perte_rang - perte;
+
+                if (vitesse <= 2.0f && difference >= 0 && (bestPerte == -1 || difference < (limite_perte_rang - bestPerte))) {
+                    bestPerte = perte;
+                    bestDiameter = dia;
+                    bestVitesse = vitesse;
+                }
+            }
+
+            _Donnees[i][15] = bestDiameter;
+            _Donnees[i][18] = bestVitesse;
+        }
+    }
+    calcul_droit_aspersseurs(indices,debit,a,b,k);
+}
+
+
+
+
+void parcelle::optimize_diameters_gauche(float a, float b, double k) {
+    const float PI = 3.14159265358979323846;
+    int debut = poste_de_commande - _decalage;
+    int fin_droit = _Donnees.size() - 1;
+    float sigmadebit = 0.0f;
+
+    std::vector<float> diametresDisponibles = {21.0f, 28.0f, 35.2f, 44.0f, 55.4f, 66.0f, 79.20f};
+
+    int count = 0;
+    for (int index = 0; index < debut; index++) {
+        if (index >= _Donnees.size() || _Donnees[index].size() < 23){
+            break;
+        }
+        ++count;
+    }
+
+    float limite_cumul_piezo = 2;
+    float denivele_total_peigne = amont ? _Donnees[0][3] - _Donnees[debut][3] : _Donnees[0][4] - _Donnees[debut][4];
+    float limite_cumul_perte = limite_cumul_piezo - denivele_total_peigne;
+    float limite_perte_rang = limite_cumul_perte / count;
+
+    for (int i = 0; i < debut - _decalage; i++) {
+        if(i > _Donnees.size() && _Donnees[i].size() >= 23){
+            return;
+        }
+
+        float bestDiameter = _Donnees[i][15];
+        float bestVitesse = std::numeric_limits<float>::max();
+        float bestPerte = -1;
+
+        sigmadebit += _Donnees[i][9]; // Débit en l/h
+
+        for (float dia : diametresDisponibles) {
+            float vitesse = calcul_vitesse(dia, sigmadebit, a, b, k);
+            float perte = k * std::pow(sigmadebit/3600 , a) * std::pow(dia, b);
+
+            float difference = limite_perte_rang - perte;
+
+            if (vitesse < bestVitesse && vitesse < 2.0f && difference >= 0 && (bestPerte == -1 || difference < (limite_perte_rang - bestPerte))) {
+                bestDiameter = dia;
+                bestVitesse = vitesse;
+                bestPerte = perte;
+                break;
+            }
+        }
+
+        _Donnees[i][15] = bestDiameter;
+    }
+
+    calcul_gauche(a,b,k);
+}
+
+
