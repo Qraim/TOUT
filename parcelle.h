@@ -88,21 +88,12 @@ public:
   ///
   int trouvemilieuhydro();
 
-  ///
-  /// @brief retourne la longueur de la parcelle
-  ///
-  float getLongueur() const;
-
-  ///
+    ///
   /// @brief retourne le débit totql de la parcelle
   ///
   float getDebit() const;
 
-  /// @brief renvoie si le calcul à été effectué ou non
-  /// @return
-  bool isCalcul() const;
-
-  /// @brief fixe le diametre des différents tuyaux
+    /// @brief fixe le diametre des différents tuyaux
   /// @param matiere
   void setDiametreDialog(std::string matiere);
 
@@ -142,30 +133,13 @@ public:
   /// @brief Liste des Setters
   /// @param amont
   void SetAmont(bool amont);
-  void setDonnees(const std::vector<std::vector<float>> &donnees);
-  void setMilieuhydro(int milieuhydro);
-  void setIndexdebut(int indexdebut);
-  void setIndexfin(int indexfin);
-  void setLongueur(float longueur);
-  void setMatiere(const std::string &matiere);
-  void setAmont(bool amont);
-  void setDebit(float debit);
-  void setCalcul(bool calcul);
 
-  /// @brief Liste des Getters
+    /// @brief Liste des Getters
   /// @return
   const std::string &getMatiere() const;
 
 
-  /// @brief calcul du peigne en asperssions
-  /// @param a coefficient A de la matiere choisis
-  /// @param b coefficient B de la matiere choisis
-  /// @param k coefficient K de la matiere choisis
-  /// @param debitgoutteur
-  void calculpeigne(float a, float b, double k, float debitgoutteur);
-
-
-  /// @brief retourne la parcelle
+    /// @brief retourne la parcelle
   void inverser();
 
   /// @brief  permet de choisir si le poste est du cote gauche ou droit
@@ -187,12 +161,7 @@ public:
   /// @param ligne
   void herse(int ligne);
 
-  /// @brief permet de charger une sauvegarde depuis un fichier // ABANDONNE
-  /// @param s
-  /// @param db
-  void fromString(const std::string &s, std::shared_ptr<bdd> db);
-
-  /// @brief convertit une parcelle en texte
+    /// @brief convertit une parcelle en texte
   /// @return
   std::string toString() const;
 
@@ -242,12 +211,12 @@ public:
   /// @brief Liste de getters/setters
   float getAspdebit() const;
 
-  void setAspdebit(float aspdebit);
+  void setAspdebit(float d);
 
 
   float getAspinterdebut() const;
 
-  void setAspinterdebut(float aspinterdebut);
+  void setAspinterdebut(float d);
 
   /// permet de changer le débit
   /// \param multi

@@ -127,9 +127,9 @@ void gag2::calcul() {
   float hauteur = hauteurText.toFloat();
 
   // Initialise les paramètres.
-  double k = 0;
-  double a = 0;
-  double b = 0;
+  double k;
+  double a;
+  double b;
 
   std::string material_name = Materiau->currentText().toStdString();
   auto coefficients = database->get_material_coefficients(material_name);
@@ -138,7 +138,7 @@ void gag2::calcul() {
   b = std::get<1>(coefficients);
   k = std::get<2>(coefficients);
 
-  float arosseurs = 0 ;
+  float arosseurs;
 
   if(espacement!=0)
     arosseurs = longueur / espacement ;
@@ -148,7 +148,7 @@ void gag2::calcul() {
   double perte = 0;
   double piezo = 0;
 
-  int index = 0;
+  int index;
   index = unite->currentIndex();
 
   float debitLS = 0;

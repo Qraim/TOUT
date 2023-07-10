@@ -416,7 +416,7 @@ void MainWindow::focusNextInput() {
 void MainWindow::setvitesse(int vitesse) {
     // met le champ en visible
     ChampVitesse.setVisible(true);
-    std::string str = "";
+    std::string str;
     // si la vitesse est > 2 on écrit en rouge
     if (vitesse > 2) {
         ChampVitesse.setStyleSheet("color: red;  background-color: white ");

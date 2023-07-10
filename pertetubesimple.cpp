@@ -221,8 +221,8 @@ void pertetubesimple::focusNextInput() {
 void pertetubesimple::calculer() {
 
     int index = unite->currentIndex();
-    float flowRate = 0;
-    float dLS=0;
+    float flowRate;
+    float dLS;
 
     
     QString debitText = debit.text();
@@ -249,9 +249,9 @@ void pertetubesimple::calculer() {
     }
 
     float deniveles = 0;
-    double  k =0;
-    float a=0;
-    float b = 0 ;
+    double  k;
+    float a;
+    float b;
 
     // Si l'input de dénivelé n'est pas vide, on le convertit en float et on le stocke dans la variable deniveles
     if(!denivele.text().isEmpty()){
@@ -273,7 +273,7 @@ void pertetubesimple::calculer() {
     float variation = pertecharge+deniveles; // Calcule la variation de charge en Pa
 
 
-    QString str = "";
+    QString str;
     if (v > 2) { // Si la vitesse d'écoulement est supérieure à 2 m/s, on change la couleur de la QLineEdit "Vitesse" en rouge
         Vitesse.setStyleSheet("color: red;  background-color: white ");
         str = QString::number(v, 'f', 2);

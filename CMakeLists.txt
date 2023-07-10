@@ -13,7 +13,7 @@ find_package(Qt5 COMPONENTS
         Widgets
         REQUIRED)
 
-add_executable(Tout main.cpp bdd.cpp bdd.h pertetubesimple.cpp pertetubesimple.h tout.cpp tout.h herse.h herse.cpp pcdim.cpp pcdim.h gag.cpp gag.h diametre.cpp diametre.h gag2.cpp etude.cpp etude.h parcelle.cpp parcelle.h parcelle.h)
+add_executable(Tout WIN32 main.cpp bdd.cpp bdd.h pertetubesimple.cpp pertetubesimple.h tout.cpp tout.h herse.h herse.cpp pcdim.cpp pcdim.h gag.cpp gag.h diametre.cpp diametre.h gag2.cpp etude.cpp etude.h parcelle.cpp parcelle.h parcelle.h)
 target_link_libraries(Tout
         Qt5::Core
         Qt5::Gui

@@ -30,28 +30,6 @@ parcelle::parcelle(std::vector<std::vector<float>> &data, int indexdebut, int in
 }
 
 
-void parcelle::setDonnees(const std::vector<std::vector<float>> &donnees) {
-    _Donnees = donnees;
-}
-
-void parcelle::setMilieuhydro(int milieuhydro) {
-    parcelle::milieuhydro = milieuhydro;
-}
-
-void parcelle::setIndexdebut(int indexdebut) { _indexdebut = indexdebut; }
-
-void parcelle::setIndexfin(int indexfin) { _indexfin = indexfin; }
-
-void parcelle::setLongueur(float longueur) { _longueur = longueur; }
-
-void parcelle::setMatiere(const std::string &matiere) { _matiere = matiere; }
-
-void parcelle::setAmont(bool amont) { parcelle::amont = amont; }
-
-void parcelle::setDebit(float debit) { _debit = debit; }
-
-void parcelle::setCalcul(bool calcul) { _calcul = calcul; }
-
 std::vector<std::vector<float>> &parcelle::getDonnees() {
     return _Donnees;
 }
@@ -555,10 +533,6 @@ int parcelle::getIndexfin() const {
     return _indexfin;
 }
 
-float parcelle::getLongueur() const {
-    return _longueur;
-}
-
 float parcelle::getDebit() const {
     return _debit;
 }
@@ -658,10 +632,6 @@ int parcelle::getPosteDeCommande() const {
 
 int parcelle::getvraiindiceposte() {
     return poste_de_commande + _indexdebut;
-}
-
-bool parcelle::isCalcul() const {
-    return _calcul;
 }
 
 const float pi = 3.14159265358979323846;
@@ -768,61 +738,6 @@ std::vector<int> parcelle::trouveaspersseurs() {
 
 
 #include <QInputDialog>
-
-
-
-void parcelle::calculpeigne(float a, float b, double k, float debitasp) {
-    int debut = poste_de_commande - _decalage;
-    int fin_droit = _Donnees.size() - 1;
-
-    float perteg = 0;
-    float sigmadebitg = 0;
-    float intervalleg = 0;
-    float perted = 0;
-    float sigmadebitd = 0;
-    float intervalled = 0;
-
-    const float debit_scale = 1000.0f / 3600.0f;
-
-    for (int i = 0; i < debut; ++i) {
-        if(_Donnees.size() > i && _Donnees[i].size() >= 16){
-            float interval = amont ? _Donnees[i][6] : _Donnees[i][5];
-            float debit = _Donnees[i][2] * debitasp;
-
-            if (_Donnees[i][2] != 0) {
-                float Dia = _Donnees[i][15]; // Diamètre en mm
-                sigmadebitg += debit; // Débit en M3/h
-                float perte = k * std::pow(sigmadebitg * debit_scale, a) * std::pow(Dia, b) * interval;
-                perteg += perte;
-            }
-            intervalleg += interval;
-        }
-        else{
-            // Gestion d'erreur si les données ne sont pas disponibles
-        }
-    }
-
-    for (int i = fin_droit; i >= debut; --i) {
-        if(_Donnees.size() > i && _Donnees[i].size() >= 16){
-            float interval = amont ? _Donnees[i][6] : _Donnees[i][5];
-            float debit = _Donnees[i][2] * debitasp;
-
-            if (_Donnees[i][2] != 0) {
-                float Dia = _Donnees[i][15];    // Diamètre en mm
-                sigmadebitd += debit; // Débit en l/h
-
-                // Calcul de la perte de charge
-                float perte = k * std::pow(sigmadebitd * debit_scale, a) * std::pow(Dia, b) * interval;
-                perted += perte; // Cumul de la perte de charge
-            }
-            intervalled += interval;
-        }
-        else{
-            // Gestion d'erreur si les données ne sont pas disponibles
-        }
-    }
-
-}
 
 
 void parcelle::calculaspersseurs(std::vector<int> &indices, float a, float b, double k) {
@@ -1201,58 +1116,6 @@ std::string parcelle::toString() const {
     return s;
 }
 
-void parcelle::fromString(const std::string &s, std::shared_ptr<bdd> db) {
-    database = db;
-    std::istringstream ss(s);
-    std::string item;
-
-    // Charge les données passer en parametre dans la parcelle
-    _Donnees.clear();
-    while (std::getline(ss, item, ';')) {
-        std::istringstream iss(item);
-        std::string value;
-        std::vector<float> row;
-        while (std::getline(iss, value, ',')) {
-            row.push_back(std::stof(value));
-        }
-        _Donnees.push_back(row);
-    }
-
-    // Chargement des autre données
-    std::getline(ss, item, ';');
-    _nom = QString::fromStdString(item);
-
-    std::getline(ss, item, ';');
-    milieuhydro = std::stoi(item);
-
-    std::getline(ss, item, ';');
-    poste_de_commande = std::stoi(item);
-
-    std::getline(ss, item, ';');
-    _indexdebut = std::stoi(item);
-
-    std::getline(ss, item, ';');
-    _indexfin = std::stoi(item);
-
-    std::getline(ss, item, ';');
-    _longueur = std::stof(item);
-
-    std::getline(ss, item, ';');
-    _matiere = item;
-
-    std::getline(ss, item, ';');
-    amont = std::stoi(item);
-
-    std::getline(ss, item, ';');
-    _debit = std::stof(item);
-
-    std::getline(ss, item, ';');
-    _calcul = std::stoi(item);
-
-    std::getline(ss, item);
-    _decalage = std::stoi(item);
-}
-
 int parcelle::getDecalage() const {
     return _decalage;
 }
@@ -1265,8 +1128,8 @@ float parcelle::getAspdebit() const {
     return aspdebit;
 }
 
-void parcelle::setAspdebit(float aspdebit) {
-    parcelle::aspdebit = aspdebit;
+void parcelle::setAspdebit(float d) {
+    parcelle::aspdebit = d;
 }
 
 
@@ -1274,8 +1137,8 @@ float parcelle::getAspinterdebut() const {
     return aspinterdebut;
 }
 
-void parcelle::setAspinterdebut(float aspinterdebut) {
-    parcelle::aspinterdebut = aspinterdebut;
+void parcelle::setAspinterdebut(float d) {
+    parcelle::aspinterdebut = d;
 }
 
 
