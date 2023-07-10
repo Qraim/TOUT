@@ -25,16 +25,20 @@ etude::etude(std::shared_ptr<bdd> db, QWidget *parent)
     QPushButton *divideButton = new QPushButton("Diviser", this);
     QPushButton *postebutton = new QPushButton("Poste", this);
     QPushButton *calcul = new QPushButton("Calcul", this);
+    QPushButton *opti = new QPushButton("Optimiser", this);
+
 
     connect(initButton, &QPushButton::clicked, this, &etude::init);
     connect(divideButton, &QPushButton::clicked, this, &etude::divideData);
     connect(postebutton, &QPushButton::clicked, this, &etude::chooseCommandPost);
     connect(calcul, &QPushButton::clicked, this, &etude::appelSetDiametreDialog);
+    connect(opti, &QPushButton::clicked, this, &etude::optimizeparcelle);
 
     QHBoxLayout *buttonsLayout = new QHBoxLayout();
     buttonsLayout->addWidget(initButton);
     buttonsLayout->addWidget(divideButton);
     buttonsLayout->addWidget(postebutton);
+    buttonsLayout->addWidget(opti);
     buttonsLayout->addWidget(calcul);
 
     QPushButton *showButton = new QPushButton("Afficher", this);
@@ -2060,28 +2064,16 @@ void etude::readFromFile(const std::string &filename) {
     rafraichirTableau();
 
 }
-
+#include <QGroupBox>
 
 void etude::optimizeparcelle(){
     updateDonnees();
 
-    int column = 2;
-    std::vector<int> result;
-
-    for (int i = 0; i < _Donnees.size(); ++i) {
-        if (_Donnees[i].size() > column)
-            result.push_back(_Donnees[i][column]);
-    }
-
-    bool tout0 = std::all_of(result.begin(), result.end(), [](int i) { return i == 0; });
-
-    if(tout0){
-        for(auto &parcel : _parcelles)
-            parcel.optimize();
-        rafraichirTableau();
-        return;
-    }
-
+    for(auto &i : _parcelles)
+        if(i.getPosteDeCommande()<=0){
+            chooseCommandPost();
+            break;
+        }
 
     // Création de la boîte de dialogue
     QDialog dialog(nullptr);
@@ -2096,6 +2088,10 @@ void etude::optimizeparcelle(){
     lineEditDistAsperseurs->setText(QString::number(0));
     form.addRow("Distance entre asperseurs:", lineEditDistAsperseurs);
 
+    QLineEdit *LineEditPiezo = new QLineEdit(&dialog);
+    LineEditPiezo->setText(QString::number(0));
+    form.addRow("Piezo Ciblé:", LineEditPiezo);
+
     QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
     form.addRow(&buttonBox);
 
@@ -2105,11 +2101,120 @@ void etude::optimizeparcelle(){
     dialog.setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
 
     if (dialog.exec() == QDialog::Accepted) {
+
         float aspdebit = lineEditDebit->text().replace(",",".").toFloat();
         float aspinterdebut = lineEditDistAsperseurs->text().replace(",",".").toFloat();
+        float piezo = LineEditPiezo->text().replace(",",".").toFloat();
+
+        int column = 2;
+        std::vector<int> result;
+
+        for (int i = 0; i < _Donnees.size(); ++i) {
+            if (_Donnees[i].size() > column)
+                result.push_back(_Donnees[i][column]);
+        }
+
+        bool tout0 = std::all_of(result.begin(), result.end(), [](int i) { return i == 0; });
+
+        if(tout0){
+
+            std::vector<float> diametresDisponibles = database->getInnerDiametersForMatiereAndPressure("PEHD",6 );
+
+            QDialog *dialog = new QDialog();
+            QVBoxLayout *mainLayout = new QVBoxLayout(dialog);
+            QVector<QCheckBox*> checkboxes;
+
+            // Crée un QHBoxLayout pour organiser les checkboxes en horizontal
+            QHBoxLayout *checkboxLayout = new QHBoxLayout();
+            mainLayout->addLayout(checkboxLayout);
+
+            // Ajout des checkboxes pour chaque diamètre
+            for (float diameter : diametresDisponibles) {
+                QCheckBox *checkbox = new QCheckBox(QString::number(diameter), dialog);
+                checkbox->setChecked(true);
+
+                // Crée un QGroupBox pour chaque checkbox
+                QGroupBox *groupbox = new QGroupBox(dialog);
+                QVBoxLayout *groupboxLayout = new QVBoxLayout(groupbox);
+                groupboxLayout->addWidget(checkbox);
+                checkboxLayout->addWidget(groupbox);
+
+                checkboxes.push_back(checkbox);
+            }
+
+            // Ajout du bouton "OK"
+            QPushButton *button = new QPushButton("OK", dialog);
+            mainLayout->addWidget(button);
+
+            // Connecte le signal du bouton au slot de la dialogue
+            QObject::connect(button, &QPushButton::clicked, dialog, &QDialog::accept);
+
+            // Affiche le dialogue modale
+            dialog->exec();
+
+
+            // Récupère les diamètres sélectionnés
+            std::vector<float> diametresChoisis;
+            for (QCheckBox *checkbox : checkboxes) {
+                if (checkbox->isChecked()) {
+                    diametresChoisis.push_back(checkbox->text().toFloat());
+                }
+            }
+
+            // Vous pouvez maintenant utiliser diametresChoisis pour vos calculs
+            // Supprime la boîte de dialogue
+            delete dialog;
+
+            for(auto &parcel : _parcelles)
+                parcel.optimize(diametresChoisis,piezo);
+            rafraichirTableau();
+            return;
+        }
+
+        std::vector<float> diametresDisponibles = database->getInnerDiametersForMatiereAndPressure("PVC",10 );
+
+        QDialog *dialog = new QDialog();
+        QVBoxLayout *mainLayout = new QVBoxLayout(dialog);
+        QVector<QCheckBox*> checkboxes;
+
+        // Crée un QHBoxLayout pour organiser les checkboxes en horizontal
+        QHBoxLayout *checkboxLayout = new QHBoxLayout();
+        mainLayout->addLayout(checkboxLayout);
+
+        // Ajout des checkboxes pour chaque diamètre
+        for (float diameter : diametresDisponibles) {
+            QCheckBox *checkbox = new QCheckBox(QString::number(diameter), dialog);
+            checkbox->setChecked(true);
+
+            // Crée un QGroupBox pour chaque checkbox
+            QGroupBox *groupbox = new QGroupBox(dialog);
+            QVBoxLayout *groupboxLayout = new QVBoxLayout(groupbox);
+            groupboxLayout->addWidget(checkbox);
+            checkboxLayout->addWidget(groupbox);
+
+            checkboxes.push_back(checkbox);
+        }
+
+        // Ajout du bouton "OK"
+        QPushButton *button = new QPushButton("OK", dialog);
+        mainLayout->addWidget(button);
+
+        // Connecte le signal du bouton au slot de la dialogue
+        QObject::connect(button, &QPushButton::clicked, dialog, &QDialog::accept);
+
+        // Affiche le dialogue modale
+        dialog->exec();
+
+        // Récupère les diamètres sélectionnés
+        std::vector<float> diametresChoisis;
+        for (QCheckBox *checkbox : checkboxes) {
+            if (checkbox->isChecked()) {
+                diametresChoisis.push_back(checkbox->text().toFloat());
+            }
+        }
 
         for(auto &parcel : _parcelles)
-            parcel.optimize(aspdebit,aspinterdebut);
+            parcel.optimize(diametresDisponibles,piezo,aspdebit,aspinterdebut);
         rafraichirTableau();
 
     }

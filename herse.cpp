@@ -199,6 +199,7 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db, QWidget *parent)
     QPushButton *effacerButton = new QPushButton("Effacer");
     QPushButton *modifierButton = new QPushButton("Modifier");
     QPushButton *recopier = new QPushButton("Recopier");
+    QPushButton *optimize = new QPushButton("Optimiser");
     QPushButton *reinitialiserButton = new QPushButton("Réinitialiser");
     QPushButton *editdiam = new QPushButton("Diametre");
 
@@ -212,6 +213,7 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db, QWidget *parent)
     connect(calculButton, &QPushButton::clicked, this, &pertechargeherse::calcul);
     connect(effacerButton, &QPushButton::clicked, this, &pertechargeherse::enleverLigne);
     connect(modifierButton, &QPushButton::clicked, this, &pertechargeherse::showUpdateDialog);
+    connect(optimize, &QPushButton::clicked, this, &pertechargeherse::optimiseDiametres);
     connect(reinitialiserButton, &QPushButton::clicked, this, &pertechargeherse::refresh);
     connect(recopier, &QPushButton::clicked, this, &pertechargeherse::recopiederniereligne);
     connect(insererbutton, &QPushButton::clicked, this, &pertechargeherse::addRow);
@@ -223,6 +225,7 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db, QWidget *parent)
     buttonsLayout->addWidget(calculButton);
     buttonsLayout->addWidget(effacerButton);
     buttonsLayout->addWidget(modifierButton);
+    buttonsLayout->addWidget(optimize);
     buttonsLayout->addWidget(recopier);
     buttonsLayout->addWidget(editdiam);
     buttonsLayout->addWidget(insererbutton);
@@ -1701,7 +1704,6 @@ void pertechargeherse::calculligne(int ligne) {
 void pertechargeherse::optimiseDiametres() {
     // Initialise les limites.
     float limitevitesse = 2.0f;
-    float limitecumulpiezo = 3.0f;
 
     // Liste des diamètres disponibles.
     std::vector<float> diametresDisponibles = {28.0f, 35.2f, 44.0f, 55.4f, 63.2f, 69.00f};
@@ -1723,32 +1725,6 @@ void pertechargeherse::optimiseDiametres() {
                 // Ajoute la hauteur piezométrique à la hauteur cumulée.
                 cumulPiezo += _Donnees[i][8];
                 break;
-            }
-        }
-    }
-
-    // Si le cumul piezo est supérieur à la limite, on recommence le processus en excluant le plus petit diamètre disponible
-    // et ce jusqu'à ce que le cumul piezo soit inférieur à la limite.
-    while (cumulPiezo > limitecumulpiezo && !diametresDisponibles.empty()) {
-        diametresDisponibles.erase(diametresDisponibles.begin()); // Enlève le plus petit diamètre disponible
-
-        cumulPiezo = 0.0f; // Réinitialise le cumul du piezométrique pour chaque ligne.
-
-        // Recommence le processus pour chaque ligne de données.
-        for (int i = 0; i < _Donnees.size(); ++i) {
-            for (float diametre : diametresDisponibles) {
-                // Applique le nouveau diamètre.
-                _Donnees[i][3] = diametre;
-
-                // Refait les calculs pour cette ligne.
-                calculligne(i);
-
-                // Si les nouvelles valeurs sont dans les limites, c'est bon, on a trouvé le diamètre optimal pour cette ligne.
-                if (_Donnees[i][6] <= limitevitesse) {
-                    // Ajoute la hauteur piezométrique à la hauteur cumulée.
-                    cumulPiezo += _Donnees[i][8];
-                    break;
-                }
             }
         }
     }
