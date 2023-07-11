@@ -60,24 +60,25 @@ public:
 
 private:
 
-    std::shared_ptr<bdd> database;
+    std::shared_ptr<bdd> database; // base de données
 
     int ligne;
 
-    float *_hauteurligne;
+    float *_hauteurligne; // Sert pour le cas étude
 
     bool milieuhydro = true;
 
-    QLineEdit *inputD;
-    QLineEdit *inputQ;
-    QLineEdit *inputH;
-    QLineEdit *inputL;
-    QComboBox *Materiau;
-    QComboBox *unite;
+    QLineEdit *inputD; // Diametre
+    QLineEdit *inputQ; // Débit
+    QLineEdit *inputH; // Hauteur
+    QLineEdit *inputL; // Lingueur
+    QComboBox *Materiau; // Materiel du tuyau
+    QComboBox *unite; // unité débit
     QGridLayout *gridLayout;
     QScrollArea *scrollArea;
     QWidget* scrollWidget;
 
+    // case résultats
     QLineEdit *sigmadebitcase;
     QLineEdit *sigmalongueurcase;
     QLineEdit *sigmapertecase;

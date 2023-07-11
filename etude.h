@@ -50,17 +50,19 @@ class etude : public QWidget
 
 
 private :
-    std::shared_ptr<bdd> database;
-    std::vector<std::vector<float>> _Donnees;
-    std::vector<parcelle> _parcelles;
+    std::shared_ptr<bdd> database; // Base de données
+    std::vector<std::vector<float>> _Donnees; // Vecteur pour contenir les données des parcelles
+    std::vector<parcelle> _parcelles; // vecteur de parcelle
 
-    std::string _matiere;
+    std::string _matiere; // Matiere des tuyaux
 
+    // Boolean pour gérer quoi afficher
     bool milieu;
     bool limitations;
     bool poste;
     bool premier;
-    bool asp;
+
+    // Organisation de la page
     QScrollArea *scrollArea;
     QWidget *scrollAreaWidgetContents;
     QGridLayout *gridLayout;
@@ -74,7 +76,7 @@ private :
     ///
     /// \param ligne ligne ou changer le nombre d'arroseurs
     /// \param nombre nombre d'arroseurs à placer
-    void modifierarro(int ligne, float nombre);
+    [[maybe_unused]] void modifierarro(int ligne, float nombre);
 
     ///
     /// @brief Initialise les données ou les paramètres nécessaires. Permet de choisir entre 2.2/0.6 ou 1.6/0.5
@@ -205,6 +207,8 @@ private :
     /// \param multi
     void doubledebit(float multi);
 
+
+    /// permet d'optimiser les diametres dans les parcelles suivant une regle de piezo
     void optimizeparcelle();
 };
 

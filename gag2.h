@@ -55,17 +55,19 @@ private :
     std::shared_ptr<bdd> database;
 
 
-    QLineEdit *Q;
-    QLineEdit *E;
-    QLineEdit *D;
-    QLineEdit *L;
-    QLineEdit *H;
+    QLineEdit *Q; // Débit
+    QLineEdit *E; // Espacement
+    QLineEdit *D; // Diametre
+    QLineEdit *L; // Longueur
+    QLineEdit *H; // Hauteur
 
+    // Case de résultats
     QLineEdit *_Longueur;
     QLineEdit *_Hauteur;
     QLineEdit *_Perte;
     QLineEdit *_Piezo;
 
+    // Case permettant de choisir l'unité de débit et le materiau du tuyau
     QComboBox *unite;
     QComboBox *Materiau;
 

@@ -49,17 +49,20 @@ public:
     }
 private:
 
-    std::shared_ptr<bdd> database;
+    std::shared_ptr<bdd> database; // Base de données
 
+    // Permet de choisir un tuyau en fonction de matiere/pression/dia intérieur
     QComboBox Materiau;
     QComboBox Pression;
     QComboBox *Unite;
 
+    // Champ d'entrée
     QLineEdit debit;
     QLineEdit vitesse;
     QLineEdit longueur;
     QLineEdit denivele;
 
+    // Labels indiquant les unités
     QLabel *debitLabel;
     QLabel *vitesseLabel;
     QLabel *longueurLabel;
@@ -68,12 +71,14 @@ private:
     QLabel *longueurUnite;
     QLabel *deniveleUnite;
 
+    // Champ résultats
     QLineEdit Champresultat;
     QLineEdit Champligne;
     QLineEdit ChampVitesse;
     QLineEdit Champligne2;
     QLineEdit Champligne3;
 
+    // Boutton d'action
     QPushButton Changer;
     QPushButton Calcul;
 

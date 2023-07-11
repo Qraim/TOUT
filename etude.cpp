@@ -13,7 +13,6 @@ etude::etude(std::shared_ptr<bdd> db, QWidget *parent)
     limitations = true;
     poste = true;
     premier = true;
-    asp = false;
 
     // MainLayout
     mainLayout = new QVBoxLayout();
@@ -166,8 +165,6 @@ void etude::showOptionsDialog() {
 
 void etude::init() {
     bool amont = true;
-    _Donnees.clear();
-    _parcelles.clear();
 
     QDialog choiceDialog(this);
     choiceDialog.setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
@@ -227,6 +224,8 @@ void etude::init() {
             connect(cancelButton, &QPushButton::clicked, &dialog, &QDialog::reject);
 
             if (dialog.exec() == QDialog::Accepted) {
+                _Donnees.clear();
+                _parcelles.clear();
                 QString data = dataEdit->toPlainText();
                 traitements(data);
                 amont = amontButton->isChecked();
@@ -450,7 +449,7 @@ void etude::rafraichirTableau() {
 
         headers << "No rang" << "Long" << "NbAsp" << "Zamont" << "Zaval" << "InterRangD" << "InterRangF" << "DebitG"
                 << "Espacement" << "Q Ligne" << "Σ Q Ligne" << "PeigneZAm" << "PeigneZAv"<<"DeltaLigneAm"<< "DeltaLigneAv" <<  "Diametre" << "Nom" << "Hauteur" << "Vitesse" << "J Peigne" << "P Peigne"
-                << "Σ J" << "Σ P" <<" Ligne "<<"Longueur"<<"DeltaLigneAm"<< "DeltaLigneAv" <<"J Ø16/14" << "P Ø16" << "J Ø20/17.6" << "P Ø20";
+                << "Σ J" << "Σ P" <<" Ligne "<<"Longueur"<<"ΔLigneAm"<< "ΔLigneAv" <<"J Ø16/14" << "P Ø16" << "J Ø20/17.6" << "P Ø20";
     } else {
         for (int i = 0; i < _Donnees.size(); i++) {
             _Donnees[i].resize(24);
@@ -484,8 +483,8 @@ void etude::rafraichirTableau() {
         // _Donnees[i][23] - "Afficher" : Bouton permettant de lancer le calcul sur la ligne.
 
         headers << "No rang" << "Long" << "NbAsp" << "Zamont" << "Zaval" << "InterRangD" << "InterRangF" << "DebitG"
-                << "Espacement" << "Q Ligne" << "Σ Q Ligne" << "PeigneZAm" << "PeigneZAv" << "DeltaLigneAm"
-                << "DeltaLigneAv" << "Diametre" << "Nom" << "Hauteur" << "Vitesse" << "J Peigne" << "P Peigne"
+                << "Espacement" << "Q Ligne" << "Σ Q Ligne" << "PeigneZAm" << "PeigneZAv" << "ΔLigneAm"
+                << "ΔLigneAv" << "Diametre" << "Nom" << "Hauteur" << "Vitesse" << "J Peigne" << "P Peigne"
                 << "Σ J" << "Σ P" << "Afficher";
     }
 
@@ -657,14 +656,14 @@ void etude::rafraichirTableau() {
             int parcelIndex = std::distance(parcelInfos.begin(), parcelInfoIt);
 
             if (ligne >= 5) {
-               /* QLineEdit *parcelNameLineEdit = createLineEdit(info.nom, textColor, this, false);
-                // Connecte le signal textChanged au slot setNom
-                connect(parcelNameLineEdit, &QLineEdit::textChanged, [this, parcelIndex](const QString &newName) {
-                    this->_parcelles[parcelIndex].setNom(newName);
-                });
-                gridLayout->addWidget(parcelNameLineEdit, ligne, 16);  // Ajoute le QLineEdit à la 16e colonne
-*/
-               QPushButton *calculparcelle = new QPushButton("Calcul", nullptr);
+                /* QLineEdit *parcelNameLineEdit = createLineEdit(info.nom, textColor, this, false);
+                 // Connecte le signal textChanged au slot setNom
+                 connect(parcelNameLineEdit, &QLineEdit::textChanged, [this, parcelIndex](const QString &newName) {
+                     this->_parcelles[parcelIndex].setNom(newName);
+                 });
+                 gridLayout->addWidget(parcelNameLineEdit, ligne, 16);  // Ajoute le QLineEdit à la 16e colonne
+ */
+                QPushButton *calculparcelle = new QPushButton("Calcul", nullptr);
                 calculparcelle->setStyleSheet("QPushButton {"
                                               "background-color: blue;"
                                               "color: white;"
@@ -727,6 +726,11 @@ void etude::rafraichirTableau() {
                 if (ligne == info.commandPost && poste) {
                     inverse->setStyleSheet("QPushButton { background-color: #e6ffff; color: black; }");
                     setamont->setStyleSheet("QComboBox { background-color: #e6ffff; color: black; }");
+                    calculparcelle->setStyleSheet("QPushButton {"
+                                                  "background-color: #e6ffff;"
+                                                  "color: black;"
+                                                  "border: none;"
+                                                  "}");
                 }
 
                 gridLayout->addWidget(inverse, ligne - 4, 16);  // Ajoute le QLineEdit à la 16e colonne
@@ -1268,6 +1272,15 @@ void etude::chooseCommandPost() {
 
             int defaultIndex = -1;
             int commandPost = parcel.getPosteDeCommande() + parcel.getIndexdebut();
+            int decalage = parcel.getDecalage();
+
+
+            if(decalage==0){
+                sideComboBox->setCurrentIndex(0);
+            } else {
+                sideComboBox->setCurrentIndex(1);
+
+            }
 
             for (size_t i = 1; i < parcelData.size() + 1; ++i) {
                 if(i != 0) {
@@ -1538,7 +1551,7 @@ void etude::modifierdebit(int debut, int fin, float dia) {
     rafraichirTableau();
 }
 
-void etude::modifierarro(int ligne, float nombre) {
+[[maybe_unused]] void etude::modifierarro(int ligne, float nombre) {
     int i = 0;
 
     for (auto &parcelle: _parcelles) {
@@ -1690,6 +1703,8 @@ void etude::exportPdf(const QString &fileName) {
     }
 
     QDialog inputDialog;
+    inputDialog.setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
+
     inputDialog.setWindowTitle("Entrez les informations");
 
     QLabel *nomLabel = new QLabel("Nom:");
@@ -2129,12 +2144,12 @@ void etude::optimizeparcelle(){
         float aspinterdebut = lineEditDistAsperseurs->text().replace(",",".").toFloat();
         float piezo = LineEditPiezo->text().replace(",",".").toFloat();
 
-
         if(tout0){
 
             std::vector<float> diametresDisponibles = database->getInnerDiametersForMatiereAndPressure("PEHD",6 );
 
             QDialog *dialog = new QDialog();
+            dialog->setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
             QVBoxLayout *mainLayout = new QVBoxLayout(dialog);
             QVector<QCheckBox*> checkboxes;
 
@@ -2188,6 +2203,7 @@ void etude::optimizeparcelle(){
         std::vector<float> diametresDisponibles = database->getInnerDiametersForMatiereAndPressure("PVC",10 );
 
         QDialog *dialog = new QDialog();
+        dialog->setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
         QVBoxLayout *mainLayout = new QVBoxLayout(dialog);
         QVector<QCheckBox*> checkboxes;
 

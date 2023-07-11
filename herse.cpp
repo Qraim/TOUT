@@ -1355,7 +1355,7 @@ void pertechargeherse::saveData(const QString &fileName) {
 void pertechargeherse::loadData(const QString &fileName) {
     QFile file(fileName);
     if (!file.open(QIODevice::ReadOnly)) {
-        qWarning("Cannot open file for reading");
+        qWarning("On ne peut pas ouvrir le fichier");
         return;
     }
 
@@ -1510,7 +1510,7 @@ void pertechargeherse::editDiameter() {
 
     QHBoxLayout *buttonLayout = new QHBoxLayout();
     QPushButton *okButton = new QPushButton("OK");
-    QPushButton *cancelButton = new QPushButton("Cancel");
+    QPushButton *cancelButton = new QPushButton("Annuler");
     buttonLayout->addWidget(okButton);
     buttonLayout->addWidget(cancelButton);
     mainLayout->addLayout(buttonLayout);

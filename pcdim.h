@@ -48,7 +48,7 @@ private:
     void calculate();
     void clearAll();
 
-    std::shared_ptr<bdd> database;
+    std::shared_ptr<bdd> database; // Base de données
 
     QGridLayout *mainLayout;
     QLabel *unitsLabels[5];

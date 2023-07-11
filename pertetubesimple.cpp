@@ -9,8 +9,8 @@
 
 pertetubesimple::pertetubesimple(std::shared_ptr<bdd> db, QWidget *parent)
         : QWidget(parent), database(db) {
-  setWindowTitle(QString::fromStdString("Tube simple"));
-  setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
+    setWindowTitle(QString::fromStdString("Tube simple"));
+    setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
 
 
     std::vector<std::string> matiere_names = database->getAllMatiereNames();
@@ -224,7 +224,7 @@ void pertetubesimple::calculer() {
     float flowRate;
     float dLS;
 
-    
+
     QString debitText = debit.text();
     debitText.replace(',', '.');
     float D = debitText.toFloat();
@@ -267,7 +267,6 @@ void pertetubesimple::calculer() {
     a = std::get<0>(coefficients);
     b = std::get<1>(coefficients);
     k = std::get<2>(coefficients);
-
 
     float pertecharge = k * pow(dLS, a) * pow(Dia, b) * L; // Calcule la perte de charge en Pa
     float variation = pertecharge+deniveles; // Calcule la variation de charge en Pa

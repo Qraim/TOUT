@@ -43,6 +43,7 @@ public:
 
 private:
 
+    // Chacun des attributs est un pointeur vers une classe gérant une fenetre spécifique
     std::shared_ptr<bdd> database;
     std::unique_ptr<pertetubesimple> tube;
     std::unique_ptr<pertechargeherse> perteherse;
