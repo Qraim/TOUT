@@ -163,7 +163,7 @@ public:
 
     /// @brief convertit une parcelle en texte
   /// @return
-  std::string toString() const;
+    [[maybe_unused]] std::string toString() const;
 
   /// @brief renvoie l'indice du poste dans la parcelle en entiere
   /// @return

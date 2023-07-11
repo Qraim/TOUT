@@ -133,8 +133,6 @@ void etude::showOptionsDialog() {
     premiere->setChecked(poste);
     premiere->setStyleSheet("QCheckBox { color : pink}");
 
-    QCheckBox *asper = new QCheckBox("Aspersions", this);
-    asper->setChecked(asp);
 
     // Créer un layout pour le QDialog
     QVBoxLayout dialogLayout(&optionsDialog);
@@ -142,7 +140,6 @@ void etude::showOptionsDialog() {
     dialogLayout.addWidget(limitationParcelleCheckBox);
     dialogLayout.addWidget(postecheckbox);
     dialogLayout.addWidget(premiere);
-    dialogLayout.addWidget(asper);
 
     // Ajouter un bouton OK
     QPushButton okButton("OK");
@@ -161,7 +158,6 @@ void etude::showOptionsDialog() {
     limitations = limitationParcelleCheckBox->isChecked();
     poste = postecheckbox->isChecked();
     premier = premiere->isChecked();
-    asp = asper->isChecked();
 
     // Rafraichir le tableau pour prendre en compte les nouvelles options d'affichage
     rafraichirTableau();
@@ -526,10 +522,6 @@ void etude::rafraichirTableau() {
     // Ajoute les données au tableau.
     for (const std::vector<float> &donneesLigne: _Donnees) {
 
-        if (donneesLigne[2] == 0 && asp) {
-            ligne++;
-            continue;
-        }
 
         // Détermine la couleur du texte.
         QString textColor = WHITE_TEXT;
@@ -541,10 +533,10 @@ void etude::rafraichirTableau() {
 
         if (parcelInfoIt != parcelInfos.end()) {
             const ParcelInfo &info = *parcelInfoIt;
-            if (ligne == info.limiteParcelle && limitations) {
-                textColor = BLUE_TEXT; // Limite entre deux parcelles
-            } else if (ligne == info.commandPost && poste) {
-                textColor = RED_TEXT; // Poste de commande
+            if (ligne == info.commandPost && poste ) {
+                textColor = RED_TEXT; // Limite entre deux parcelles
+            } else if (ligne == info.limiteParcelle && limitations) {
+                textColor = BLUE_TEXT; // Poste de commande
             } else if (ligne == info.milieuHydro && milieu) {
                 textColor = ORANGE_TEXT; // Milieu hydrolique
             } else if (donneesLigne[0] == 1 && premier) {

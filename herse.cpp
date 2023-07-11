@@ -141,26 +141,7 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db, QWidget *parent)
 
     QGridLayout *bottomGrid = new QGridLayout();
     bottomLayout->addLayout(bottomGrid);
-/*
 
-    QSpacerItem *spacer1 = new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Minimum);
-    QSpacerItem *spacer2 = new QSpacerItem(5, 1, QSizePolicy::Expanding, QSizePolicy::Minimum);
-    QSpacerItem *spacer3 = new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Minimum);
-    QSpacerItem *spacer4 = new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Minimum);
-    QSpacerItem *spacer5 = new QSpacerItem(50, 1, QSizePolicy::Expanding, QSizePolicy::Minimum);
-    QSpacerItem *spacer6 = new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Minimum);
-    QSpacerItem *spacer7 = new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Minimum);
-    QSpacerItem *spacer8 = new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Minimum);
-
-    bottomGrid->addItem(spacer1, 0, 0);
-    bottomGrid->addItem(spacer2, 0, 3);
-    bottomGrid->addItem(spacer3, 0, 6);
-    bottomGrid->addItem(spacer4, 0, 9);
-    bottomGrid->addItem(spacer5, 0, 1);
-    bottomGrid->addItem(spacer6, 0, 5);
-    bottomGrid->addItem(spacer7, 0, 7);
-    bottomGrid->addItem(spacer8, 0, 8);
-*/
 
     // fixe la taille
     sigmadebitcase->setFixedSize(170, 40);
@@ -177,9 +158,6 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db, QWidget *parent)
     for(int i = 0; i < 40; i++) {
         bottomGrid->setColumnStretch(i, 1);
     }
-
-
-
 
     QPushButton *saveAsPdfButton = new QPushButton("Export PDF", this);
 
@@ -575,17 +553,17 @@ bool pertechargeherse::eventFilter(QObject *obj, QEvent *event) {
                 return true; // retire l'action naturel de tab
             }
         }
-            // Save as PDF (Ctrl + S)
+            // Enregistrer en PDF (Ctrl + S)
         else if (controlPressed && keyEvent->key() == Qt::Key_S && !shiftPressed) {
             saveAsPdf();
             return true;
         }
-            // Save data (Ctrl + Shift + S)
+            // Sauvegarder data (Ctrl + Shift + S)
         else if (controlPressed && keyEvent->key() == Qt::Key_S && shiftPressed) {
             saveDataWrapper();
             return true;
         }
-            // Load data (Ctrl + L)
+            // Charger data (Ctrl + L)
         else if (controlPressed && keyEvent->key() == Qt::Key_L && !shiftPressed) {
             loadDataWrapper();
             return true;
@@ -773,8 +751,6 @@ void pertechargeherse::calcul() {
 
     // Effectue les calculs pour chaque ligne de données.
     for (int i = 0; i < _Donnees.size(); ++i) {
-
-
 
         // Calcule le cumul de débit.
         sigmaDebit += _Donnees[i][1];
@@ -1706,7 +1682,7 @@ void pertechargeherse::optimiseDiametres() {
     float limitevitesse = 2.0f;
 
     // Liste des diamètres disponibles.
-    std::vector<float> diametresDisponibles = {28.0f, 35.2f, 44.0f, 55.4f, 63.2f, 69.00f};
+    std::vector<float> diametresDisponibles = database->getInnerDiametersForMatiereAndPressure("PEHD",6);
     std::sort(diametresDisponibles.begin(), diametresDisponibles.end()); // Tri croissant
 
     float cumulPiezo = 0.0f; // Initialisation du cumul du piezométrique pour chaque ligne.
