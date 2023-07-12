@@ -214,16 +214,13 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     CumulPerte->setFixedSize(fixedWidth, fixedHeight);
     CumulPiezo->setFixedSize(fixedWidth, fixedHeight);
 
-    // Add spacer before the first QLineEdit
 
     bottomLayout->addWidget(CumulLongueur, 0, 3, Qt::AlignCenter); // Column 4 for Longueur
     bottomLayout->addWidget(Cumulhauteur, 0, 4, Qt::AlignCenter); // Column 6 for Hauteur
 
-    // Add spacer between Hauteur and Perte
 
     bottomLayout->addWidget(CumulPerte, 0, 5, Qt::AlignCenter); // Column 9 for Perte
 
-    // Add spacer between Perte and Piezo
     bottomLayout->addWidget(CumulPiezo, 0, 6, Qt::AlignCenter); // Column 11 for Piezo
 
     connect(Debit, &QLineEdit::returnPressed, this, &gag::AjoutDonnee);
@@ -243,12 +240,10 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     Hauteur->installEventFilter(this);
 
 
-    // Create buttons
     QPushButton *button1 = new QPushButton("Export PDF");
     QPushButton *button2 = new QPushButton("Sauvergarder");
     QPushButton *button3 = new QPushButton("Charger");
 
-    // Create the buttons for the bottom layout
     QPushButton *calculButton = new QPushButton("Calcul");
     QPushButton *effacerButton = new QPushButton("Effacer");
     QPushButton *modifierButton = new QPushButton("Modifier");
@@ -271,9 +266,6 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
     reinitialiserButton->setFixedSize(fixedWidth, fixedHeight);
     recopier->setFixedSize(fixedWidth, fixedHeight);
 
-    // Add buttons to the bottomLayout
-
-    // Add buttons to the bottomLayout
     bottomLayout->addWidget(calculButton, 1, 0, Qt::AlignCenter);
     bottomLayout->addWidget(effacerButton, 1, 1, Qt::AlignCenter);
     bottomLayout->addWidget(modifierButton, 1, 2, Qt::AlignCenter);
@@ -286,7 +278,6 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
 
     bottomLayout->setAlignment(Qt::AlignHCenter);
 
-// Connect buttons to their respective slots (functions)
     connect(button1, &QPushButton::clicked, this, &gag::saveAsPdf);
     connect(button2, &QPushButton::clicked, this, &gag::saveDataWrapper);
     connect(button3, &QPushButton::clicked, this, &gag::loadDataWrapper);
@@ -294,11 +285,9 @@ gag::gag(std::shared_ptr<bdd> db,QWidget *parent) : QWidget(parent), database(db
 
     Debit->setFocus();
 
-    // Get the available geometry of the screen
     QDesktopWidget desktop;
     QRect screenSize = desktop.availableGeometry(this);
 
-    // Set the window size to the screen size
     this->setGeometry(screenSize);
 
 }
@@ -341,7 +330,6 @@ bool gag::eventFilter(QObject *watched, QEvent *event) {
     QLineEdit *lineEdit = qobject_cast<QLineEdit *>(watched);
     if (lineEdit) {
         if (event->type() == QEvent::MouseButtonPress) {
-            // QTimer::singleShot will allow the QLineEdit to handle the event first.
             QTimer::singleShot(0, lineEdit, &QLineEdit::selectAll);
             return false;
         } else if (event->type() == QEvent::KeyPress) {
@@ -359,10 +347,10 @@ bool gag::eventFilter(QObject *watched, QEvent *event) {
                 }
 
                 if (found) {
-                    --i; // Adjust the index to match the actual row in _Donnees.
+                    --i;
                     on_lineEdit_editingFinished(lineEdit->text(), i, j-1);
 
-                    // Move to the next row in the same column.
+
                     if (i + 1 < _Donnees.size()) {
                         QLineEdit *nextLineEdit = qobject_cast<QLineEdit *>(scrollAreaLayout->itemAtPosition(i + 2, j-1)->widget());
                         if (nextLineEdit) {
@@ -370,7 +358,6 @@ bool gag::eventFilter(QObject *watched, QEvent *event) {
                             nextLineEdit->selectAll();
                         }
                     } else {
-                        // If the next row does not exist, stay in the same cell.
                         lineEdit->setFocus();
                         lineEdit->selectAll();
                     }
@@ -414,7 +401,7 @@ bool gag::eventFilter(QObject *watched, QEvent *event) {
                 return true;
 
             } else {
-                keyEvent->ignore(); // Ignore tab key event to prevent natural action
+                keyEvent->ignore();
                 return true;
             }
         }
@@ -538,7 +525,6 @@ void gag::AjoutLigne() {
 
     Debit->setFocus(); // Définir le focus sur l'objet "Debit" après avoir ajouté la nouvelle ligne.
 
-    // Scroll to the last line of the scroll area.
     scrollArea->ensureVisible(0, scrollWidgetHeight);
 }
 
@@ -680,167 +666,12 @@ void gag::calcul() {
 
     RafraichirTableau();
 }
-/*
- * void gag::calcul() {
-    if(_Donnees.size()==0) return;
-
-    // Initialise les paramètres.
-    double k = 0;
-    double a = 0;
-    double b = 0;
-
-    // Initialise les variables.
-    double espacement = 0;
-    double diametre = 0;
-    double longueur = 0;
-    double hauteur = 0;
-    double perteCharge = 0;
-    double piezo = 0;
-    double sigmaDebit = 0; // Cumul débit
-    double debitLS = 0;
-
-    std::string material_name = Materiau->currentText().toStdString();
-    auto coefficients = database->get_material_coefficients(material_name);
-
-    a = std::get<0>(coefficients);
-    b = std::get<1>(coefficients);
-    k = std::get<2>(coefficients);
-
-    double sigmaPiezo = 0; // Cumul piezo
-    double sigmaPerte = 0; // Cumul perte
-    double sigmaLongueur = 0;
-    double sigmaHauteur = 0;
-
-    int index = 0;
-    index = unite->currentIndex();
-
-    // Récupère les données de la ligne courante.
-    sigmaDebit = _Donnees[0][1];
-    espacement = _Donnees[0][2];
-    diametre = _Donnees[0][3];
-    longueur = _Donnees[0][4];
-    hauteur = _Donnees[0][5];
-
-    if(index==0){ // l/h
-        debitLS = sigmaDebit / 3600;
-
-    } else if(index==1){ // l/s
-        debitLS = sigmaDebit;
-
-    } else if(index==2){ // m3/h
-        debitLS = sigmaDebit / 3.6;
-    }
-
-    float arosseurs =(longueur + espacement -1 ) /espacement;
-
-    // Calcule la perte de charge.
-    perteCharge = k * std::pow(debitLS, a) * std::pow(diametre, b) * espacement ;
-
-
-    _Donnees[0][6] = perteCharge;
-    _Donnees[0][7] = perteCharge + hauteur;
-    _Donnees[0][8] = perteCharge * arosseurs;
-    _Donnees[0][9] = perteCharge * arosseurs + hauteur * arosseurs;
-
-    // Affiche les résultats dans les cases correspondantes en arrondissant à deux chiffres après la virgule.
-    CumulLongueur->setText(QString::number(sigmaLongueur, 'f', 2));
-    CumulLongueur->setAlignment(Qt::AlignCenter);
-    Cumulhauteur->setText(QString::number(sigmaHauteur, 'f', 2));
-    Cumulhauteur->setAlignment(Qt::AlignCenter);
-    CumulPerte->setText(QString::number(sigmaPerte, 'f', 2));
-    CumulPerte->setAlignment(Qt::AlignCenter);
-    CumulPiezo->setText(QString::number(sigmaPiezo, 'f', 2));
-    CumulPiezo->setAlignment(Qt::AlignCenter);
-
-    RafraichirTableau();
-}
-*/
 
 
 
 
-/*void gag::calcul() {
 
-    if(_Donnees.size()==0) return;
 
-    // Initialise les paramètres.
-    double k = 0;
-    float a = 0;
-    float b = 0;
-
-    // Initialise les variables.
-    float espacement = 0;
-    float diametre = 0;
-    float longueur = 0;
-    float hauteur = 0;
-    float perteCharge = 0;
-    float piezo = 0;
-    float sigmaDebit = 0; // Cumul débit
-    float debitLS = 0;
-
-    std::string material_name = Materiau->currentText().toStdString();
-    auto coefficients = database->get_material_coefficients(material_name);
-
-    a = std::get<0>(coefficients);
-    b = std::get<1>(coefficients);
-    k = std::get<2>(coefficients);
-
-    float sigmaPiezo = 0; // Cumul piezo
-    float sigmaPerte = 0; // Cumul perte
-    float sigmaLongueur = 0;
-    float sigmaHauteur = 0;
-
-    // Effectue les calculs pour chaque ligne de données.
-    for (int i = 0; i < _Donnees.size(); ++i) {
-
-        // Récupère les données de la ligne courante.
-        sigmaDebit += _Donnees[i][1];
-        espacement = _Donnees[i][2];
-        diametre = _Donnees[i][3];
-        longueur = _Donnees[i][4];
-        hauteur = _Donnees[i][5];
-
-        debitLS = sigmaDebit / 3600;
-
-        // Calcule le nombre de trous.
-        int nombreDeTrous = longueur / espacement;
-
-        // Calcule le débit par trou.
-        float debitParTrou = debitLS / nombreDeTrous;
-
-        // Calcule la perte de charge.
-        perteCharge = k * std::pow(debitParTrou, a) * std::pow(diametre, b) * longueur;
-
-        // Calcule la hauteur piezométrique.
-        piezo = perteCharge + hauteur;
-
-        // Ajoute les données calculées au vecteur.
-        _Donnees[i][6] = perteCharge;
-        _Donnees[i][7] = piezo;
-
-        // Calcule les cumuls pour chaque ligne de données.
-        sigmaPiezo += piezo;
-        sigmaPerte += perteCharge;
-        sigmaLongueur += longueur;
-        sigmaHauteur += hauteur;
-
-        // Stocke les cumuls dans le vecteur.
-        _Donnees[i][8] = sigmaPerte;
-        _Donnees[i][9] = sigmaPiezo;
-    }
-
-    // Affiche les résultats dans les cases correspondantes en arrondissant à deux chiffres après la virgule.
-    CumulLongueur->setText(QString::number(sigmaLongueur, 'f', 2));
-    CumulLongueur->setAlignment(Qt::AlignCenter);
-    Cumulhauteur->setText(QString::number(sigmaHauteur, 'f', 2));
-    Cumulhauteur->setAlignment(Qt::AlignCenter);
-    CumulPerte->setText(QString::number(sigmaPerte, 'f', 2));
-    CumulPerte->setAlignment(Qt::AlignCenter);
-    CumulPiezo->setText(QString::number(sigmaPiezo, 'f', 2));
-    CumulPiezo->setAlignment(Qt::AlignCenter);
-    RafraichirTableau();
-}
-*/
 void gag::clear(){
     // Supprime les widgets existants dans le layout de la scrollArea.
     QLayoutItem *item;

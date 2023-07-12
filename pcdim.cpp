@@ -183,10 +183,10 @@ float pcdim::calculvitesse() {
     QString unit = Unite->currentText();
 
     if (unit == "l/h") {
-        debitValue = (debitValue / 1000); // Convert to m³/h
+        debitValue = (debitValue / 1000); // L/h en m³/h
     } else if (unit == "l/s") {
-        debitValue = (debitValue * 3.6); // Convert to m³/h
-    } // else: m³/h, no conversion needed
+        debitValue = (debitValue * 3.6); // L/s en m³/h
+    } // Sinon pas de conversion nécéssaire
 
     float debit = (debitValue * 1000) / 3600;
 
@@ -206,18 +206,18 @@ float pcdim::calculdiametre() {
     QString unit = Unite->currentText();
 
     if (unit == "l/h") {
-        debitValue = (debitValue / 1000); // Convert to m³/h
+        debitValue = (debitValue / 1000); // L/h en m³/h
     } else if (unit == "l/s") {
-        debitValue = (debitValue * 3.6); // Convert to m³/h
-    } // else: m³/h, no conversion needed
+        debitValue = (debitValue * 3.6); // L/s en m³/h
+    }
 
-    float debit_m3s = debitValue / 3600; // Convert m³/h to m³/s
+    float debit_m3s = debitValue / 3600; //  m³/h en m³/s
 
     QString vitessetext = inputs[2]->text();
     vitessetext.replace(',', '.');
     float vitesse = vitessetext.toFloat();
 
-    float diametre = std::sqrt((4 * debit_m3s) / (PI3 * vitesse)) * 1000; // Calculate the diameter in millimeters
+    float diametre = std::sqrt((4 * debit_m3s) / (PI3 * vitesse)) * 1000; // Calcul du diametre
 
     return diametre;
 }
@@ -244,10 +244,10 @@ float pcdim::calculperte() {
     QString unit = Unite->currentText();
 
     if (unit == "l/h") {
-        debitValue = (debitValue / 1000); // Convert to m³/h
+        debitValue = (debitValue / 1000); // L/h en m³/h
     } else if (unit == "l/s") {
-        debitValue = (debitValue * 3.6); // Convert to m³/h
-    } // else: m³/h, no conversion needed
+        debitValue = (debitValue * 3.6); // L/s en m³/h
+    }
 
     float debit_ls = (debitValue * 1000) / 3600;
     std::string materiel = materialComboBox->currentText().toStdString();

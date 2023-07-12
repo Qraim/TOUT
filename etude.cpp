@@ -473,7 +473,7 @@ void etude::rafraichirTableau() {
         // _Donnees[i][5] - "InterRangD" : L'intervalle entre les rangs sur le côté droit.
         // _Donnees[i][6] - "InterRangF" : L'intervalle entre les rangs sur le côté gauche.
         // _Donnees[i][7] - "DebitG" : Le débit de l'eau sur le côté gauche.
-        // _Donnees[i][8] - "Espacement" : L'espacement entre les aspersions.
+        // _Donnees[i][8] - "Espacement" : L'espacement entre les asperseurs.
         // _Donnees[i][9] - "Q Ligne" : Le débit total de la ligne.
         // _Donnees[i][10] - "Σ Q Ligne" : Le débit cumulé de la ligne.
         // _Donnees[i][11] - "PeigneZAm" : L'altitude du peigne côté amont.
@@ -945,6 +945,7 @@ void etude::initCalcul() {
             _Donnees[i].resize(24);
         }
         milieu = false;
+        calcul();
         return;
     } else {
         for (int i = 0; i < _Donnees.size(); i++) {
@@ -1052,12 +1053,6 @@ void etude::calcul() {
 
         zamont = _Donnees[i][3];
         zaval = _Donnees[i][4];
-
-        _Donnees[i][9] = _Donnees[i][1] * (_Donnees[i][7] / _Donnees[i][8]);
-        debitcumule += _Donnees[i][9];
-
-        _Donnees[i][10] = debitcumule;
-
         _Donnees[i][11] = zamont - zamontO;
         _Donnees[i][12] = zaval - zavalO;
 
@@ -1069,6 +1064,9 @@ void etude::calcul() {
             _Donnees[i][24] = _Donnees[i][1];
             _Donnees[i][25] = zamont - zaval;
             _Donnees[i][26] = zaval - zamont;
+            _Donnees[i][9] = _Donnees[i][1] * (_Donnees[i][7] / _Donnees[i][8]);
+            debitcumule += _Donnees[i][9];
+            _Donnees[i][10] = debitcumule;
         }
 
     }

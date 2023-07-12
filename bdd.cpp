@@ -275,7 +275,6 @@ void bdd::afficher_tableaux() {
                                         "    background-color: #303030;"
                                         "    border: 1px solid #808080;"
                                         "}");
-            // Customize the appearance of the QTabWidget and its tab bar
             tabWidget->setStyleSheet("QTabWidget {"
                                      "    background-color: #404c4d;"
                                      "    color: white;"
@@ -1129,7 +1128,7 @@ QString bdd::getFormulaText(int index) {
                        "<li>Q: m3/s</li>"
                        "<li>D: mm</li>"
                        "</ul>");
-    } else {
+    } else { // Piezo
         return QString("<p style=\"font-size: 18pt;\"><b>Piezo</b> = Perte + Hauteur</p>"
                        "<p style=\"font-size: 14pt;\"><b>Unités:</b></p>"
                        "<ul style=\"font-size: 14pt;\">"
