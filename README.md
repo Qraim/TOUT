@@ -1,36 +1,25 @@
-# TOUT
-Compilé avec MVSC, avec QT 5.15.2
+#Module gag2
+Remplaçant de l'ancien module gag, ce module est conçu pour calculer la perte de charge dans un système de goutte à goutte. Il représente une amélioration par rapport à l'ancien module en offrant des calculs plus précis.
 
-gag.h et gag.cpp non utilisé car remplacé par gag2.h et gag2.cpp, class gag contient une herse de goutte à goutte avec calcul invalide
+#Module Herse
+Fournit des méthodes pour calculer la perte de charge dans une herse d'alimentation. Il s'agit d'un outil essentiel pour la gestion de l'alimentation dans divers systèmes.
 
-# gag2
+#Module PerteTubeSimple
+Ce module fournit des outils pour calculer la perte de charge dans un tube simple. Ceci est particulièrement utile pour des applications comme l'ingénierie des fluides où la perte de charge est un facteur clé.
 
-permet de calculer la perte de charge dans un goutte à goutte
+#Module PCDIM
+Permet le calcul de plusieurs variables liées à un tube simple, incluant la perte de charge, le diamètre, et la vitesse de l'écoulement.
 
-# Herse
+#Module Diametres
+Fournit des outils pour calculer le diamètre et la vitesse d'un écoulement en fonction de différents champs d'entrée. Ceci est particulièrement utile pour les problèmes d'optimisation des flux.
 
-permet de calculer la perte de charge dans une herse d'alimentation
+#Module BDD
+Gère une base de données au format CSV qui contient des informations sur différents types de tuyaux et de matériaux. Cette base de données est essentielle pour soutenir les calculs effectués par les autres modules.
 
-# PerteTubeSImple
+#Module Etude
+Permet l'importation de données à partir de GéoGag, facilitant ainsi l'analyse et l'étude de terrain. C'est un outil important pour intégrer les données géographiques dans l'analyse de l'écoulement.
 
-permet de calculer la perte de charge dans un tube simple
+#Module Parcelle
+Utilisé en tandem avec Etude, ce module permet de diviser les données en plusieurs parcelles pour faciliter le traitement. Il rend le processus d'analyse des données plus organisé et efficace.
 
-# PCDIM
-
-permet de calculer la perte de charge, diametre, vitesse d'un / dans un tube simple 
-
-# Diametres
-
-permet de calculer le diametre et la vitesse à partir de différent champs d'entrée
-
-# BDD
-
-gére la base de donnée en format CSV qui contient tout les tuyaux / matieres
-
-# Etude
-
-permet d'importer les données de GéoGag afin de faciliter les études de terrains
-
-# Parcelle
-
-Utile à Etude afin de pouvoir diviser en plusieurs parcelle l'ensemble des données et de la traiter
+Remarque : Tous les modules sont compilés avec MVSC 2015 et QT 5.15.2, et ils ont été construits à l'aide de QT Creator.
