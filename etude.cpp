@@ -434,6 +434,7 @@ void etude::rafraichirTableau() {
     if (_parcelles.size() != 0) {
         updateDonnees(); // Met à jour les données
     }
+    std::cout<<"updatedonne"<<std::endl;
 
     if (_Donnees.size() == 0) {
         return;
@@ -444,6 +445,8 @@ void etude::rafraichirTableau() {
     int scrollPosHorizontal = scrollArea->horizontalScrollBar()->value();
     // Supprime toutes les cases du tableau.
     clearchild();
+    std::cout<<"clearchild"<<std::endl;
+
 
     bool amont = true;
     if (_parcelles.size() > 0)
@@ -1074,7 +1077,8 @@ void etude::calcul() {
 
 #include <QMessageBox>
 
-void etude::divideData() {
+void etude::divideData(){
+    int cpt=0;
 
     QMessageBox::StandardButton reply;
     if (_parcelles.size() > 1) {
@@ -1120,7 +1124,13 @@ void etude::divideData() {
         _Donnees.insert(_Donnees.end(), parcelData.begin(), parcelData.end());
     }
 
-    QDialog dialog(this);
+
+    bool amont = _parcelles[0].isAmont();
+    updateDonnees();
+    _parcelles.clear();
+    std::cout<<"cleared"<<std::endl;
+
+     QDialog dialog(this);
     dialog.setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
     dialog.setWindowTitle("Diviser les données");
 
@@ -1158,17 +1168,19 @@ void etude::divideData() {
 
     });
 
-    // Création du bouton OK et Cancel
-    QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
-    formLayout.addWidget(&buttonBox);
-    connect(&buttonBox, SIGNAL(accepted()), &dialog, SLOT(accept()));
-    connect(&buttonBox, SIGNAL(rejected()), &dialog, SLOT(reject()));
+    QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal);
+    formLayout.addWidget(buttonBox);
 
-    if (!_parcelles.empty()) {
-        updateDonnees();
-        matiere = _parcelles[0].getMatiere();
-        _parcelles.clear();
-    }
+    QPushButton *okButton = buttonBox->button(QDialogButtonBox::Ok);
+    QPushButton *cancelButton = buttonBox->button(QDialogButtonBox::Cancel);
+
+    QObject::connect(buttonBox, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+    QObject::connect(buttonBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+
+
+    int dialogResult = dialog.exec();
+
+    std::cout<<"boite de dialog"<<std::endl;
 
 
     int nextStartIndex = 0;
@@ -1176,7 +1188,7 @@ void etude::divideData() {
     while (nextStartIndex < _Donnees.size()) {
         remainingLinesLabel.setText(QString::number(_Donnees.size() - nextStartIndex));
 
-        if (dialog.exec() == QDialog::Accepted) {
+        if ( dialogResult== QDialog::Accepted) {
             if (autoButton.isChecked()) {
                 int nombreparcelle = nombreparcelleLineEdit.text().toInt();
 
@@ -1203,7 +1215,7 @@ void etude::divideData() {
                         endIndex = i;
                         QString nomParcelle = QString("parcelle %1").arg(_parcelles.size() + 1);
                         _parcelles.push_back(parcelle(_Donnees, startIndex, endIndex + 1, database, nomParcelle,
-                                                      _parcelles[0].isAmont(), matiere));
+                                                      amont, matiere));
                         startIndex = i + 1;
                         currentLength = 0;
                     }
@@ -1230,7 +1242,12 @@ void etude::divideData() {
             break;
         }
     }
+
+    std::cout<<"while"<<std::endl;
+
+
     rafraichirTableau();
+    std::cout<<"rafraichirtableau"<<std::endl;
 }
 
 void etude::setTabOrderForLineEdits() {

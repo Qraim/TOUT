@@ -221,6 +221,8 @@ pertechargeherse::pertechargeherse(std::shared_ptr<bdd> db, QWidget *parent)
 
     inputQ->setFocus();
 
+    _hauteurligne = nullptr;
+
     bottomLayout->setSpacing(5);
 
     inputD->installEventFilter(this);
