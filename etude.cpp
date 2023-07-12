@@ -1,6 +1,7 @@
 
 #include "etude.h"
 
+// Dimensions des cases en pixel
 float hauteur = 30;
 float largueur = 122.5;
 
@@ -74,7 +75,7 @@ etude::etude(std::shared_ptr<bdd> db, QWidget *parent)
     mainLayout->addWidget(headerScrollArea);
     mainLayout->addWidget(scrollArea);
 
-    // On crée les 20 colonnes
+    // On crée les 40 colonnes
     for (int i = 0; i < 40; ++i) {
         gridLayout->setColumnStretch(i, 1);
         headerLayout->setColumnStretch(i, 1);
@@ -110,7 +111,7 @@ etude::etude(std::shared_ptr<bdd> db, QWidget *parent)
 
 
 
-void etude::showOptionsDialog() {
+void etude::showOptionsDialog() { // gerer les informations que l'ont souhaite afficher ou non
 
     // Créer un QDialog pour les options
     QDialog optionsDialog(this);
@@ -173,9 +174,11 @@ void etude::init() {
     QVBoxLayout *choiceLayout = new QVBoxLayout(&choiceDialog);
 
     QRadioButton *pasteDataButton = new QRadioButton("Coller les données", &choiceDialog);
+    QRadioButton *adddatas = new QRadioButton("Ajouter des données", &choiceDialog);
     QRadioButton *importFromFileButton = new QRadioButton("Importer depuis un fichier", &choiceDialog);
 
     choiceLayout->addWidget(pasteDataButton);
+    choiceLayout->addWidget(adddatas);
     choiceLayout->addWidget(importFromFileButton);
 
     QHBoxLayout *choiceButtonLayout = new QHBoxLayout();
@@ -191,7 +194,6 @@ void etude::init() {
     if (choiceDialog.exec() == QDialog::Accepted) {
         if (importFromFileButton->isChecked()) {
             loadDataWrapper();
-            return;
         } else if (pasteDataButton->isChecked()) {
             QDialog dialog(this);
             dialog.setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
@@ -229,16 +231,64 @@ void etude::init() {
                 QString data = dataEdit->toPlainText();
                 traitements(data);
                 amont = amontButton->isChecked();
+                QString nomParcelle = "parcelle 1";
+                initCalcul();
+                _parcelles.push_back(parcelle(_Donnees, 0, _Donnees.size(), database, nomParcelle, amont));
             }
+        } else if(adddatas->isChecked()){
+            ajouterDonnees();
+            initCalcul();
         }
     }
 
-    // Ajouter une parcelle avec toutes les données
-    if (!_Donnees.empty()) {
-        QString nomParcelle = "parcelle 1";
-        initCalcul();
-        _parcelles.push_back(parcelle(_Donnees, 0, _Donnees.size(), database, nomParcelle, amont));
-        rafraichirTableau();
+
+    rafraichirTableau();
+
+}
+
+
+void etude::ajouterDonnees() {
+    // Similaire à la partie "pasteDataButton->isChecked()" dans etude::init(),
+    // mais cette fois, les nouvelles données sont ajoutées aux anciennes plutôt que de les remplacer.
+
+    QDialog dialog(this);
+    dialog.setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
+    dialog.setWindowTitle("Ajouter des données");
+
+    QVBoxLayout *mainLayout = new QVBoxLayout(&dialog);
+
+    QLabel *dataLabel = new QLabel("Collez vos données:");
+    mainLayout->addWidget(dataLabel);
+
+    QPlainTextEdit *dataEdit = new QPlainTextEdit();
+    mainLayout->addWidget(dataEdit);
+
+    QRadioButton *amontButton = new QRadioButton("Amont", &dialog);
+    amontButton->setChecked(true);
+    QRadioButton *avalButton = new QRadioButton("Aval", &dialog);
+
+    mainLayout->addWidget(amontButton);
+    mainLayout->addWidget(avalButton);
+
+
+    QHBoxLayout *buttonLayout = new QHBoxLayout();
+    QPushButton *okButton = new QPushButton("OK");
+    QPushButton *cancelButton = new QPushButton("Annuler");
+    buttonLayout->addWidget(okButton);
+    buttonLayout->addWidget(cancelButton);
+    mainLayout->addLayout(buttonLayout);
+
+    connect(okButton, &QPushButton::clicked, &dialog, &QDialog::accept);
+    connect(cancelButton, &QPushButton::clicked, &dialog, &QDialog::reject);
+
+    if (dialog.exec() == QDialog::Accepted) {
+        QString data = dataEdit->toPlainText();
+        traitements(data);
+        bool amont = amontButton->isChecked();
+
+        // Ajouter une nouvelle parcelle avec les nouvelles données
+        QString nomParcelle = "parcelle " + QString::number(_parcelles.size() + 1);
+        _parcelles.push_back(parcelle(_Donnees, _Donnees.size() - data.count('\n'), _Donnees.size(), database, nomParcelle, amont));
     }
 }
 
@@ -432,7 +482,7 @@ void etude::rafraichirTableau() {
         // _Donnees[i][14] - "DeltaLigneAv" : Le delta de la ligne côté aval.
         // _Donnees[i][15] - "Diametre" : Le diamètre du tuyau de la ligne.
         // _Donnees[i][16] - "Colonne vide."
-        // _Donnees[i][17] - "DenivelePeigne" : Le dénivelé du peigne.
+        // _Donnees[i][17] - "Hauteur" : Le dénivelé de la ligne par rapport au poste.
         // _Donnees[i][18] - "Vitesse" : La vitesse de l'eau dans la ligne.
         // _Donnees[i][19] - "J Peigne" : La perte de charge du peigne.
         // _Donnees[i][20] - "P Peigne" : Le Piezo du peigne.
@@ -474,7 +524,7 @@ void etude::rafraichirTableau() {
         // _Donnees[i][14] - "DeltaLigneAv" : Le delta de la ligne côté aval.
         // _Donnees[i][15] - "Diametre" : Le diamètre du tuyau sur la ligne.
         // _Donnees[i][16] - "Colonne Vide".
-        // _Donnees[i][17] - "DenivelePeigne" : Le dénivelé du peigne.
+        // _Donnees[i][17] - "Hauteur" : Le dénivelé de la ligne par rapport au poste.
         // _Donnees[i][18] - "Vitesse" : La vitesse de l'eau dans la ligne.
         // _Donnees[i][19] - "J Peigne" : La perte de charge du peigne.
         // _Donnees[i][20] - "P Peigne" : Le Piezo du peigne.
@@ -501,6 +551,7 @@ void etude::rafraichirTableau() {
     // Initialise le numéro de ligne.
     int ligne = 1;
 
+    // Récupérations des infos des parcelles
     int totalRows = 0;
     std::vector<ParcelInfo> parcelInfos;
     for (auto &parcel: _parcelles) {
@@ -523,7 +574,7 @@ void etude::rafraichirTableau() {
 
 
         // Détermine la couleur du texte.
-        QString textColor = WHITE_TEXT;
+        QString textColor = WHITE_TEXT; // CSS définit dans etude.h
         int distanceToNearestCommandPost = std::numeric_limits<int>::max();
 
         // Trouvez la parcelle à laquelle cette ligne appartient
@@ -662,7 +713,7 @@ void etude::rafraichirTableau() {
                      this->_parcelles[parcelIndex].setNom(newName);
                  });
                  gridLayout->addWidget(parcelNameLineEdit, ligne, 16);  // Ajoute le QLineEdit à la 16e colonne
- */
+                 */
                 QPushButton *calculparcelle = new QPushButton("Calcul", nullptr);
                 calculparcelle->setStyleSheet("QPushButton {"
                                               "background-color: blue;"
@@ -773,7 +824,6 @@ void etude::rafraichirTableau() {
                         gridLayout->itemAtPosition(j, i)->widget()->setVisible(false);
                     }
                 }
-                // cache les entetes
                 if (headerLayout->itemAtPosition(0, i) && headerLayout->itemAtPosition(0, i)->widget()) {
                     // cache les entetes
                     if (headerLayout->itemAtPosition(0, i)) {
@@ -823,14 +873,11 @@ void etude::rafraichirTableau() {
                     if (gridLayout->itemAtPosition(j, i)) {
                         QWidget* widget = gridLayout->itemAtPosition(j, i)->widget();
                         if (widget) {
-                            // Check if widget is QLineEdit or not
                             QLineEdit* lineEdit = qobject_cast<QLineEdit*>(widget);
                             if (lineEdit) {
-                                // If widget is QLineEdit, make it invisible
                                 lineEdit->setVisible(false);
                             }
                             else {
-                                // If widget is not QLineEdit, make it also invisible
                                 widget->setVisible(false);
                             }
                         }
@@ -865,6 +912,8 @@ void etude::rafraichirTableau() {
     scrollArea->horizontalScrollBar()->setValue(scrollPosHorizontal);
 
     setTabOrderForLineEdits();
+
+    saveDataWrapper();
 }
 
 QLineEdit *etude::createLineEdit(const QString &text, const QString &style, QWidget *parent, bool readOnly) {
@@ -878,7 +927,6 @@ QLineEdit *etude::createLineEdit(const QString &text, const QString &style, QWid
     lineEdit->setText(text);
     return lineEdit;
 }
-
 
 void etude::initCalcul() {
 
@@ -1191,7 +1239,6 @@ void etude::setTabOrderForLineEdits() {
     QLineEdit *previousLineEdit = nullptr;
     QLineEdit *firstLineEdit = nullptr;
 
-    // terminations du mode de calcul
     int column = 2;
     std::vector<int> result;
     for (int i = 0; i < _Donnees.size(); ++i) {
@@ -1286,19 +1333,19 @@ void etude::chooseCommandPost() {
                 if(i != 0) {
                     rangeIndexComboBox->addItem(QString::number(globalIndex));
                 } else {
-                    rangeIndexComboBox->addItem(""); // Add empty string if the index is 0.
+                    rangeIndexComboBox->addItem("");
                 }
                 ++globalIndex;
             }
 
-            if (commandPost != -1 && commandPost != 0) { // Added commandPost != 0 to the condition.
+            if (commandPost != -1 && commandPost != 0) {
                 defaultIndex = commandPost;
             }
 
             if (defaultIndex != -1) {
                 rangeIndexComboBox->setCurrentIndex(rangeIndexComboBox->findText(QString::number(defaultIndex)));
             } else {
-                rangeIndexComboBox->setCurrentIndex(rangeIndexComboBox->findText("")); // Select the empty string if the default index is -1.
+                rangeIndexComboBox->setCurrentIndex(rangeIndexComboBox->findText(""));
             }
 
 
@@ -1433,11 +1480,15 @@ void etude::updateinterval(int row, int ligne, const QString &newDiameter) {
 
 
 void etude::saveDataWrapper() {
-    QString fileName = QFileDialog::getSaveFileName(
-            this, "Save Data", QDir::homePath(), "Data Files (*.dat)");
-
-    if (!fileName.isEmpty()) {
-        saveToFile(fileName.toStdString());
+    if (_currentFileName.empty()) {
+        QString fileName = QFileDialog::getSaveFileName(
+                this, "Save Data", QDir::homePath(), "Data Files (*.dat)");
+        if (!fileName.isEmpty()) {
+            _currentFileName = fileName.toStdString();
+        }
+    }
+    if (!_currentFileName.empty()) {
+        saveToFile(_currentFileName);
     }
 }
 
@@ -2027,6 +2078,8 @@ void etude::readFromFile(const std::string &filename) {
 
     refresh();
 
+    _currentFileName = filename;
+
     std::ifstream inFile(filename);
     if (!inFile) {
         return;
@@ -2079,8 +2132,6 @@ void etude::readFromFile(const std::string &filename) {
     }
 
     inFile.close();
-
-    rafraichirTableau();
 
 }
 #include <QGroupBox>

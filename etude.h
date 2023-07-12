@@ -56,6 +56,8 @@ private :
 
     std::string _matiere; // Matiere des tuyaux
 
+    std::string _currentFileName; // sauvegarde nom fichier
+
     // Boolean pour gérer quoi afficher
     bool milieu;
     bool limitations;
@@ -210,6 +212,8 @@ private :
 
     /// permet d'optimiser les diametres dans les parcelles suivant une regle de piezo
     void optimizeparcelle();
+
+    void ajouterDonnees();
 };
 
 #endif // ETUDE_H

@@ -248,7 +248,7 @@ public:
 
     float calcul_vitesse(float dia, float sigmadebit, float a, float b, double k);
 
-    void optimize_aspersseurs(std::vector<int> indices, float a, float d, double k, float piezo,std::vector<float> diametresDisponibles);
+    void optimize_aspersseurs(std::vector<int> indices, float a, float d, double k, float piezo,std::vector<float> &diametresDisponibles);
 
     void optimize_gauche_aspersseurs(std::vector<int> &indices, float debit, float a, float b, double k,float piezo,std::vector<float> diametresDisponibles);
 
