@@ -173,6 +173,10 @@ void parcelle::optimize(std::vector<float> diametres,float piezo,float aspdebit,
     calculdiametre(a,b,k);
 }
 
+float parcelle::getLongueur() const {
+    return _longueur;
+}
+
 void parcelle::optimize_aspersseurs(std::vector<int> indices, float a, float b, double k,float piezo,std::vector<float> & diametresDisponibles) {
 
 

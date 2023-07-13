@@ -361,7 +361,7 @@ void etude::updateAllLineEditsFromDonnees() {
         info.limiteParcelle = totalRows;
         info.commandPost = parcel.getPosteDeCommande() + parcel.getIndexdebut();
         info.nom = parcel.getNom();
-        info.longueur = parcel.hectare();
+        info.longueur = parcel.getLongueur();
         info.debit = parcel.getDebit();
         parcelInfos.push_back(info);
     }
@@ -572,7 +572,7 @@ void etude::rafraichirTableau() {
         info.limiteParcelle = totalRows;
         info.commandPost = parcel.getPosteDeCommande() + parcel.getIndexdebut();
         info.nom = parcel.getNom();
-        info.longueur = parcel.hectare();
+        info.longueur = parcel.getLongueur();
         info.debit = parcel.getDebit();
         parcelInfos.push_back(info);
     }
@@ -738,7 +738,7 @@ void etude::rafraichirTableau() {
                 gridLayout->addWidget(calculparcelle, ligne, 16);  // Ajoute le QLineEdit à la 16e colonne
 
                 // Crée un QLineEdit pour la longueur de la parcelle
-                QLineEdit *parcelLengthLineEdit = createLineEdit(QString::number(info.longueur, 'f', 2) + " Hec",
+                QLineEdit *parcelLengthLineEdit = createLineEdit(QString::number(info.longueur, 'f', 2) + " m",
                                                                  textColor, this);
                 gridLayout->addWidget(parcelLengthLineEdit, ligne - 1, 16);  // Ajoute le QLineEdit à la 17e colonne
 
@@ -1346,13 +1346,15 @@ void etude::updateDonnees() {
 
 void etude::chooseCommandPost() {
     // Créer un QDialog pour le choix du poste de commande
-    QDialog dialog(this);
-    dialog.setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
+    QDialog *dialog = new QDialog(this);
+    dialog->setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
 
-    dialog.setWindowTitle("Choisir le poste de commande");
+    dialog->setWindowTitle("Choisir le poste de commande");
 
     // Créer un layout pour le QDialog
-    QVBoxLayout dialogLayout(&dialog);
+    QVBoxLayout *dialogLayout = new QVBoxLayout;
+    dialog->setLayout(dialogLayout);
+
 
     // Créer deux QMap pour mapper les QComboBox aux parcelles correspondantes
     QMap<QComboBox *, parcelle *> comboBoxToParcelMap;
@@ -1363,8 +1365,8 @@ void etude::chooseCommandPost() {
     for (auto &parcel: _parcelles) {
         const std::vector<std::vector<float>> &parcelData = parcel.getDonnees();
         if (!parcelData.empty() && !parcelData[0].empty()) {
-            QComboBox *rangeIndexComboBox = new QComboBox(&dialog);
-            QComboBox *sideComboBox = new QComboBox(&dialog);
+            QComboBox *rangeIndexComboBox = new QComboBox(dialog);
+            QComboBox *sideComboBox = new QComboBox(dialog);
 
             // Ajouter les options pour choisir le côté
             sideComboBox->addItem("Au dessus");
@@ -1406,7 +1408,7 @@ void etude::chooseCommandPost() {
             QHBoxLayout *parcelLayout = new QHBoxLayout();
             parcelLayout->addWidget(rangeIndexComboBox);
             parcelLayout->addWidget(sideComboBox);
-            dialogLayout.addLayout(parcelLayout);
+            dialogLayout->addLayout(parcelLayout);
 
             // Ajouter les comboboxes et la parcelle correspondante à la QMap
             comboBoxToParcelMap.insert(rangeIndexComboBox, &parcel);
@@ -1414,14 +1416,15 @@ void etude::chooseCommandPost() {
         }
     }
 
-    // Créer un bouton OK
-    QPushButton okButton("OK", &dialog);
-    dialogLayout.addWidget(&okButton);
+    QPushButton* okButton = new QPushButton("OK", dialog);
+    dialogLayout->addWidget(okButton);
+
 
     // Connecter le bouton OK pour mettre à jour le poste de commande lorsque le bouton est cliqué
-    connect(&okButton, &QPushButton::clicked, [&]() {
+    connect(okButton, &QPushButton::clicked, [&, comboBoxToParcelMap, sideComboBoxToParcelMap, dialog]() {
+
         // Pour chaque combobox dans la QMap
-        for (auto &comboBox: comboBoxToParcelMap.keys()) {
+        for (auto comboBox: comboBoxToParcelMap.keys()) {
             // Mettre à jour le poste de commande avec la valeur sélectionnée dans la combobox
             int rangeIndex = comboBox->currentText().toInt(); // Soustraire 1 pour obtenir l'index d'origine
             parcelle *selectedParcel = comboBoxToParcelMap.value(comboBox);
@@ -1440,7 +1443,7 @@ void etude::chooseCommandPost() {
             }
         }
 
-        for (auto &comboBox: sideComboBoxToParcelMap.keys()) {
+        for (auto comboBox: sideComboBoxToParcelMap.keys()) {
             // Mettre à jour le côté avec la valeur sélectionnée dans la combobox
             QString side = comboBox->currentText();
             parcelle *selectedParcel = sideComboBoxToParcelMap.value(comboBox);
@@ -1448,15 +1451,14 @@ void etude::chooseCommandPost() {
                 selectedParcel->choisirCote(side == "Au dessus" ? 0 : 1);
             }
         }
-
         updateDonnees();
         rafraichirTableau();
-        dialog.accept();
+        dialog->accept();
     });
 
     // Afficher le QDialog
-    dialog.setLayout(&dialogLayout);
-    dialog.exec();
+    dialog->setLayout(dialogLayout);
+    dialog->show();
 }
 
 

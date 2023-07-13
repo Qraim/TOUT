@@ -13,6 +13,8 @@
 #include "bdd.h"
 #include "herse.h"
 
+
+
 class parcelle {
 
 public:
@@ -253,6 +255,8 @@ public:
     void optimize_gauche_aspersseurs(std::vector<int> &indices, float debit, float a, float b, double k,float piezo,std::vector<float> diametresDisponibles);
 
     void optimize_droit_aspersseurs(std::vector<int> &indices, float debit, float a, float b, double k,float piezo,std::vector<float> diametresDisponibles);
+
+    float getLongueur() const;
 
 private:
 
