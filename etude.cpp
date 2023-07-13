@@ -322,7 +322,7 @@ void etude::traitements(QString data) {
         }
 
         std::vector<float> rowData(31);
-        rowData[0] = _Donnees.size()+1; // numero du rang
+        rowData[0] = cols[2].toFloat(); // numero du rang
         rowData[1] = cols[3].toFloat(); // Longueur du rang
         rowData[2] = cols[4].toFloat(); // Nombre d'asperseurs
         rowData[3] = cols[5].toFloat(); // Zamont du rang
@@ -579,6 +579,7 @@ void etude::rafraichirTableau() {
 
     int parcelIndex = 0;  // Ajoutez ceci avant la boucle sur _parcelles
 
+    int compteurrang=1;
     // Ajoute les données au tableau.
     for (const std::vector<float> &donneesLigne: _Donnees) {
 
@@ -632,7 +633,7 @@ void etude::rafraichirTableau() {
 
                 QString formattedText;
                 if (i == 0) {
-                    formattedText = QString::number(static_cast<int>(donneesLigne[i]));
+                    formattedText = QString::number(static_cast<int>(donneesLigne[i]) )+QString::fromStdString("  |  ") + QString::number(compteurrang);
                 } else if (donneesLigne[i] == 0) {
                     formattedText = " ";
                 } else if (i == 17 || i == 19 || i == 20 || i == 21 || i == 22 || i==24 || i==25 || i == 26 || i == 27 || i == 28 || i == 29 || i==30) {
@@ -797,7 +798,7 @@ void etude::rafraichirTableau() {
                 gridLayout->addWidget(inverse, ligne - 4, 16);  // Ajoute le QLineEdit à la 16e colonne
             }
         }
-
+        compteurrang++;
         // Incrémente le numéro de ligne.
         ligne++;
     }
