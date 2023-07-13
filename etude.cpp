@@ -443,7 +443,6 @@ void etude::rafraichirTableau() {
     if (_parcelles.size() != 0) {
         updateDonnees(); // Met à jour les données
     }
-    std::cout<<"updatedonne"<<std::endl;
 
     if (_Donnees.size() == 0) {
         return;
@@ -454,7 +453,6 @@ void etude::rafraichirTableau() {
     int scrollPosHorizontal = scrollArea->horizontalScrollBar()->value();
     // Supprime toutes les cases du tableau.
     clearchild();
-    std::cout<<"clearchild"<<std::endl;
 
 
     bool amont = true;
@@ -1137,7 +1135,6 @@ void etude::divideData(){
     bool amont = _parcelles[0].isAmont();
     updateDonnees();
     _parcelles.clear();
-    std::cout<<"cleared"<<std::endl;
 
      QDialog dialog(this);
     dialog.setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
@@ -1188,8 +1185,6 @@ void etude::divideData(){
 
 
     int dialogResult = dialog.exec();
-
-    std::cout<<"boite de dialog"<<std::endl;
 
 
     int nextStartIndex = 0;
@@ -1252,11 +1247,9 @@ void etude::divideData(){
         }
     }
 
-    std::cout<<"while"<<std::endl;
 
 
     rafraichirTableau();
-    std::cout<<"rafraichirtableau"<<std::endl;
 }
 
 void etude::setTabOrderForLineEdits() {
