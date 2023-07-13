@@ -1136,60 +1136,79 @@ void etude::divideData(){
     updateDonnees();
     _parcelles.clear();
 
-     QDialog dialog(this);
-    dialog.setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
-    dialog.setWindowTitle("Diviser les données");
-
-    QRadioButton autoButton("Automatique");
-    QRadioButton manualButton("Manuel");
-    QLineEdit startIndexLineEdit;
-    QLineEdit endIndexLineEdit;
-    QLineEdit nombreparcelleLineEdit;
-
-    QLabel remainingLinesLabel;
-
-    QFormLayout formLayout(&dialog);
-    formLayout.addRow(&autoButton);
-    formLayout.addRow(&manualButton);
-
-    formLayout.addRow("Nombre de parcelles:", &nombreparcelleLineEdit);
-    formLayout.addRow("Index de début:", &startIndexLineEdit);
-    formLayout.addRow("Index de fin:", &endIndexLineEdit);
-    formLayout.addRow("Lignes restantes:", &remainingLinesLabel);
-
-    autoButton.setChecked(true);
-    startIndexLineEdit.setEnabled(false);
-    endIndexLineEdit.setEnabled(false);
-
-    connect(&autoButton, &QRadioButton::clicked, [&]() {
-        startIndexLineEdit.setEnabled(false);
-        endIndexLineEdit.setEnabled(false);
-        nombreparcelleLineEdit.setEnabled(true);
-    });
-
-    connect(&manualButton, &QRadioButton::clicked, [&]() {
-        startIndexLineEdit.setEnabled(true);
-        endIndexLineEdit.setEnabled(true);
-        nombreparcelleLineEdit.setEnabled(false);
-
-    });
-
-    QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal);
-    formLayout.addWidget(buttonBox);
-
-    QPushButton *okButton = buttonBox->button(QDialogButtonBox::Ok);
-    QPushButton *cancelButton = buttonBox->button(QDialogButtonBox::Cancel);
-
-    QObject::connect(buttonBox, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
-    QObject::connect(buttonBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
-
-
-    int dialogResult = dialog.exec();
-
-
     int nextStartIndex = 0;
+    int manuelindex = 1;
+    bool ischeck = false;
 
     while (nextStartIndex < _Donnees.size()) {
+
+        QDialog dialog(this);
+        dialog.setStyleSheet("background-color: #404c4d; color: white; font-size: 24px;");
+        dialog.setWindowTitle("Diviser les données");
+
+        QRadioButton autoButton("Automatique");
+        QRadioButton manualButton("Manuel");
+        QLineEdit startIndexLineEdit;
+        QLineEdit endIndexLineEdit;
+        QLineEdit nombreparcelleLineEdit;
+
+        QLabel remainingLinesLabel;
+
+        QFormLayout formLayout(&dialog);
+        formLayout.addRow(&autoButton);
+        formLayout.addRow(&manualButton);
+
+        formLayout.addRow("Nombre de parcelles:", &nombreparcelleLineEdit);
+        formLayout.addRow("Index de début:", &startIndexLineEdit);
+        formLayout.addRow("Index de fin:", &endIndexLineEdit);
+        formLayout.addRow("Lignes restantes:", &remainingLinesLabel);
+
+        startIndexLineEdit.setText(QString::number(manuelindex));
+        endIndexLineEdit.setText(QString::number(manuelindex+1));
+
+
+        startIndexLineEdit.setEnabled(false);
+        endIndexLineEdit.setEnabled(false);
+
+        connect(&autoButton, &QRadioButton::clicked, [&]() {
+            startIndexLineEdit.setEnabled(false);
+            endIndexLineEdit.setEnabled(false);
+            nombreparcelleLineEdit.setEnabled(true);
+        });
+
+        connect(&manualButton, &QRadioButton::clicked, [&]() {
+            startIndexLineEdit.setEnabled(true);
+            endIndexLineEdit.setEnabled(true);
+            nombreparcelleLineEdit.setEnabled(false);
+        });
+
+        if (ischeck) {
+            manualButton.setChecked(true);
+            startIndexLineEdit.setEnabled(true);
+            endIndexLineEdit.setEnabled(true);
+            nombreparcelleLineEdit.setEnabled(false);
+            endIndexLineEdit.setFocus();
+        } else {
+            autoButton.setChecked(true);
+            startIndexLineEdit.setEnabled(false);
+            endIndexLineEdit.setEnabled(false);
+            nombreparcelleLineEdit.setEnabled(true);
+            nombreparcelleLineEdit.setFocus();
+        }
+
+        QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal);
+        formLayout.addWidget(buttonBox);
+
+        QPushButton *okButton = buttonBox->button(QDialogButtonBox::Ok);
+        QPushButton *cancelButton = buttonBox->button(QDialogButtonBox::Cancel);
+
+        QObject::connect(buttonBox, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+        QObject::connect(buttonBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+
+        remainingLinesLabel.setText(QString::number(_Donnees.size() - nextStartIndex));
+
+        int dialogResult = dialog.exec();
+
         remainingLinesLabel.setText(QString::number(_Donnees.size() - nextStartIndex));
 
         if ( dialogResult== QDialog::Accepted) {
@@ -1227,6 +1246,8 @@ void etude::divideData(){
                 nextStartIndex = _Donnees.size();
             } else if (manualButton.isChecked()) {
 
+                ischeck = true;
+
                 int startIndex = startIndexLineEdit.text().toInt() - 1;
                 int endIndex = endIndexLineEdit.text().toInt() - 1;
 
@@ -1236,9 +1257,7 @@ void etude::divideData(){
                     _parcelles.push_back(parcelle(_Donnees, startIndex, endIndex + 1, database, nomParcelle));
 
                     nextStartIndex = endIndex + 1;
-
-                    startIndexLineEdit.setText(QString::number(endIndex + 2));
-                    endIndexLineEdit.setText(QString::number(endIndex + 3));
+                    manuelindex = nextStartIndex +1;
 
                 }
             }
