@@ -237,7 +237,6 @@ void etude::init() {
             }
         } else if(adddatas->isChecked()){
             ajouterDonnees();
-            initCalcul();
         }
     }
 
@@ -283,13 +282,23 @@ void etude::ajouterDonnees() {
 
     if (dialog.exec() == QDialog::Accepted) {
         QString data = dataEdit->toPlainText();
+        int start = _Donnees.size() ;
+
         traitements(data);
         bool amont = amontButton->isChecked();
 
         // Ajouter une nouvelle parcelle avec les nouvelles données
         QString nomParcelle = "parcelle " + QString::number(_parcelles.size() + 1);
-        _parcelles.push_back(parcelle(_Donnees, _Donnees.size() - data.count('\n'), _Donnees.size(), database, nomParcelle, amont));
+        int end = _Donnees.size();
+        initCalcul();
+
+
+        if (start < 0) start = 0;
+
+        // Create the new parcel
+        _parcelles.push_back(parcelle(_Donnees, start, end, database, nomParcelle, amont));
     }
+
 }
 
 

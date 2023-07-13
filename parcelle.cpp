@@ -557,30 +557,6 @@ void parcelle::setPosteDeCommande(int posteDeCommande) {
             }
         }
     }
-
-    auto indices = trouveaspersseurs();
-
-    if(!indices.empty()){
-        if(aspdebit != 0 && aspinterdebut != 0){
-            auto all_diameters = std::all_of(indices.begin(), indices.end(),
-                                             [this](int i){ return _Donnees[i][15] != 0; });
-
-            if (all_diameters) {
-                calcul();
-                return;
-            }
-        }
-    } else {
-        auto all_pipes = std::all_of(_Donnees.begin(), _Donnees.end(),
-                                     [](const std::vector<float> &v){ return v[15] != 0; });
-
-        if (all_pipes) {
-            calcul();
-        }
-    }
-
-
-
 }
 
 int parcelle::getPosteDeCommande() const {
