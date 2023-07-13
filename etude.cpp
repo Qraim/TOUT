@@ -1089,7 +1089,7 @@ void etude::divideData(){
 
     QMessageBox::StandardButton reply;
     if (_parcelles.size() > 1) {
-        reply = QMessageBox::question(this, "Alert", "Êtes vous sûr de vouloir séparer les parcelles",
+        reply = QMessageBox::question(this, "Alert", "Êtes vous sûr de vouloir séparer les parcelles ? Si vous fermez sans rien faire dans la fenetre d'après, toutes vos données seront perdu",
                                       QMessageBox::Yes | QMessageBox::No);
         if (reply == QMessageBox::No)
             return;
@@ -1226,6 +1226,7 @@ void etude::divideData(){
                 }
                 nextStartIndex = _Donnees.size();
             } else if (manualButton.isChecked()) {
+
                 int startIndex = startIndexLineEdit.text().toInt() - 1;
                 int endIndex = endIndexLineEdit.text().toInt() - 1;
 
@@ -1239,10 +1240,12 @@ void etude::divideData(){
                     startIndexLineEdit.setText(QString::number(endIndex + 2));
                     endIndexLineEdit.setText(QString::number(endIndex + 3));
 
-                } else {
                 }
             }
         } else {
+            QString nomParcelle = "parcelle 1";
+            _parcelles.push_back(parcelle(_Donnees, 0, _Donnees.size(), database, nomParcelle, amont));
+            rafraichirTableau();
             break;
         }
     }
@@ -1971,7 +1974,6 @@ void etude::exportPdf(const QString &fileName) {
             painter.drawLine(0, yOffset - (lineHeight * secondValue), tableWidth, yOffset - (lineHeight * secondValue));
             painter.setPen(QColor(Qt::black));
         }
-
 
         int xPos = 0;
         int cpt = 0;
