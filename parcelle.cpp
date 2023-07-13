@@ -17,6 +17,11 @@ parcelle::parcelle(std::vector<std::vector<float>> &data, int indexdebut, int in
 
     _Donnees.resize(range_size);
 
+    aspdebit = 0;
+    aspinterdebut = 0;
+
+    _decalage=0;
+
     hersealim = std::make_unique<pertechargeherse>(database, nullptr);
 
     std::copy(data.begin() + indexdebut, data.begin() + indexfin, _Donnees.begin());

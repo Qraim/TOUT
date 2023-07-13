@@ -2139,6 +2139,7 @@ void etude::readFromFile(const std::string &filename) {
         parcelle p = parcelle(_Donnees, indexdebut, indexfin, database, QString::fromStdString(nom).replace("_", " "),
                               amont);
 
+        if(poste_de_commande > 0)
         p.setPosteDeCommande(poste_de_commande);
         p.setDecalage(decalage);
         p.setAspdebit(aspdebit);
