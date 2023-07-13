@@ -322,7 +322,7 @@ void etude::traitements(QString data) {
         }
 
         std::vector<float> rowData(31);
-        rowData[0] = cols[2].toInt(); // numero du rang
+        rowData[0] = _Donnees.size()+1; // numero du rang
         rowData[1] = cols[3].toFloat(); // Longueur du rang
         rowData[2] = cols[4].toFloat(); // Nombre d'asperseurs
         rowData[3] = cols[5].toFloat(); // Zamont du rang
@@ -1202,12 +1202,25 @@ void etude::divideData(){
         QPushButton *okButton = buttonBox->button(QDialogButtonBox::Ok);
         QPushButton *cancelButton = buttonBox->button(QDialogButtonBox::Cancel);
 
+        QEventLoop loop;
+
+
+        // Connectez les signaux pour quitter la boucle d'événements lorsque le bouton est cliqué
+        QObject::connect(buttonBox, &QDialogButtonBox::accepted, &loop, &QEventLoop::quit);
+        QObject::connect(buttonBox, &QDialogButtonBox::rejected, &loop, &QEventLoop::quit);
         QObject::connect(buttonBox, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
         QObject::connect(buttonBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
 
+
         remainingLinesLabel.setText(QString::number(_Donnees.size() - nextStartIndex));
 
-        int dialogResult = dialog.exec();
+        dialog.show();
+
+        // Exécutez la boucle d'événements pour bloquer jusqu'à ce que la boîte de dialogue soit fermée
+        loop.exec();
+
+        // Utilisez QDialog::result pour obtenir le résultat de la boîte de dialogue
+        int dialogResult = dialog.result();
 
         remainingLinesLabel.setText(QString::number(_Donnees.size() - nextStartIndex));
 
